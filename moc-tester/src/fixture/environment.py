@@ -27,7 +27,7 @@ class Environment:
         if res:
             return res
         else:
-            if key in ('email', 'password', 'database_platform_password', 'env', 'provider', 'region', 'k8s_unit_config', 'k8s_controller_config'):
+            if key in ('env', 'provider', 'region', 'k8s_unit_config', 'k8s_controller_config'):
                 return os.environ.get(key)
             raise Exception(f"args {key} no exists...")
 
