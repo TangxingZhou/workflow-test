@@ -48,9 +48,6 @@ jobs:
           cd $GITHUB_WORKSPACE/moc-tester
           pytest src/tests/instance/production_instance/test_k8s_api.py --alluredir=./allure-results
         env:
-          email: ${{secrets.EMAIL}}
-          password: ${{secrets.PASSWORD}}
-          database_platform_password: ${{secrets.DATABASE_PLATFORM_PASSWORD}}
           env: qa
           provider: aliyun
           region: cn-hangzhou
