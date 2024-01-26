@@ -1,7 +1,6 @@
 name: Study and Test
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:
@@ -46,7 +45,7 @@ jobs:
       - name: Run Aliyun Tests Case
         run: |
           cd $GITHUB_WORKSPACE/moc-tester
-          pytest src/tests/instance/production_instance/test_k8s_api.py --alluredir=./allure-results
+          pytest src/tests/test_k8s_api.py --alluredir=./allure-results
         env:
           env: qa
           provider: aliyun
