@@ -2,10 +2,11 @@ from src.cloud.k8s import K8sClient
 
 
 class K8sApi:
-    def __init__(self, config_file=None):
-        self.k8s_client = None
-        K8sClient(config_file=config_file)
-        self.switch_k8s()
+
+    def __init__(self, k8s_client=None, name='default', config_file=None):
+        if k8s_client is None:
+            k8s_client = K8sClient(name, config_file)
+        self.k8s_client = k8s_client
 
     def switch_k8s(self, name='default'):
         self.k8s_client = K8sClient.get_client(name)

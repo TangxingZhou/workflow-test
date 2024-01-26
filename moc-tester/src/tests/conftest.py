@@ -54,11 +54,8 @@ def init_k8s_client(name):
 
 @pytest.fixture(name='k8s_api', scope='session')
 def k8s_api():
-    init_k8s_client('unit')
     init_k8s_client('controller')
-    k8s_api = K8sApi()
-    k8s_api.switch_k8s('unit')
-    return K8sApi()
+    return K8sApi(init_k8s_client('unit'))
 
 
 @pytest.fixture(name='k8s_unit_client', scope='session')
