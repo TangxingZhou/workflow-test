@@ -1,0 +1,13 @@
+{
+  "active": {"env": "", "provider":  ""},
+  "qa": {
+    "aliyun": {
+      "k8s_unit_config": "",
+      "k8s_controller_config": "",
+      "k8s_controller_ca_cert": "",
+      "k8s_controller_host": "",
+      "k8s_controller_user_cert": "",
+      "k8s_controller_user_key": ""
+    }
+  }
+}
