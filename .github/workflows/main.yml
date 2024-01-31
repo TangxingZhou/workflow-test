@@ -29,12 +29,12 @@ jobs:
 #        with:
 #          java-version: 1.8
 
-      - name: Install Allure
-        run: |
-          export ALLURE_VERSION=2.20.0
-          curl -o allure-$ALLURE_VERSION.tgz -sL https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.tgz
-          sudo tar -zxvf allure-$ALLURE_VERSION.tgz -C /usr/local/bin/
-          sudo ln -s /usr/local/bin/allure-$ALLURE_VERSION/bin/allure /usr/bin/allure
+      # - name: Install Allure
+      #   run: |
+      #     export ALLURE_VERSION=2.20.0
+      #     curl -o allure-$ALLURE_VERSION.tgz -sL https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.tgz
+      #     sudo tar -zxvf allure-$ALLURE_VERSION.tgz -C /usr/local/bin/
+      #     sudo ln -s /usr/local/bin/allure-$ALLURE_VERSION/bin/allure /usr/bin/allure
 
       - name: Install Python Dependencies
         run: |
@@ -61,7 +61,7 @@ jobs:
           # k8s_controller_user_cert: ${{secrets.K8S_CONTROLLER_USER_CERT}}
           # k8s_controller_user_key: ${{secrets.K8S_CONTROLLER_USER_KEY}}
       
-      - name: Load test report history
+      - name: Load Test Report History
         uses: actions/checkout@v3
         if: always()
         continue-on-error: true
@@ -69,23 +69,16 @@ jobs:
           ref: allure-reports
           path: allure-reports
       
-      - name: get current directory
-        run: |
-          pwd && tree
-      
-      - name: Build test report
+      - name: Build Test Report
         uses: simple-elf/allure-report-action@v1.7
         if: always()
         with:
           gh_pages: allure-reports
           allure_history: allure-history
           allure_results: moc-tester/allure-results
+          keep_reports: 50
       
-      - name: get current directory
-        run: |
-          pwd && tree
-      
-      - name: Publish test report
+      - name: Publish Test Report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
