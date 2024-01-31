@@ -71,7 +71,7 @@ jobs:
       
       - name: get current directory
         run: |
-          pwd && ls -l
+          pwd && tree
       
       - name: Build test report
         uses: simple-elf/allure-report-action@v1.7
@@ -80,7 +80,11 @@ jobs:
           gh_pages: allure-reports
           allure_history: allure-history
           allure_results: moc-tester/allure-results
-  
+      
+      - name: get current directory
+        run: |
+          pwd && tree
+      
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
