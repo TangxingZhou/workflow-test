@@ -1,0 +1,4 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Jan 31 03:30:08 GMT 2024","Wed Jan 31 03:30:11 GMT 2024","3528","src.tests","test_k8s_api","","","","test_get_all_unit_pods",""
+"skipped","Wed Jan 31 03:30:08 GMT 2024","Wed Jan 31 03:30:08 GMT 2024","0","src.tests","test_k8s_api","","","","test_get_all_pods",""
+"skipped","Wed Jan 31 03:30:11 GMT 2024","Wed Jan 31 03:30:11 GMT 2024","0","src.tests","test_k8s_api","","","","test_get_all_controller_pods",""
