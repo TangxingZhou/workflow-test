@@ -60,3 +60,27 @@ jobs:
           # k8s_controller_ca_cert: ${{secrets.K8S_CONTROLLER_CA_CERT}}
           # k8s_controller_user_cert: ${{secrets.K8S_CONTROLLER_USER_CERT}}
           # k8s_controller_user_key: ${{secrets.K8S_CONTROLLER_USER_KEY}}
+      
+      - name: Load test report history
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: allure-reports
+          path: allure-reports
+  
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          gh_pages: allure-reports
+          allure_history: allure-history
+          allure_results: allure-results
+  
+      - name: Publish test report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_branch: allure-reports
+            publish_dir: allure-history
