@@ -23,6 +23,7 @@ jobs:
         with:
             repository: matrixorigin/mo-backup
             ref: main
+            token: ${{ secrets.GH_PAT }}
             # fetch-depth: 0
           
       - name: Prepare
