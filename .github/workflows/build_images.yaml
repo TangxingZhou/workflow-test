@@ -29,8 +29,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          pwd && ls -al
-          TAGS="registry.cn-hangzhou.aliyuncs.com/matrixorigin/moc-test/mo-backup:latest"
+          TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:latest"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Get image info
