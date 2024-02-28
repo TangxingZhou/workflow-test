@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  dockerhub:
+  mo-backup:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,8 @@ jobs:
         run: |
           TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:latest"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          git checkout 77f46ce7d55cd4835fa78bb120c8f77bdfb36551
+          git status
 
       - name: Get image info
         run: |
