@@ -29,7 +29,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:latest"
+          TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:old"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           git checkout 77f46ce7d55cd4835fa78bb120c8f77bdfb36551
           git status
