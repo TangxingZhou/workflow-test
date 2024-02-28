@@ -22,19 +22,16 @@ jobs:
         uses: actions/checkout@v4
         with:
             repository: matrixorigin/mo-backup
-            ref: main
+            ref: 77f46ce7d55cd4835fa78bb120c8f77bdfb36551
             token: ${{ secrets.GH_PAT }}
             # fetch-depth: 0
           
       - name: Prepare
         id: prep
         run: |
-          pwd && ls -al
           git status
           TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:old"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          git checkout 77f46ce7d55cd4835fa78bb120c8f77bdfb36551
-          git status
 
       - name: Get image info
         run: |
