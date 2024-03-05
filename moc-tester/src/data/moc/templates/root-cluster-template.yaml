@@ -1,0 +1,424 @@
+apiVersion: core.matrixone-cloud/v1alpha1
+kind: Cluster
+metadata:
+  annotations:
+    matrixone.cloud/enable-aksk-authorize: "true"
+  labels:
+    matrixone.cloud/role: root
+    matrixone.cloud/cordoned: "Y"
+  name: {{ cluster.name }}
+spec:
+  cnPools:
+  - managed:
+      config: |
+        [cn.frontend]
+        saveQueryResult = "on"
+        queryResultTimeout = 72
+        lengthOfQueryPrinted = 10000
+        disable-select-into = true
+        [cn.txn]
+        enable-leak-check = 1
+        max-active-ages = "20m"
+        [observability]
+        metricUpdateStorageUsageInterval = "15m"
+        enableStmtMerge = true
+        enableMetricToProm = true
+      nodeSelector:
+        matrixone.cloud/cluster-pool: {{ cluster.name }}
+        matrixone.cloud/profile: cn.standard
+      resources:
+        limits:
+          cpu: "7"
+          memory: 13Gi
+        requests:
+          cpu: "7"
+          memory: 13Gi
+      sharedStorageCache:
+        memoryCacheSize: 1Gi
+      storageClassName: {{ cluster.storageClassName }}
+      storageSize: 300Gi
+      toleratedTaints:
+      - profile.matrixone.cloud/cn.standard
+      - cluster-pool.matrixone.cloud/{{ cluster.name }}
+    name: pool
+    poolStrategy:
+      scaleStrategy:
+        maxIdle: 2
+      updateStrategy:
+        reclaimTimeout: 24h0m0s
+    profile: cn.standard
+  - managed:
+      config: |
+        [cn.frontend]
+        saveQueryResult = "on"
+        queryResultTimeout = 72
+        lengthOfQueryPrinted = 10000
+        disable-select-into = true
+        [cn.txn]
+        enable-leak-check = 1
+        max-active-ages = "20m"
+        [observability]
+        metricUpdateStorageUsageInterval = "15m"
+        enableStmtMerge = true
+        enableMetricToProm = true
+      nodeSelector:
+        matrixone.cloud/cluster-pool: {{ cluster.name }}
+        matrixone.cloud/profile: cn.tiny
+      resources:
+        limits:
+          cpu: "1"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+      sharedStorageCache:
+        memoryCacheSize: 128Mi
+      storageClassName: {{ cluster.storageClassName }}
+      storageSize: 300Gi
+      toleratedTaints:
+      - profile.matrixone.cloud/cn.tiny
+      - cluster-pool.matrixone.cloud/{{ cluster.name }}
+    name: limited
+    poolStrategy:
+      scaleStrategy:
+        maxIdle: 0
+      updateStrategy:
+        reclaimTimeout: 24h0m0s
+    profile: cn.tiny
+  cnSets:
+  - managed:
+      componentBackend: Pod
+      config: |
+        [cn]
+        init-work-state = "Draining"
+        [cn.frontend]
+        saveQueryResult = "on"
+        queryResultTimeout = 72
+        lengthOfQueryPrinted = 10000
+        disable-select-into = true
+        [cn.txn]
+        enable-leak-check = 1
+        max-active-ages = "20m"
+        [observability]
+        metricUpdateStorageUsageInterval = "15m"
+        enableStmtMerge = true
+        enableMetricToProm = true
+      nodeSelector:
+        matrixone.cloud/cluster-pool: {{ cluster.name }}
+        matrixone.cloud/profile: cn.standard
+      resources:
+        limits:
+          cpu: "7"
+          memory: 13Gi
+        requests:
+          cpu: "7"
+          memory: 13Gi
+      sharedStorageCache:
+        memoryCacheSize: 1Gi
+      storageClassName: {{ cluster.storageClassName }}
+      storageSize: 300Gi
+      toleratedTaints:
+      - profile.matrixone.cloud/cn.standard
+      - cluster-pool.matrixone.cloud/{{ cluster.name }}
+    name: default
+    profile: cn.standard
+    replicas: 2
+    scalingConfig:
+      maxReplicas: 10
+      minReplicas: 2
+      policy: AutoScaling
+  dnSets:
+  - managed:
+      config: |
+        [log]
+        level = "info"
+      nodeSelector:
+        matrixone.cloud/cluster-pool: {{ cluster.name }}
+        matrixone.cloud/profile: dn.standard
+      resources:
+        limits:
+          cpu: "15"
+          memory: 29184Mi
+        requests:
+          cpu: "15"
+          memory: 29184Mi
+      sharedStorageCache:
+        memoryCacheSize: 5Gi
+      storageClassName: {{ cluster.storageClassName }}
+      storageSize: 100Gi
+      toleratedTaints:
+      - profile.matrixone.cloud/dn.standard
+      - cluster-pool.matrixone.cloud/{{ cluster.name }}
+    name: default
+    profile: dn.standard
+    replicas: 1
+  endpoint:
+    mode: Dedicated
+    proxySpec:
+      image: {{ cluster.image.repository }}:{{ cluster.version.from }}
+      managed:
+        config: |
+          [proxy.plugin]
+          timeout = "3s"
+        profile: proxy.standard
+      pluginImage: {{ cluster.pluginImage }}
+      replicas: 2
+    whitelistIPRanges:
+    - 0.0.0.0/0
+  initJobs:
+  - jobType: sql
+    name: loaddata-create-tables
+    sqls:
+    - CREATE DATABASE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1;
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.NATION( N_NATIONKEY INTEGER
+      NOT NULL, N_NAME CHAR(25) NOT NULL, N_REGIONKEY INTEGER NOT NULL, N_COMMENT
+      VARCHAR(152), PRIMARY KEY (N_NATIONKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.REGION( R_REGIONKEY INTEGER
+      NOT NULL, R_NAME CHAR(25) NOT NULL, R_COMMENT VARCHAR(152), PRIMARY KEY (R_REGIONKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.PART( P_PARTKEY INTEGER NOT
+      NULL, P_NAME VARCHAR(55) NOT NULL, P_MFGR CHAR(25) NOT NULL, P_BRAND CHAR(10)
+      NOT NULL, P_TYPE VARCHAR(25) NOT NULL, P_SIZE INTEGER NOT NULL, P_CONTAINER
+      CHAR(10) NOT NULL, P_RETAILPRICE DECIMAL(15,2) NOT NULL, P_COMMENT VARCHAR(23)
+      NOT NULL, PRIMARY KEY (P_PARTKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.SUPPLIER( S_SUPPKEY INTEGER
+      NOT NULL, S_NAME CHAR(25) NOT NULL, S_ADDRESS VARCHAR(40) NOT NULL, S_NATIONKEY
+      INTEGER NOT NULL, S_PHONE CHAR(15) NOT NULL, S_ACCTBAL DECIMAL(15,2) NOT NULL,
+      S_COMMENT VARCHAR(101) NOT NULL, PRIMARY KEY (S_SUPPKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.PARTSUPP( PS_PARTKEY INTEGER
+      NOT NULL, PS_SUPPKEY INTEGER NOT NULL, PS_AVAILQTY INTEGER NOT NULL, PS_SUPPLYCOST
+      DECIMAL(15,2) NOT NULL, PS_COMMENT VARCHAR(199) NOT NULL,PRIMARY KEY (PS_PARTKEY,
+      PS_SUPPKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.CUSTOMER( C_CUSTKEY INTEGER
+      NOT NULL, C_NAME VARCHAR(25) NOT NULL, C_ADDRESS VARCHAR(40) NOT NULL, C_NATIONKEY
+      INTEGER NOT NULL, C_PHONE CHAR(15) NOT NULL, C_ACCTBAL DECIMAL(15,2) NOT NULL,
+      C_MKTSEGMENT CHAR(10) NOT NULL, C_COMMENT VARCHAR(117) NOT NULL, PRIMARY KEY
+      (C_CUSTKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.ORDERS( O_ORDERKEY BIGINT
+      NOT NULL, O_CUSTKEY INTEGER NOT NULL, O_ORDERSTATUS CHAR(1) NOT NULL, O_TOTALPRICE
+      DECIMAL(15,2) NOT NULL, O_ORDERDATE DATE NOT NULL, O_ORDERPRIORITY CHAR(15)
+      NOT NULL, O_CLERK CHAR(15) NOT NULL, O_SHIPPRIORITY INTEGER NOT NULL, O_COMMENT
+      VARCHAR(79) NOT NULL, PRIMARY KEY (O_ORDERKEY));
+    - CREATE TABLE IF NOT EXISTS MO_SAMPLE_DATA_TPCH_SF1.LINEITEM( L_ORDERKEY BIGINT
+      NOT NULL, L_PARTKEY INTEGER NOT NULL, L_SUPPKEY INTEGER NOT NULL, L_LINENUMBER
+      INTEGER NOT NULL, L_QUANTITY DECIMAL(15,2) NOT NULL, L_EXTENDEDPRICE DECIMAL(15,2)
+      NOT NULL, L_DISCOUNT DECIMAL(15,2) NOT NULL, L_TAX DECIMAL(15,2) NOT NULL, L_RETURNFLAG
+      CHAR(1) NOT NULL, L_LINESTATUS CHAR(1) NOT NULL, L_SHIPDATE DATE NOT NULL, L_COMMITDATE
+      DATE NOT NULL, L_RECEIPTDATE DATE NOT NULL, L_SHIPINSTRUCT CHAR(25) NOT NULL,
+      L_SHIPMODE CHAR(10) NOT NULL, L_COMMENT VARCHAR(44) NOT NULL,PRIMARY KEY (L_ORDERKEY,
+      L_LINENUMBER));
+  - jobType: sql
+    name: loaddata-load-nation
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.nation;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/nation.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.nation FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-region
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.region;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/region.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.region FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-part
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.part;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/part.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.part FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-supplier
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.supplier;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/supplier.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.supplier FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-partsupp
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.partsupp;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/partsupp.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.partsupp FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-customer
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.customer;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/customer.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.customer FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-orders
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.orders;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/orders.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.orders FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-lineitem
+    sqls:
+    - truncate table mo_sample_data_tpch_sf1.lineitem;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs1/lineitem.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf1.lineitem FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-create-publication
+    sqls:
+    - CREATE PUBLICATION mo_sample_data_tpch_sf1 DATABASE mo_sample_data_tpch_sf1
+      COMMENT 'tpch sample data sf1';
+  - jobType: sql
+    name: loaddata-create-tables-sf10
+    sqls:
+    - CREATE DATABASE IF NOT EXISTS mo_sample_data_tpch_sf10;
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.nation( N_NATIONKEY INTEGER
+      NOT NULL, N_NAME CHAR(25) NOT NULL, N_REGIONKEY INTEGER NOT NULL, N_COMMENT
+      VARCHAR(152), PRIMARY KEY (N_NATIONKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.region( R_REGIONKEY INTEGER
+      NOT NULL, R_NAME CHAR(25) NOT NULL, R_COMMENT VARCHAR(152), PRIMARY KEY (R_REGIONKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.part( P_PARTKEY INTEGER
+      NOT NULL, P_NAME VARCHAR(55) NOT NULL, P_MFGR CHAR(25) NOT NULL, P_BRAND CHAR(10)
+      NOT NULL, P_TYPE VARCHAR(25) NOT NULL, P_SIZE INTEGER NOT NULL, P_CONTAINER
+      CHAR(10) NOT NULL, P_RETAILPRICE DECIMAL(15,2) NOT NULL, P_COMMENT VARCHAR(23)
+      NOT NULL, PRIMARY KEY (P_PARTKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.supplier( S_SUPPKEY INTEGER
+      NOT NULL, S_NAME CHAR(25) NOT NULL, S_ADDRESS VARCHAR(40) NOT NULL, S_NATIONKEY
+      INTEGER NOT NULL, S_PHONE CHAR(15) NOT NULL, S_ACCTBAL DECIMAL(15,2) NOT NULL,
+      S_COMMENT VARCHAR(101) NOT NULL, PRIMARY KEY (S_SUPPKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.partsupp( PS_PARTKEY INTEGER
+      NOT NULL, PS_SUPPKEY INTEGER NOT NULL, PS_AVAILQTY INTEGER NOT NULL, PS_SUPPLYCOST
+      DECIMAL(15,2) NOT NULL, PS_COMMENT VARCHAR(199) NOT NULL,PRIMARY KEY (PS_PARTKEY,
+      PS_SUPPKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.customer( C_CUSTKEY INTEGER
+      NOT NULL, C_NAME VARCHAR(25) NOT NULL, C_ADDRESS VARCHAR(40) NOT NULL, C_NATIONKEY
+      INTEGER NOT NULL, C_PHONE CHAR(15) NOT NULL, C_ACCTBAL DECIMAL(15,2) NOT NULL,
+      C_MKTSEGMENT CHAR(10) NOT NULL, C_COMMENT VARCHAR(117) NOT NULL, PRIMARY KEY
+      (C_CUSTKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.orders( O_ORDERKEY BIGINT
+      NOT NULL, O_CUSTKEY INTEGER NOT NULL, O_ORDERSTATUS CHAR(1) NOT NULL, O_TOTALPRICE
+      DECIMAL(15,2) NOT NULL, O_ORDERDATE DATE NOT NULL, O_ORDERPRIORITY CHAR(15)
+      NOT NULL, O_CLERK CHAR(15) NOT NULL, O_SHIPPRIORITY INTEGER NOT NULL, O_COMMENT
+      VARCHAR(79) NOT NULL, PRIMARY KEY (O_ORDERKEY));
+    - CREATE TABLE IF NOT EXISTS mo_sample_data_tpch_sf10.lineitem( L_ORDERKEY BIGINT
+      NOT NULL, L_PARTKEY INTEGER NOT NULL, L_SUPPKEY INTEGER NOT NULL, L_LINENUMBER
+      INTEGER NOT NULL, L_QUANTITY DECIMAL(15,2) NOT NULL, L_EXTENDEDPRICE DECIMAL(15,2)
+      NOT NULL, L_DISCOUNT DECIMAL(15,2) NOT NULL, L_TAX DECIMAL(15,2) NOT NULL, L_RETURNFLAG
+      CHAR(1) NOT NULL, L_LINESTATUS CHAR(1) NOT NULL, L_SHIPDATE DATE NOT NULL, L_COMMITDATE
+      DATE NOT NULL, L_RECEIPTDATE DATE NOT NULL, L_SHIPINSTRUCT CHAR(25) NOT NULL,
+      L_SHIPMODE CHAR(10) NOT NULL, L_COMMENT VARCHAR(44) NOT NULL,PRIMARY KEY (L_ORDERKEY,
+      L_LINENUMBER));
+  - jobType: sql
+    name: loaddata-load-nation-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.nation;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/nation.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.nation FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-region-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.region;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/region.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.region FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-part-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.part;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/part.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.part FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-supplier-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.supplier;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/supplier.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.supplier FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-partsupp-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.partsupp;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/partsupp.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.partsupp FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-customer-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.customer;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/customer.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.customer FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-orders-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.orders;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/orders.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.orders FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-load-lineitem-sf10
+    sqls:
+    - truncate table mo_sample_data_tpch_sf10.lineitem;
+    - load data url s3option {"endpoint"='oss-cn-hangzhou-internal.aliyuncs.com',
+      "bucket"='mocloud-sample-cn-hangzhou-new', "filepath"='tpchs10/lineitem.tbl.gz',
+      "compression"='gzip'} into table mo_sample_data_tpch_sf10.lineitem FIELDS TERMINATED
+      BY '|' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' PARALLEL 'TRUE';
+  - jobType: sql
+    name: loaddata-create-publication-sf10
+    sqls:
+    - CREATE PUBLICATION mo_sample_data_tpch_sf10 DATABASE mo_sample_data_tpch_sf10
+      COMMENT 'tpch sample data sf10';
+  logSet:
+    managed:
+      config: |
+        [log]
+        level = "info"
+      nodeSelector:
+        matrixone.cloud/cluster-pool: {{ cluster.name }}
+        matrixone.cloud/profile: log.standard
+      resources:
+        limits:
+          cpu: "3"
+          memory: 6Gi
+        requests:
+          cpu: "3"
+          memory: 6Gi
+      storageClassName: {{ cluster.storageClassName }}
+      storageSize: 100Gi
+      toleratedTaints:
+      - profile.matrixone.cloud/log.standard
+      - cluster-pool.matrixone.cloud/{{ cluster.name }}
+    name: default
+    profile: log.standard
+    replicas: 3
+  managed:
+    imageRepository: {{ cluster.image.repository }}
+    localServiceRef:
+      name: local-service
+    objectStorage:
+      path: {{ cluster.objectStorage.bucket }}/{{ cluster.name }}-{{ timestamp }}
+      region: {{ cluster.objectStorage.region }}
+  state: Active
+  unitName: {{ cluster.unit }}
+  unitSelector:
+    matchLabels:
+      matrixone.cloud/cloud: {{ cluster.provider }}
+      matrixone.cloud/region: {{ cluster.region }}
+  version: {{ cluster.version.from }}
+state: {}

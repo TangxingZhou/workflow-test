@@ -1,0 +1,144 @@
+name:  Backup/Restore and Upgrade MO Cluster
+
+on:
+#   schedule:
+#     - cron: '0 2 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: qa-txzhou
+
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Aliyun Tests Case
+        run: |
+          cd $GITHUB_WORKSPACE
+          pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
+        env:
+          email: ${{ secrets.EMAIL }}
+          password: ${{ secrets.PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
+          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+          BACKUP_CLUSTER: ${{ vars.BACKUP_CLUSTER }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ vars.BACKUP_S3_BUCKET_FILE_PATH }}
+
+      - name: Load Test Report History
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: upgrade-reports
+          path: allure-reports
+
+      - name: Build Test Report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          gh_pages: allure-reports
+          allure_history: allure-history
+          allure_results: moc-tester/allure-results
+          keep_reports: 50
+
+      - name: Publish Test Report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: upgrade-reports
+          publish_dir: allure-history
+
+  restore-and-upgrade:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: qa-txzhou
+
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Aliyun Tests Case
+        run: |
+          cd $GITHUB_WORKSPACE
+          pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
+        env:
+          email: ${{ secrets.EMAIL }}
+          password: ${{ secrets.PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
+          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+          RESTORE_CLUSTER: ${{ vars.RESTORE_CLUSTER }}
+          RESTORE_CLUSTER_VERSION: ${{ vars.RESTORE_CLUSTER_VERSION }}
+          RESTORE_S3_BUCKET: ${{ vars.RESTORE_S3_BUCKET }}
+          RESTORE_S3_BUCKET_FILE_PATH: ${{ vars.RESTORE_S3_BUCKET_FILE_PATH }}
+          UPGRADE_CLUSTER_VERSION: ${{ vars.UPGRADE_CLUSTER_VERSION }}
+
+      - name: Load Test Report History
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: upgrade-reports
+          path: allure-reports
+
+      - name: Build Test Report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          gh_pages: allure-reports
+          allure_history: allure-history
+          allure_results: moc-tester/allure-results
+          keep_reports: 50
+
+      - name: Publish Test Report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: upgrade-reports
+          publish_dir: allure-history

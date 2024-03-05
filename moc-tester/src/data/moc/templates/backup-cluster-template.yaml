@@ -1,0 +1,44 @@
+apiVersion: core.matrixone-cloud/v1alpha1
+kind: Cluster
+metadata:
+  labels:
+    matrixone.cloud/role: internal-test
+  name: backup-{{ cluster.name }}
+spec:
+  accountID: backup_{{ cluster.name | replace('-', '_') }}
+  unitName: {{ cluster.unit }}
+  cnSets:
+    - managed:
+        componentBackend: Pod
+        config: |
+          [cn.frontend]
+          saveQueryResult = "on"
+          queryResultTimeout = 72
+          lengthOfQueryPrinted = 10000
+          disable-select-into = true
+          [cn.txn]
+          enable-leak-check = 1
+          max-active-ages = "20m"
+          [observability]
+          metricUpdateStorageUsageInterval = "15m"
+          enableStmtMerge = true
+          enableMetricToProm = true
+        sharedStorageCache:
+          memoryCacheSize: 1Gi
+      name: default
+      profile: cn.standard
+      replicas: 1
+  endpoint:
+    mode: Shared
+    whitelistIPRanges:
+      - 0.0.0.0/0
+  mainClusterRef: {{ cluster.name }}
+  # managementPolicy: Manual
+  state: Active
+  unitSelector:
+    matchLabels:
+      matrixone.cloud/cloud: {{ cluster.provider }}
+      matrixone.cloud/region: {{ cluster.region }}
+  managed:
+    imageRepository: {{ cluster.image.repository }}
+  version: {{ cluster.version.from }}
