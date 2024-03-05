@@ -18,6 +18,7 @@ jobs:
         with:
           repository: matrixone-cloud/mocloud-tester
           ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set Up Python3.8
         uses: actions/setup-python@v5
@@ -85,6 +86,7 @@ jobs:
         with:
           repository: matrixone-cloud/mocloud-tester
           ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set Up Python3.8
         uses: actions/setup-python@v5
