@@ -34,7 +34,9 @@ jobs:
       - name: Run Aliyun Tests Case
         run: |
           cd $GITHUB_WORKSPACE
+          echo $k8s_unit_config
           pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
+          ls -al src/cloud/kube-configs/
         env:
           email: ${{ secrets.EMAIL }}
           password: ${{ secrets.PASSWORD }}
