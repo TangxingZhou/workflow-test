@@ -30,7 +30,7 @@ jobs:
         id: prep
         run: |
           git status
-          TAGS="registry.cn-hangzhou.aliyuncs.com/yidao-test/mo-backup:old"
+          TAGS="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:77f46ce"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Get image info
