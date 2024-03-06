@@ -133,7 +133,7 @@ jobs:
       - name: Run Aliyun Tests Case
         run: |
           cd $GITHUB_WORKSPACE
-          pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
+          pytest src/tests/upgrade/test_mo_upgrade.py --alluredir=./allure-results
         env:
           email: ${{ secrets.EMAIL }}
           password: ${{ secrets.PASSWORD }}
