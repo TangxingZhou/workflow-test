@@ -38,73 +38,73 @@ on:
         default: 'nightly-9d616832b'
 
 jobs:
-  backup:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: matrixone-cloud/mocloud-tester
-          ref: qa-txzhou
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Set Up Python3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
-
-      - name: Install Python Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Aliyun Tests Case
-        run: |
-          cd $GITHUB_WORKSPACE
-          pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
-        env:
-          email: ${{ secrets.EMAIL }}
-          password: ${{ secrets.PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
-          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
-          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
-          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
-
-      - name: Load Test Report History
-        uses: actions/checkout@v3
-        if: always()
-        continue-on-error: true
-        with:
-          ref: upgrade-reports
-          path: allure-reports
-
-      - name: Build Test Report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          gh_pages: allure-reports
-          allure_history: allure-history
-          allure_results: moc-tester/allure-results
-          keep_reports: 50
-
-      - name: Publish Test Report
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: upgrade-reports
-          publish_dir: allure-history
+#  backup:
+#    runs-on: ubuntu-latest
+#    environment:
+#      name: qa
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          repository: matrixone-cloud/mocloud-tester
+#          ref: qa-txzhou
+#          token: ${{ secrets.GH_PAT }}
+#
+#      - name: Set Up Python3.8
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: '3.8'
+#
+#      - name: Install Python Dependencies
+#        run: |
+#          cd $GITHUB_WORKSPACE
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Run Aliyun Tests Case
+#        run: |
+#          cd $GITHUB_WORKSPACE
+#          pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
+#        env:
+#          email: ${{ secrets.EMAIL }}
+#          password: ${{ secrets.PASSWORD }}
+#          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+#          env: qa
+#          provider: aliyun
+#          region: cn-hangzhou
+#          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+#          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+#          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
+#          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+#          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
+#          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+#          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+#
+#      - name: Load Test Report History
+#        uses: actions/checkout@v3
+#        if: always()
+#        continue-on-error: true
+#        with:
+#          ref: upgrade-reports
+#          path: allure-reports
+#
+#      - name: Build Test Report
+#        uses: simple-elf/allure-report-action@v1.7
+#        if: always()
+#        with:
+#          gh_pages: allure-reports
+#          allure_history: allure-history
+#          allure_results: moc-tester/allure-results
+#          keep_reports: 50
+#
+#      - name: Publish Test Report
+#        uses: peaceiris/actions-gh-pages@v3
+#        if: always()
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_branch: upgrade-reports
+#          publish_dir: allure-history
 
   restore-and-upgrade:
     runs-on: ubuntu-latest
@@ -145,6 +145,7 @@ jobs:
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
           ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
