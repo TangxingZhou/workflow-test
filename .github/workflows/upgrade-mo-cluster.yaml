@@ -4,7 +4,39 @@ on:
 #   schedule:
 #     - cron: '0 2 * * *'
 
-  workflow_dispatch:
+#  workflow_dispatch:
+  workflow_call:
+    inputs:
+      backup_cluster:
+        required: false
+        type: string
+        default: 'freetier-02'
+      backup_s3_bucket:
+        required: false
+        type: string
+        default: 'moc-backup-test'
+      backup_s3_bucket_file_path:
+        required: false
+        type: string
+      restore_cluster:
+        required: false
+        type: string
+        default: 'restore-freetier-02'
+      restore_cluster_version:
+        required: false
+        type: string
+        default: 'nightly-9d616832a'
+      restore_s3_bucket:
+        required: false
+        type: string
+        default: 'moc-backup-test'
+      restore_s3_bucket_file_path:
+        required: false
+        type: string
+      upgrade_cluster_version:
+        required: false
+        type: string
+        default: 'nightly-9d616832b'
 
 jobs:
   backup:
@@ -46,9 +78,9 @@ jobs:
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
           ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
-          BACKUP_CLUSTER: ${{ vars.BACKUP_CLUSTER }}
-          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ vars.BACKUP_S3_BUCKET_FILE_PATH }}
+          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
 
       - name: Load Test Report History
         uses: actions/checkout@v3
@@ -114,11 +146,13 @@ jobs:
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
           ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
-          RESTORE_CLUSTER: ${{ vars.RESTORE_CLUSTER }}
-          RESTORE_CLUSTER_VERSION: ${{ vars.RESTORE_CLUSTER_VERSION }}
-          RESTORE_S3_BUCKET: ${{ vars.RESTORE_S3_BUCKET }}
-          RESTORE_S3_BUCKET_FILE_PATH: ${{ vars.RESTORE_S3_BUCKET_FILE_PATH }}
-          UPGRADE_CLUSTER_VERSION: ${{ vars.UPGRADE_CLUSTER_VERSION }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+          RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
+          RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
+          RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
+          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
 
       - name: Load Test Report History
         uses: actions/checkout@v3
