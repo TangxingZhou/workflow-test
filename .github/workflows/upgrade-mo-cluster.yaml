@@ -24,7 +24,7 @@ on:
       restore_cluster_version:
         required: false
         type: string
-        default: 'nightly-9d616832a'
+#        default: 'nightly-9d616832a'
       restore_s3_bucket:
         required: false
         type: string
