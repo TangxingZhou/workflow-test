@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
             repository: matrixorigin/mo-backup
-            ref: 77f46ce7d55cd4835fa78bb120c8f77bdfb36551
+            ref: main
             token: ${{ secrets.GH_PAT }}
             # fetch-depth: 0
           
@@ -30,7 +30,7 @@ jobs:
         id: prep
         run: |
           git status
-          TAGS="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:77f46ce"
+          TAGS="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:4fa21f1"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Get image info
