@@ -131,6 +131,7 @@ jobs:
 
   restore-and-upgrade:
     if: ${{ inputs.action == 'restore' }}
+    # needs: backup
     runs-on: ubuntu-latest
     environment:
       name: qa
