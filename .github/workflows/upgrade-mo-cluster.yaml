@@ -130,7 +130,7 @@ jobs:
           publish_dir: allure-history
 
   restore-and-upgrade:
-    if: ${{ inputs.action == 'backup' }}
+    if: ${{ inputs.action == 'restore' }}
     runs-on: ubuntu-latest
     environment:
       name: qa
