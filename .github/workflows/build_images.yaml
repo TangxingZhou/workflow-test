@@ -30,7 +30,10 @@ jobs:
         id: prep
         run: |
           git status
-          TAGS="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:4fa21f1"
+          ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          VERSION=${GITHUB_SHA::8}
+          
+          TAGS="$ACR_DOCKER_IMAGE:$VERSION"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Get image info
