@@ -84,7 +84,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Aliyun Tests Case
+      - name: Run Tests Case
         run: |
           cd $GITHUB_WORKSPACE
           pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
@@ -154,7 +154,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Aliyun Tests Case
+      - name: Run Tests Case
         run: |
           cd $GITHUB_WORKSPACE
           pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
