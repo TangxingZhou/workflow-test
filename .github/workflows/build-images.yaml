@@ -8,6 +8,14 @@ on:
 #     types:
 #       - published
   workflow_dispatch:
+    inputs:
+      image:
+        description: The name of image to be built.
+        required: true
+        type: choice
+        options:
+          - mo-backup
+#        default: mo-backup
 
 permissions:
   id-token: write
@@ -15,6 +23,7 @@ permissions:
 
 jobs:
   mo-backup:
+    if: ${{ inputs.image == 'mo-backup' }}
     runs-on: ubuntu-latest
 
     steps:
