@@ -133,6 +133,8 @@ jobs:
 
       - run: |
           ls -l allure-history
+          ls -l allure-reports
+          ls -l allure-report
           pwd
 
       - name: Publish Test Report
