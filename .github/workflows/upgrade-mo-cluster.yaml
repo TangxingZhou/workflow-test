@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: The action to perform.
+        description: The action to perform
         required: true
         type: choice
         options:
@@ -15,45 +15,44 @@ on:
           - restore
         default: restore
       backup_cluster:
-        description: Backups to be made for the cluster.
+        description: Backups to be made for the cluster
         required: false
         type: string
-        default: freetier-02
       backup_cluster_version:
-        description: The cluster version for CN that performs the backup job.
+        description: The cluster version for CN that performs the backup job
         required: false
         type: string
         default: nightly-e94ba155
       backup_s3_bucket:
-        description: Backups to be made into the S3 bucket.
+        description: Backups to be made into the S3 bucket
         required: false
         type: string
         default: 'moc-backup-test'
       backup_s3_bucket_file_path:
-        description: Backups to be made into the S3 bucket path.
+        description: Backups to be made into the S3 bucket path
         required: false
         type: string
       restore_cluster:
-        description: The cluster to be restored.
+        description: The cluster to be restored
         required: false
         type: string
         default: restore-freetier-02
       restore_cluster_version:
-        description: The cluster version to be restored.
+        description: The cluster version to be restored
         required: false
         type: string
         # default: 'nightly-9d616832a'
       restore_s3_bucket:
-        description: The S3 bucket to restore.
+        description: The S3 bucket to restore
         required: false
         type: string
         default: 'moc-backup-test'
       restore_s3_bucket_file_path:
-        description: The S3 bucket path to restore.
+        description: The S3 bucket path to restore
         required: false
         type: string
       upgrade_cluster_version:
-        description: The target version to upgrade.
+        description: The target version to upgrade
         required: false
         type: string
         default: 'nightly-9d616832b'
