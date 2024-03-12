@@ -1,0 +1,3 @@
+DEBUG    pytest_dependency:pytest_dependency.py:87 check dependencies of test_upgrade_restored_cluster in module scope ...
+DEBUG    pytest_dependency:pytest_dependency.py:92 ... UpgradeMOTestSuite::test_restore_cluster succeeded
+DEBUG    kubernetes.client.rest:rest.py:235 response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the body of the request was in an unknown format - accepted media types include: application/json-patch+json, application/merge-patch+json, application/apply-patch+yaml","reason":"UnsupportedMediaType","code":415}
