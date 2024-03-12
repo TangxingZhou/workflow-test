@@ -103,12 +103,12 @@ jobs:
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
 
-#      - name: Archive allure-results
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: allure-results
-#          path: |
-#            allure-results
+      - name: Archive allure-results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: |
+            allure-results
 
       - name: Load Test Report History
         uses: actions/checkout@v4
