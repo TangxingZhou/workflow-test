@@ -1,0 +1,3 @@
+INFO     src.tests.upgrade.test_mo_upgrade:test_mo_upgrade.py:26 setup_module
+INFO     src.tests.upgrade.test_mo_upgrade:test_mo_upgrade.py:59 configs
+INFO     src.tests.upgrade.test_mo_upgrade:test_mo_upgrade.py:241 Backup cluster name is not specified.
