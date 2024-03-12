@@ -103,12 +103,12 @@ jobs:
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
 
-      - name: Archive allure-results
+      - name: Archive pytest logs
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results
+          name: pytest-logs
           path: |
-            allure-results
+            pytest.log
 
       - name: Load Test Report History
         uses: actions/checkout@v4
@@ -118,10 +118,6 @@ jobs:
           ref: upgrade-reports
           path: allure-reports
 
-      - run: |
-          ls -l
-          pwd
-
       - name: Build Test Report
         uses: simple-elf/allure-report-action@v1.7
         if: always()
@@ -129,13 +125,7 @@ jobs:
           gh_pages: allure-reports
           allure_history: allure-history
           allure_results: allure-results
-          keep_reports: 50
-
-      - run: |
-          ls -l allure-history
-          ls -l allure-reports
-          ls -l allure-report
-          pwd
+          keep_reports: 100
 
       - name: Publish Test Report
         uses: peaceiris/actions-gh-pages@v3
@@ -210,8 +200,8 @@ jobs:
         with:
           gh_pages: allure-reports
           allure_history: allure-history
-          allure_results: moc-tester/allure-results
-          keep_reports: 50
+          allure_results: allure-results
+          keep_reports: 100
 
       - name: Publish Test Report
         uses: peaceiris/actions-gh-pages@v3
