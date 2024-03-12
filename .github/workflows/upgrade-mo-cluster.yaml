@@ -43,15 +43,15 @@ on:
         required: false
         type: string
         # default: 'nightly-9d616832a'
-      restore_root_username:
-        description: Username (base64 encrypted) of origin cluster
-        required: false
-        type: string
-        default: dump
-      restore_root_password:
-        description: Password (base64 encrypted) of origin cluster
-        required: false
-        type: string
+#      restore_root_username:
+#        description: Username (base64 encrypted) of origin cluster
+#        required: false
+#        type: string
+#        default: dump
+#      restore_root_password:
+#        description: Password (base64 encrypted) of origin cluster
+#        required: false
+#        type: string
       restore_s3_bucket:
         description: The S3 bucket to restore.
         required: false
