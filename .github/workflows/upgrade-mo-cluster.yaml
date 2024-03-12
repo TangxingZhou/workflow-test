@@ -132,7 +132,7 @@ jobs:
           keep_reports: 50
 
       - run: |
-          ls -l
+          ls -l allure-history
           pwd
 
       - name: Publish Test Report
