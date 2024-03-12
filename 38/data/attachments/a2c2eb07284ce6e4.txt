@@ -1,0 +1,4 @@
+DEBUG    pytest_dependency:pytest_dependency.py:87 check dependencies of test_backup_mo_data in module scope ...
+DEBUG    pytest_dependency:pytest_dependency.py:95 ... BackupMOTestSuite::test_create_mo_backup_cluster has not succeeded
+INFO     pytest_dependency:pytest_dependency.py:100 skip test_backup_mo_data because it depends on BackupMOTestSuite::test_create_mo_backup_cluster
+INFO     src.tests.upgrade.test_mo_upgrade:test_mo_upgrade.py:30 teardown_module
