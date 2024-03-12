@@ -1,0 +1,6 @@
+DEBUG    pytest_dependency:pytest_dependency.py:87 check dependencies of test_upgrade_restored_mo_cluster in module scope ...
+DEBUG    pytest_dependency:pytest_dependency.py:95 ... UpgradeMOTestSuite::test_restore_mo_cluster has not succeeded
+INFO     pytest_dependency:pytest_dependency.py:100 skip test_upgrade_restored_mo_cluster because it depends on UpgradeMOTestSuite::test_restore_mo_cluster
+DEBUG    kubernetes.client.rest:rest.py:235 response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods \"restore-restore-freetier-02\" not found","reason":"NotFound","details":{"name":"restore-restore-freetier-02","kind":"pods"},"code":404}
+
+INFO     src.tests.upgrade.test_mo_upgrade:test_mo_upgrade.py:30 teardown_module
