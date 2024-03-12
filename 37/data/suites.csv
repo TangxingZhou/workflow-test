@@ -1,0 +1,3 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"skipped","Tue Mar 12 07:21:01 GMT 2024","Tue Mar 12 07:21:01 GMT 2024","0","src.tests.upgrade","Backup MO Cluster","BackupMOTestSuite","","","Backup MO data","This test attempts to make backups for MO data."
+"skipped","Tue Mar 12 07:21:01 GMT 2024","Tue Mar 12 07:21:01 GMT 2024","0","src.tests.upgrade","Backup MO Cluster","BackupMOTestSuite","","","Create MO backup account","This test attempts to create cluster for backup."
