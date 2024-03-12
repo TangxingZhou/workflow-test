@@ -43,15 +43,6 @@ on:
         required: false
         type: string
         # default: 'nightly-9d616832a'
-#      restore_root_username:
-#        description: Username (base64 encrypted) of origin cluster
-#        required: false
-#        type: string
-#        default: dump
-#      restore_root_password:
-#        description: Password (base64 encrypted) of origin cluster
-#        required: false
-#        type: string
       restore_s3_bucket:
         description: The S3 bucket to restore.
         required: false
@@ -119,6 +110,11 @@ jobs:
           name: allure-results
           path: |
             allure-results
+
+      - run: |
+          ls -l
+          pwd
+          ls -l $GITHUB_WORKSPACE
 
       - name: Load Test Report History
         uses: actions/checkout@v4
@@ -190,8 +186,8 @@ jobs:
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
           RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
-          RESTORE_ROOT_USERNAME: ${{ inputs.restore_root_username }}
-          RESTORE_ROOT_PASSWORD: ${{ inputs.restore_root_password }}
+          RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
+          RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
