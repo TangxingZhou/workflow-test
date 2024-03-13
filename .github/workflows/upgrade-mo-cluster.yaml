@@ -103,10 +103,11 @@ jobs:
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
 
-      - name: Archive pytest logs
+      - name: Archive artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: pytest-logs
+          name: artifacts
           path: |
             pytest.log
 
@@ -134,6 +135,21 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: upgrade-reports
           publish_dir: allure-history
+
+#      - name: Read body of wework message
+#        id: wework
+#        uses: juliangruber/read-file-action@v1
+#        with:
+#          path: wework.json
+#
+#      - name: Deploy Stage
+#        uses: fjogeleit/http-request-action@v1
+#        with:
+#          url: '${{ secrets.WEWORK_WEBHOOK_URL }}'
+#          method: 'POST'
+#          customHeaders: '{"Content-Type": "application/json"}'
+#          data: '${{ steps.wework.outputs.content }}'
+#          ignoreStatusCode: '401'
 
   restore-and-upgrade:
     if: ${{ inputs.action == 'restore' }}
@@ -185,6 +201,14 @@ jobs:
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts
+          path: |
+            pytest.log
 
       - name: Load Test Report History
         uses: actions/checkout@v3
