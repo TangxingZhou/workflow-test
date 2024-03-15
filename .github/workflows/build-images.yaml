@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: The name of image to be built.
+        description: The name of image to be built
         required: true
         type: choice
         options:

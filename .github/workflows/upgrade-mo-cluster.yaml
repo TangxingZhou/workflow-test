@@ -102,6 +102,7 @@ jobs:
           BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+          # MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
@@ -201,6 +202,7 @@ jobs:
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
