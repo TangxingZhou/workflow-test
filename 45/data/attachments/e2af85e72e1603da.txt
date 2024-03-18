@@ -1,0 +1,3 @@
+DEBUG    pytest_dependency:pytest_dependency.py:87 check dependencies of test_upgrade_mo_root_cluster in module scope ...
+DEBUG    pytest_dependency:pytest_dependency.py:95 ... UpgradeMOTestSuite::test_create_mo_root_cluster has not succeeded
+INFO     pytest_dependency:pytest_dependency.py:100 skip test_upgrade_mo_root_cluster because it depends on UpgradeMOTestSuite::test_create_mo_root_cluster
