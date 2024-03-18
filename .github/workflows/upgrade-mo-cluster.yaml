@@ -88,8 +88,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
         env:
-          email: ${{ secrets.EMAIL }}
-          password: ${{ secrets.PASSWORD }}
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
           env: qa
           provider: aliyun
@@ -102,15 +102,16 @@ jobs:
           BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
-          # MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
-      - name: Archive artifacts
+      - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: artifacts
+          name: upgrade-test-logs
           path: |
-            pytest.log
+            ${{ github.workspace }}/pytest.log
+          retention-days: 7
 
       - name: Load Test Report History
         uses: actions/checkout@v4
@@ -183,8 +184,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
         env:
-          email: ${{ secrets.EMAIL }}
-          password: ${{ secrets.PASSWORD }}
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
           env: qa
           provider: aliyun
@@ -201,16 +202,18 @@ jobs:
           RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
-      - name: Archive artifacts
+      - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: artifacts
+          name: upgrade-test-logs
           path: |
-            pytest.log
+            ${{ github.workspace }}/pytest.log
+          retention-days: 7
 
       - name: Load Test Report History
         uses: actions/checkout@v3
@@ -267,8 +270,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           pytest src/tests/upgrade/test_create_instances.py --alluredir=./allure-results --cluster-name $RESTORE_CLUSTER
         env:
-          email: ${{ secrets.EMAIL }}
-          password: ${{ secrets.PASSWORD }}
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
           env: qa
           provider: aliyun
@@ -277,13 +280,14 @@ jobs:
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
 
-      - name: Archive artifacts
+      - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: artifacts
+          name: upgrade-test-logs
           path: |
-            pytest.log
+            ${{ github.workspace }}/pytest.log
+          retention-days: 7
 
       - name: Load Test Report History
         uses: actions/checkout@v4
