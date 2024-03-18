@@ -96,8 +96,8 @@ jobs:
           region: cn-hangzhou
           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
-          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
           BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
           BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
@@ -192,8 +192,10 @@ jobs:
           region: cn-hangzhou
           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          ALIYUN_AK: ${{ secrets.ALIYUN_AK }}
-          ALIYUN_SK: ${{ secrets.ALIYUN_SK }}
+          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
+          RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
+          RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
