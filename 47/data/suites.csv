@@ -1,0 +1,4 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"skipped","Tue Mar 19 05:19:20 GMT 2024","Tue Mar 19 05:19:20 GMT 2024","1","src.tests.upgrade","Restore MO Cluster and Upgrade","UpgradeMOTestSuite","","","Create New MO Cluster","This test attempts to create new cluster if S3 bucket/filePath is not specified."
+"passed","Tue Mar 19 05:19:22 GMT 2024","Tue Mar 19 07:19:58 GMT 2024","7235753","src.tests.upgrade","Restore MO Cluster and Upgrade","UpgradeMOTestSuite","","","Restore MO data","This test attempts to restore MO data."
+"skipped","Tue Mar 19 05:19:20 GMT 2024","Tue Mar 19 05:19:20 GMT 2024","0","src.tests.upgrade","Restore MO Cluster and Upgrade","UpgradeMOTestSuite","","","Upgrade New MO Cluster","This test attempts to upgrade cluster newly created."

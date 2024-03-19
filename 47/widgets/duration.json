@@ -1,1 +1,1 @@
-[]
+[{"uid":"2fac5c5feef9d7b5","name":"Create New MO Cluster","time":{"start":1710825560915,"stop":1710825560916,"duration":1},"status":"skipped","severity":"minor"},{"uid":"49deab06a21d9e5b","name":"Restore MO data","time":{"start":1710825562882,"stop":1710832798635,"duration":7235753},"status":"passed","severity":"critical"},{"uid":"fab582da0a4c5c56","name":"Upgrade New MO Cluster","time":{"start":1710825560918,"stop":1710825560918,"duration":0},"status":"skipped","severity":"minor"}]
