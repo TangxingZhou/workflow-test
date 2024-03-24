@@ -87,6 +87,9 @@ jobs:
         if: ${{ inputs.action == 'backup' }}
         run: |
           cd $GITHUB_WORKSPACE
+          pwd
+          ls -l
+          env
           export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py backup
         env:
