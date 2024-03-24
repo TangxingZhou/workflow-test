@@ -1,0 +1,163 @@
+name:  MOC Upgrade Test
+
+on:
+#   schedule:
+#     - cron: '0 2 * * *'
+
+  workflow_dispatch:
+    inputs:
+      action:
+        description: The action to perform
+        required: true
+        type: choice
+        options:
+          - backup
+          - restore
+          - upgrade
+        default: restore
+      backup_cluster:
+        description: Backups to be made for the cluster
+        required: false
+        type: string
+      backup_cluster_version:
+        description: The cluster version for CN that performs the backup job
+        required: false
+        type: string
+        default: nightly-e94ba155
+      backup_s3_bucket:
+        description: Backups to be made into the S3 bucket
+        required: false
+        type: string
+        default: 'moc-backup-test'
+      backup_s3_bucket_file_path:
+        description: Backups to be made into the S3 bucket path
+        required: false
+        type: string
+      restore_cluster:
+        description: The cluster to be restored
+        required: false
+        type: string
+        default: restore-freetier-02
+      restore_cluster_version:
+        description: The cluster version to be restored
+        required: false
+        type: string
+        # default: 'nightly-9d616832a'
+      restore_s3_bucket:
+        description: The S3 bucket to restore
+        required: false
+        type: string
+        default: 'moc-backup-test'
+      restore_s3_bucket_file_path:
+        description: The S3 bucket path to restore
+        required: false
+        type: string
+      upgrade_cluster_version:
+        description: The target version to upgrade
+        required: false
+        type: string
+        default: 'nightly-9d616832b'
+
+jobs:
+  upgrade-test:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Backup MO Data
+        if: ${{ inputs.action == 'backup' }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          env
+          python src/script/upgrade_test/main.py backup
+        env:
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
+          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
+          BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+
+      - name: Restore MOC From Backup
+        if: ${{ inputs.action == 'restore' }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          python src/script/upgrade_test/main.py restore --force
+        env:
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
+          RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
+          RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+          RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
+          RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
+          RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
+          RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
+          RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
+          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+
+      - name: Upgrade MOC
+        if: ${{ inputs.action == 'upgrade' }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          env
+          python src/script/upgrade_test/main.py upgrade --create-instance
+        env:
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-test-logs
+          path: |
+            ${{ github.workspace }}/moc-upgrade.log
+          retention-days: 7
