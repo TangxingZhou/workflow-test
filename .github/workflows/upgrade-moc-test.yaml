@@ -87,11 +87,8 @@ jobs:
         if: ${{ inputs.action == 'backup' }}
         run: |
           cd $GITHUB_WORKSPACE
-          pwd
-          ls -l
-          env
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py backup
+          python src/script/upgrade_test/main.py --verbose backup
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
@@ -114,7 +111,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py restore --force
+          python src/script/upgrade_test/main.py --verbose restore --force
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
@@ -142,11 +139,8 @@ jobs:
         if: ${{ inputs.action == 'upgrade' }}
         run: |
           cd $GITHUB_WORKSPACE
-          pwd
-          ls -l
-          env
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py upgrade --create-instance
+          python src/script/upgrade_test/main.py --verbose upgrade --create-instance
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
