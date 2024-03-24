@@ -87,7 +87,7 @@ jobs:
         if: ${{ inputs.action == 'backup' }}
         run: |
           cd $GITHUB_WORKSPACE
-          env
+          export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py backup
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
@@ -110,6 +110,7 @@ jobs:
         if: ${{ inputs.action == 'restore' }}
         run: |
           cd $GITHUB_WORKSPACE
+          export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py restore --force
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
@@ -139,6 +140,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           env
+          export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py upgrade --create-instance
         env:
           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
