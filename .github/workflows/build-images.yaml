@@ -39,7 +39,8 @@ jobs:
         id: prep
         run: |
           git status
-          ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup"
           # VERSION=${GITHUB_SHA::8}
           VERSION=e602904
           
