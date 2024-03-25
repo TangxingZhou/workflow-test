@@ -40,7 +40,8 @@ jobs:
         run: |
           git status
           ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
-          VERSION=${GITHUB_SHA::8}
+          # VERSION=${GITHUB_SHA::8}
+          VERSION=a40a455
           
           TAGS="$ACR_DOCKER_IMAGE:$VERSION"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
