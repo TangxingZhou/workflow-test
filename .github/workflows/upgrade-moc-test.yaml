@@ -28,7 +28,7 @@ on:
         description: Backups to be made into the S3 bucket
         required: false
         type: string
-        default: 'moc-backup-test'
+        default: 'mo-backup-20240201'
       backup_s3_bucket_file_path:
         description: Backups to be made into the S3 bucket path
         required: false
