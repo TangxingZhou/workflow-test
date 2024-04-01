@@ -42,7 +42,7 @@ jobs:
           # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
           ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup"
           # VERSION=${GITHUB_SHA::8}
-          VERSION=e602904
+          VERSION=c3b10ba
           
           TAGS="$ACR_DOCKER_IMAGE:$VERSION"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
