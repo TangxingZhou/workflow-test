@@ -9,55 +9,65 @@ on:
 #       - published
   workflow_dispatch:
     inputs:
-      image:
-        description: The name of image to be built
+      project:
+        description: The project of image to be built
         required: true
         type: choice
         options:
           - mo-backup
+          - matrixone
 #        default: mo-backup
+
+      ref:
+        description: The project ref of image to be built
+        required: true
+        type: string
+        default: main
+
+      image:
+        description: The image to be tagged
+        required: true
+        type: string
+
+      repository:
+        description: Repository of image
+        required: false
+        type: string  
+
+      registry:
+        description: Image registry
+        required: true
+        type: string
+        default: registry.cn-hangzhou.aliyuncs.com
+      
+      namespace:
+        description: Namespace of image registry
+        required: true
+        type: string
+        default: mocloud
+      
+      tag:
+        description: The tag of image to be built
+        required: false
+        type: string
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  mo-backup:
-    if: ${{ inputs.image == 'mo-backup' }}
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-            repository: matrixorigin/mo-backup
-            ref: main
-            token: ${{ secrets.GH_PAT }}
-            # fetch-depth: 0
-          
-      - name: Prepare
-        id: prep
-        run: |
-          git status
-          # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
-          ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup"
-          # VERSION=${GITHUB_SHA::8}
-          VERSION=c3b10ba
-          
-          TAGS="$ACR_DOCKER_IMAGE:$VERSION"
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
-      - name: Get image info
-        run: |
-          echo image-tags: ${{ steps.prep.outputs.tags }}
-
-      - name: Set up QEMU
+      - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           image: tonistiigi/binfmt:latest
           platforms: linux/amd64,linux/arm64
 
-      - name: Set up Docker Buildx
+      - name: Set Up Docker Buildx
         id: buildx
         uses:  docker/setup-buildx-action@v3
 
@@ -73,16 +83,89 @@ jobs:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_TOKEN }}
-
-      - name: Build and Push
-        uses: docker/build-push-action@v5
+      
+      - name: Checkout
+        if: ${{ inputs.project == 'mo-backup' }}
+        uses: actions/checkout@v4
         with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.prep.outputs.tags }}
+          repository: matrixorigin/mo-backup
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.GH_PAT }}
+          # fetch-depth: 0
+
+      - name: Checkout
+        if: ${{ inputs.project == 'matrixone' }}
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/matrixone
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Prepare
+        id: prep
+        run: |
+          git status
+          # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          if [ -z $DOCKER_REPOSITORY ]; then
+            repo_name=$(git remote get-url origin | xargs basename -s .git)
+          else
+            repo_name=$DOCKER_REPOSITORY
+          fi
+          ACR_DOCKER_IMAGE="$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name"
+          # VERSION=${GITHUB_SHA::8}
+          echo ${GITHUB_SHA}
+          if [ -z $DOCKER_IMAGE_TAG ]; then
+            VERSION=c3b10ba
+          else
+            VERSION=$DOCKER_IMAGE_TAG
+          fi
+          TAGS="$ACR_DOCKER_IMAGE:$VERSION"
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        env:
+          DOCKER_REPOSITORY: ${{ inputs.repository }}
+          DOCKER_REGISTRY: ${{ inputs.registry }}
+          DOCKER_NAMESPACE: ${{ inputs.namespace }}
+          DOCKER_IMAGE_TAG: ${{ inputs.tag }}
+
+      - name: Get Image Info
+        run: |
+          echo image-tags: ${{ steps.prep.outputs.tags }}
+      
+      # - name: Build and Push
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     context: .
+      #     file: Dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     push: true
+      #     tags: ${{ steps.prep.outputs.tags }}
+      
+      - name: Pull and Push
+        if: ${{ inputs.image }}
+        run: |
+          # docker pull $DOCKER_IMAGE
+          if [ -z $DOCKER_REPOSITORY ]; then
+            repo_name=${DOCKER_IMAGE%:*}
+            repo_name=${repo_name##*/}
+          else
+            repo_name=$DOCKER_REPOSITORY
+          fi
+          if [ -z $DOCKER_IMAGE_TAG ]; then
+            repo_tag=${DOCKER_IMAGE##*:}
+          else
+            repo_tag=$DOCKER_IMAGE_TAG
+          fi
+          # docker tag $DOCKER_IMAGE $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
+          # docker push $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
+          docker info
+          echo $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
+        env:
+          DOCKER_IMAGE: ${{ inputs.image }}
+          DOCKER_REPOSITORY: ${{ inputs.repository }}
+          DOCKER_REGISTRY: ${{ inputs.registry }}
+          DOCKER_NAMESPACE: ${{ inputs.namespace }}
+          DOCKER_IMAGE_TAG: ${{ inputs.tag }}
 #   release:
 #     runs-on: ubuntu-latest
 #     steps:
