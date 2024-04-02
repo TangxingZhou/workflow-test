@@ -105,6 +105,7 @@ jobs:
         id: prep
         run: |
           git status
+          env
           # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
           if [ -z $DOCKER_REPOSITORY ]; then
             repo_name=$(git remote get-url origin | xargs basename -s .git)
@@ -115,11 +116,11 @@ jobs:
           # VERSION=${GITHUB_SHA::8}
           echo ${GITHUB_SHA}
           if [ -z $DOCKER_IMAGE_TAG ]; then
-            VERSION=c3b10ba
+            repo_tag=c3b10ba
           else
-            VERSION=$DOCKER_IMAGE_TAG
+            repo_tag=$DOCKER_IMAGE_TAG
           fi
-          TAGS="$ACR_DOCKER_IMAGE:$VERSION"
+          TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
         env:
           DOCKER_REPOSITORY: ${{ inputs.repository }}
