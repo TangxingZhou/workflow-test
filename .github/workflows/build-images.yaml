@@ -26,7 +26,7 @@ on:
 
       image:
         description: The image to be tagged
-        required: true
+        required: false
         type: string
 
       repository:
@@ -105,7 +105,6 @@ jobs:
         id: prep
         run: |
           git status
-          env
           # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
           if [ -z $DOCKER_REPOSITORY ]; then
             repo_name=$(git remote get-url origin | xargs basename -s .git)
@@ -116,7 +115,8 @@ jobs:
           # VERSION=${GITHUB_SHA::8}
           echo ${GITHUB_SHA}
           if [ -z $DOCKER_IMAGE_TAG ]; then
-            repo_tag=c3b10ba
+            repo_tag=$(git rev-parse HEAD)
+            repo_tag=${repo_tag::7}
           else
             repo_tag=$DOCKER_IMAGE_TAG
           fi
