@@ -16,7 +16,7 @@ on:
         options:
           - mo-backup
           - matrixone
-#        default: mo-backup
+        default: mo-backup
 
       ref:
         description: The project ref of image to be built
@@ -132,20 +132,20 @@ jobs:
         run: |
           echo image-tags: ${{ steps.prep.outputs.tags }}
       
-      # - name: Build and Push
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     builder: ${{ steps.buildx.outputs.name }}
-      #     context: .
-      #     file: Dockerfile
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: ${{ steps.prep.outputs.tags }}
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
       
       - name: Pull and Push
         if: ${{ inputs.image }}
         run: |
-          # docker pull $DOCKER_IMAGE
+          docker pull $DOCKER_IMAGE
           if [ -z $DOCKER_REPOSITORY ]; then
             repo_name=${DOCKER_IMAGE%:*}
             repo_name=${repo_name##*/}
@@ -157,9 +157,8 @@ jobs:
           else
             repo_tag=$DOCKER_IMAGE_TAG
           fi
-          # docker tag $DOCKER_IMAGE $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
-          # docker push $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
-          docker info
+          docker tag $DOCKER_IMAGE $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
+          docker push $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
           echo $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
         env:
           DOCKER_IMAGE: ${{ inputs.image }}
