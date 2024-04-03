@@ -14,6 +14,7 @@ on:
           - backup
           - restore
           - upgrade
+          - clear
         default: restore
       backup_cluster:
         description: Backups to be made for the cluster
@@ -28,7 +29,7 @@ on:
         description: Backups to be made into the S3 bucket
         required: false
         type: string
-        default: 'mo-backup-20240201'
+        default: 'moc-backup-test'
       backup_s3_bucket_file_path:
         description: Backups to be made into the S3 bucket path
         required: false
@@ -153,6 +154,23 @@ jobs:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+      
+      - name: Upgrade MOC
+        if: ${{ inputs.action == 'clear' }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          export PYTHONPATH=$(pwd)
+          python src/script/upgrade_test/main.py --verbose clear --force
+        env:
+          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          env: qa
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
