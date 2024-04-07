@@ -22,7 +22,9 @@ jobs:
       name: dev
     steps:
       - name: Checkout mocloud-tester
-        if: ${{ inputs.action == 'backup' }}
+        # if: ${{ inputs.action == 'backup' }}
+        # if: ${{ github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && contains(['restore', 'upgrade', inputs.action])}}
         run: |
           echo 123
       - name: Checkout mocloud-tester
