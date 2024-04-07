@@ -1,7 +1,19 @@
 name: Study and Test
 
 on:
+  schedule:
+    - cron: '20 15 * * *'
   workflow_dispatch:
+    inputs:
+      action:
+        description: The action to perform
+        required: true
+        type: choice
+        options:
+          - backup
+          - restore
+          - upgrade
+        default: restore
 
 jobs:
   moc-test:
@@ -10,10 +22,11 @@ jobs:
       name: dev
     steps:
       - name: Checkout mocloud-tester
-        if: ${{ false }}
-        uses: actions/checkout@v3
-        with:
-          repository: matrixone-cloud/mocloud-tester
-          ref: qa-txzhou
-          token: ${{ secrets.GH_PAT }}
+        if: ${{ inputs.action == 'backup' }}
+        run: |
+          echo 123
+      - name: Checkout mocloud-tester
+        if: ${{ inputs.action == 'restore' || inputs.action == 'upgrade' }}
+        run: |
+          echo 456
 
