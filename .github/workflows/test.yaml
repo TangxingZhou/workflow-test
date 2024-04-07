@@ -1,0 +1,19 @@
+name: Study and Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  moc-test:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Checkout mocloud-tester
+        if: ${{ false }}
+        uses: actions/checkout@v3
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
+
