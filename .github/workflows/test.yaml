@@ -2,7 +2,7 @@ name: Study and Test
 
 on:
   schedule:
-    - cron: '20 15 * * *'
+    - cron: '22 7 * * *'
   workflow_dispatch:
     inputs:
       action:
