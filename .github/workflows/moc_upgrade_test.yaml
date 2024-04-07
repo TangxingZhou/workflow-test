@@ -1,8 +1,8 @@
 name:  MOC Upgrade Test
 
 on:
-#   schedule:
-#     - cron: '0 2 * * *'
+  # schedule:
+  #   - cron: '0 18 * * *'
 
   workflow_dispatch:
     inputs:
@@ -16,10 +16,6 @@ on:
           - upgrade
           - clear
         default: restore
-      backup_cluster:
-        description: Backups to be made for the cluster
-        required: false
-        type: string
       backup_cluster_version:
         description: The cluster version for CN that performs the backup job
         required: false
