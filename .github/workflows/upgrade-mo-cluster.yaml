@@ -6,60 +6,68 @@ on:
 
   workflow_dispatch:
     inputs:
-      action:
-        description: The action to perform
+      # action:
+      #   description: The action to perform
+      #   required: true
+      #   type: choice
+      #   options:
+      #     - backup
+      #     - restore
+      #   default: restore
+      # backup_cluster:
+      #   description: Backups to be made for the cluster
+      #   required: false
+      #   type: string
+      # backup_cluster_version:
+      #   description: The cluster version for CN that performs the backup job
+      #   required: false
+      #   type: string
+      #   default: nightly-e94ba155
+      # backup_s3_bucket:
+      #   description: Backups to be made into the S3 bucket
+      #   required: false
+      #   type: string
+      #   default: 'moc-backup-test'
+      # backup_s3_bucket_file_path:
+      #   description: Backups to be made into the S3 bucket path
+      #   required: false
+      #   type: string
+      # restore_cluster:
+      #   description: The cluster to be restored
+      #   required: false
+      #   type: string
+      #   default: restore-freetier-02
+      # restore_cluster_version:
+      #   description: The cluster version to be restored
+      #   required: false
+      #   type: string
+      #   # default: 'nightly-9d616832a'
+      # restore_s3_bucket:
+      #   description: The S3 bucket to restore
+      #   required: false
+      #   type: string
+      #   default: 'moc-backup-test'
+      # restore_s3_bucket_file_path:
+      #   description: The S3 bucket path to restore
+      #   required: false
+      #   type: string
+      # upgrade_cluster_version:
+      #   description: The target version to upgrade
+      #   required: false
+      #   type: string
+      #   default: 'nightly-9d616832b'
+      aliyun_acr_ak:
+        description: Aliyun ACR AK
         required: true
-        type: choice
-        options:
-          - backup
-          - restore
-        default: restore
-      backup_cluster:
-        description: Backups to be made for the cluster
-        required: false
         type: string
-      backup_cluster_version:
-        description: The cluster version for CN that performs the backup job
-        required: false
+      aliyun_acr_sk:
+        description: Aliyun ACR SK
+        required: true
         type: string
-        default: nightly-e94ba155
-      backup_s3_bucket:
-        description: Backups to be made into the S3 bucket
-        required: false
-        type: string
-        default: 'moc-backup-test'
-      backup_s3_bucket_file_path:
-        description: Backups to be made into the S3 bucket path
-        required: false
-        type: string
-      restore_cluster:
-        description: The cluster to be restored
-        required: false
-        type: string
-        default: restore-freetier-02
-      restore_cluster_version:
-        description: The cluster version to be restored
-        required: false
-        type: string
-        # default: 'nightly-9d616832a'
-      restore_s3_bucket:
-        description: The S3 bucket to restore
-        required: false
-        type: string
-        default: 'moc-backup-test'
-      restore_s3_bucket_file_path:
-        description: The S3 bucket path to restore
-        required: false
-        type: string
-      upgrade_cluster_version:
-        description: The target version to upgrade
-        required: false
-        type: string
-        default: 'nightly-9d616832b'
 
 jobs:
   backup:
-    if: ${{ inputs.action == 'backup' }}
+    # if: ${{ inputs.action == 'backup' }}
     runs-on: ubuntu-latest
     environment:
       name: qa
@@ -80,238 +88,251 @@ jobs:
       - name: Install Python Dependencies
         run: |
           cd $GITHUB_WORKSPACE
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Tests Case
-        run: |
-          cd $GITHUB_WORKSPACE
-          pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
+          # python -m pip install --upgrade pip
+          # pip install -r requirements.txt
+          curl -O https://aliyuncli.alicdn.com/aliyun-cli-linux-latest-amd64.tgz
+          tar xzvf aliyun-cli-linux-latest-amd64.tgz
+          chmod +x ./aliyun
+          ./aliyun configure set \
+            --profile akProfile \
+            --mode AK \
+            --region cn-hangzhou \
+            --access-key-id $ALIYUN_ACR_AK \
+            --access-key-secret $ALIYUN_ACR_SK
+          ./aliyun cr ListRepository --region cn-hangzhou
         env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
-          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
-          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
-          BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
-          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
-          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+          ALIYUN_ACR_AK: ${{ inputs.aliyun_acr_ak }}
+          ALIYUN_ACR_SK: ${{ inputs.aliyun_acr_sk }}
 
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: upgrade-test-logs
-          path: |
-            ${{ github.workspace }}/pytest.log
-          retention-days: 7
+#       - name: Run Tests Case
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           pytest src/tests/upgrade/test_mo_upgrade.py::BackupMOTestSuite --alluredir=./allure-results
+#         env:
+#           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+#           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+#           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+#           env: qa
+#           provider: aliyun
+#           region: cn-hangzhou
+#           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+#           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+#           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+#           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
+#           BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
+#           BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
+#           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+#           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+#           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
-      - name: Load Test Report History
-        uses: actions/checkout@v4
-        if: always()
-        continue-on-error: true
-        with:
-          ref: upgrade-reports
-          path: allure-reports
+#       - name: Upload Logs
+#         uses: actions/upload-artifact@v4
+#         if: always()
+#         with:
+#           name: upgrade-test-logs
+#           path: |
+#             ${{ github.workspace }}/pytest.log
+#           retention-days: 7
 
-      - name: Build Test Report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          gh_pages: allure-reports
-          allure_history: allure-history
-          allure_results: allure-results
-          keep_reports: 100
+#       - name: Load Test Report History
+#         uses: actions/checkout@v4
+#         if: always()
+#         continue-on-error: true
+#         with:
+#           ref: upgrade-reports
+#           path: allure-reports
 
-      - name: Publish Test Report
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: upgrade-reports
-          publish_dir: allure-history
+#       - name: Build Test Report
+#         uses: simple-elf/allure-report-action@v1.7
+#         if: always()
+#         with:
+#           gh_pages: allure-reports
+#           allure_history: allure-history
+#           allure_results: allure-results
+#           keep_reports: 100
 
-#      - name: Read body of wework message
-#        id: wework
-#        uses: juliangruber/read-file-action@v1
-#        with:
-#          path: wework.json
-#
-#      - name: Deploy Stage
-#        uses: fjogeleit/http-request-action@v1
-#        with:
-#          url: '${{ secrets.WEWORK_WEBHOOK_URL }}'
-#          method: 'POST'
-#          customHeaders: '{"Content-Type": "application/json"}'
-#          data: '${{ steps.wework.outputs.content }}'
-#          ignoreStatusCode: '401'
+#       - name: Publish Test Report
+#         uses: peaceiris/actions-gh-pages@v3
+#         if: always()
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_branch: upgrade-reports
+#           publish_dir: allure-history
 
-  restore-and-upgrade:
-    if: ${{ inputs.action == 'restore' }}
-    # needs: backup
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
+# #      - name: Read body of wework message
+# #        id: wework
+# #        uses: juliangruber/read-file-action@v1
+# #        with:
+# #          path: wework.json
+# #
+# #      - name: Deploy Stage
+# #        uses: fjogeleit/http-request-action@v1
+# #        with:
+# #          url: '${{ secrets.WEWORK_WEBHOOK_URL }}'
+# #          method: 'POST'
+# #          customHeaders: '{"Content-Type": "application/json"}'
+# #          data: '${{ steps.wework.outputs.content }}'
+# #          ignoreStatusCode: '401'
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: matrixone-cloud/mocloud-tester
-          ref: qa-txzhou
-          token: ${{ secrets.GH_PAT }}
+#   restore-and-upgrade:
+#     if: ${{ inputs.action == 'restore' }}
+#     # needs: backup
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: qa
 
-      - name: Set Up Python3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           repository: matrixone-cloud/mocloud-tester
+#           ref: qa-txzhou
+#           token: ${{ secrets.GH_PAT }}
 
-      - name: Install Python Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+#       - name: Set Up Python3.8
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.8'
 
-      - name: Run Tests Case
-        run: |
-          cd $GITHUB_WORKSPACE
-          pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
-        env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
-          BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
-          RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
-          RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
-          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
-          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
-          RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
-          RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
-          RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
-          RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
-          RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
-          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
-          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
-          MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+#       - name: Install Python Dependencies
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
 
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: upgrade-test-logs
-          path: |
-            ${{ github.workspace }}/pytest.log
-          retention-days: 7
+#       - name: Run Tests Case
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           pytest src/tests/upgrade/test_mo_upgrade.py::UpgradeMOTestSuite --alluredir=./allure-results
+#         env:
+#           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+#           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+#           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+#           env: qa
+#           provider: aliyun
+#           region: cn-hangzhou
+#           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+#           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+#           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
+#           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
+#           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
+#           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
+#           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
+#           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+#           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+#           RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
+#           RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
+#           RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
+#           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
+#           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
+#           UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+#           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+#           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
-      - name: Load Test Report History
-        uses: actions/checkout@v3
-        if: always()
-        continue-on-error: true
-        with:
-          ref: upgrade-reports
-          path: allure-reports
+#       - name: Upload Logs
+#         uses: actions/upload-artifact@v4
+#         if: always()
+#         with:
+#           name: upgrade-test-logs
+#           path: |
+#             ${{ github.workspace }}/pytest.log
+#           retention-days: 7
 
-      - name: Build Test Report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          gh_pages: allure-reports
-          allure_history: allure-history
-          allure_results: allure-results
-          keep_reports: 100
+#       - name: Load Test Report History
+#         uses: actions/checkout@v3
+#         if: always()
+#         continue-on-error: true
+#         with:
+#           ref: upgrade-reports
+#           path: allure-reports
 
-      - name: Publish Test Report
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: upgrade-reports
-          publish_dir: allure-history
+#       - name: Build Test Report
+#         uses: simple-elf/allure-report-action@v1.7
+#         if: always()
+#         with:
+#           gh_pages: allure-reports
+#           allure_history: allure-history
+#           allure_results: allure-results
+#           keep_reports: 100
 
-  create-instances:
-    needs: restore-and-upgrade
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
+#       - name: Publish Test Report
+#         uses: peaceiris/actions-gh-pages@v3
+#         if: always()
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_branch: upgrade-reports
+#           publish_dir: allure-history
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: matrixone-cloud/mocloud-tester
-          ref: qa-txzhou
-          token: ${{ secrets.GH_PAT }}
+#   create-instances:
+#     needs: restore-and-upgrade
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: qa
 
-      - name: Set Up Python3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           repository: matrixone-cloud/mocloud-tester
+#           ref: qa-txzhou
+#           token: ${{ secrets.GH_PAT }}
 
-      - name: Install Python Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+#       - name: Set Up Python3.8
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.8'
 
-      - name: Run Tests Case
-        run: |
-          cd $GITHUB_WORKSPACE
-          pytest src/tests/upgrade/test_create_instances.py --alluredir=./allure-results --cluster-name $RESTORE_CLUSTER
-        env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
-          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+#       - name: Install Python Dependencies
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
 
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: upgrade-test-logs
-          path: |
-            ${{ github.workspace }}/pytest.log
-          retention-days: 7
+#       - name: Run Tests Case
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           pytest src/tests/upgrade/test_create_instances.py --alluredir=./allure-results --cluster-name $RESTORE_CLUSTER
+#         env:
+#           email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+#           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+#           database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+#           env: qa
+#           provider: aliyun
+#           region: cn-hangzhou
+#           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+#           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+#           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
 
-      - name: Load Test Report History
-        uses: actions/checkout@v4
-        if: always()
-        continue-on-error: true
-        with:
-          ref: upgrade-reports
-          path: allure-reports
+#       - name: Upload Logs
+#         uses: actions/upload-artifact@v4
+#         if: always()
+#         with:
+#           name: upgrade-test-logs
+#           path: |
+#             ${{ github.workspace }}/pytest.log
+#           retention-days: 7
 
-      - name: Build Test Report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          gh_pages: allure-reports
-          allure_history: allure-history
-          allure_results: allure-results
-          keep_reports: 100
+#       - name: Load Test Report History
+#         uses: actions/checkout@v4
+#         if: always()
+#         continue-on-error: true
+#         with:
+#           ref: upgrade-reports
+#           path: allure-reports
 
-      - name: Publish Test Report
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: upgrade-reports
-          publish_dir: allure-history
+#       - name: Build Test Report
+#         uses: simple-elf/allure-report-action@v1.7
+#         if: always()
+#         with:
+#           gh_pages: allure-reports
+#           allure_history: allure-history
+#           allure_results: allure-results
+#           keep_reports: 100
+
+#       - name: Publish Test Report
+#         uses: peaceiris/actions-gh-pages@v3
+#         if: always()
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_branch: upgrade-reports
+#           publish_dir: allure-history
