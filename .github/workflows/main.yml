@@ -12,10 +12,11 @@ jobs:
       name: qa
     steps:
       - name: Run Aliyun Tests Case
-        if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !vars.UPGRADE_IMAGE_REPOSITORY || !vars.UPGRADE_CLUSTER_VERSION }}
+        if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!vars.ZTX_TEST0 || !vars.ZTX_TEST1) }}
         run: |
           echo hello
           echo $UPGRADE_IMAGE_REPOSITORY
+          echo $UPGRADE_CLUSTER_VERSION
         env:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_BRANCH }}
