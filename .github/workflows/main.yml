@@ -34,15 +34,15 @@ jobs:
           if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
             echo "upgrade-image-repository=''" >> $GITHUB_OUTPUT
             echo "upgrade-cluster-version=''" >> $GITHUB_OUTPUT
-          else:
+          else
             # echo "build-mo-image=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
             echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
             echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
           fi
           
         env:
-          UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_BRANCH }}
-          UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_BRANCH }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_MO_BRANCH }}
+          UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_MO_VERSION }}
       
       - name: Build Image
         if: ${{ inputs.action == 'upgrade' && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
