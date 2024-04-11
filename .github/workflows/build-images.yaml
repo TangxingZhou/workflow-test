@@ -120,7 +120,7 @@ jobs:
           # VERSION=${GITHUB_SHA::8}
           echo ${GITHUB_SHA}
           if [ -z $DOCKER_IMAGE_TAG ]; then
-            repo_tag=$(git rev-parse HEAD)
+            repo_tag=$(git rev-parse --short HEAD)
             repo_tag=${repo_tag::7}
           else
             repo_tag=$DOCKER_IMAGE_TAG
