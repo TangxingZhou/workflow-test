@@ -44,6 +44,11 @@ jobs:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_MO_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_MO_VERSION }}
       
+      - name: Check
+        if: ${{ steps.prep.outputs.upgrade-image-repository }}
+        run: |
+          echo "check"   
+      
       - name: Build Image
         if: ${{ inputs.action == 'upgrade' && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
         run: |
