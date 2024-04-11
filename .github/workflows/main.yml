@@ -32,8 +32,8 @@ jobs:
 
           # set output parameters
           if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
-            echo "upgrade-image-repository=''" >> $GITHUB_OUTPUT
-            echo "upgrade-cluster-version=''" >> $GITHUB_OUTPUT
+            echo "upgrade-image-repository=" >> $GITHUB_OUTPUT
+            echo "upgrade-cluster-version=" >> $GITHUB_OUTPUT
           else
             # echo "build-mo-image=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
             echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
@@ -47,7 +47,9 @@ jobs:
       - name: Check
         if: ${{ steps.prep.outputs.upgrade-image-repository }}
         run: |
-          echo "check"   
+          echo "check"
+        env:
+          UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository }}
       
       - name: Build Image
         if: ${{ inputs.action == 'upgrade' && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
