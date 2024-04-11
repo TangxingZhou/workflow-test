@@ -57,7 +57,7 @@ on:
         description: The target version to upgrade
         required: false
         type: string
-        default: 'nightly-9d616832b'
+        # default: 'nightly-9d616832b'
 
 jobs:
   upgrade-test:
@@ -135,7 +135,40 @@ jobs:
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
+          MOC_PLUGIN_IMAGE: ${{ vars.MOC_PLUGIN_IMAGE }}
 
+      - name: Prepare MO Image
+        if: ${{ inputs.action == 'upgrade' }}
+        id: prep
+        shell: bash
+        run: |
+          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+          UPGRADE_CLUSTER_VERSION=$(echo $UPGRADE_CLUSTER_VERSION)
+
+          # set output parameters
+          if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
+            echo "upgrade-image-repository=" >> $GITHUB_OUTPUT
+            echo "upgrade-cluster-version=" >> $GITHUB_OUTPUT
+          else
+            echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
+            echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
+          fi
+        env:
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+      
+      - name: Build MO Image
+        if: ${{ inputs.action == 'upgrade' && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+        id: build
+        uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+        with:
+          branch: ${{ vars.BUILD_MO_BRANCH }}
+          mo-version: ${{ vars.BUILD_MO_VERSION }}
+          image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
+          platform: linux/amd64
+          acr-username: ${{ secrets.ACR_USERNAME }}
+          acr-password: ${{ secrets.ACR_PASSWORD }}
+      
       - name: Upgrade MOC
         if: ${{ inputs.action == 'upgrade' }}
         run: |
@@ -152,8 +185,8 @@ jobs:
           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
-          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
-          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
+          UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
       
       - name: Upgrade MOC
         if: ${{ inputs.action == 'clear' }}

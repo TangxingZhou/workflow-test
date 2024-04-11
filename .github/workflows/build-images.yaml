@@ -86,7 +86,7 @@ jobs:
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_TOKEN }}
+          password: ${{ secrets.ACR_PASSWORD }}
       
       - name: Checkout
         if: ${{ inputs.project == 'mo-backup' }}
