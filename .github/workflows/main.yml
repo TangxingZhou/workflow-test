@@ -17,6 +17,7 @@ jobs:
           echo hello
           echo 000${UPGRADE_IMAGE_REPOSITORY}000
           echo 123${UPGRADE_CLUSTER_VERSION}123
+          if [ -z $UPGRADE_IMAGE_REPOSITORY ]; then echo yes; fi
         env:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_BRANCH }}
