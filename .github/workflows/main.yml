@@ -15,8 +15,8 @@ jobs:
         # if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!vars.ZTX_TEST0 || !vars.ZTX_TEST1) }}
         run: |
           echo hello
-          echo ${UPGRADE_IMAGE_REPOSITORY}000
-          echo ${UPGRADE_CLUSTER_VERSION}123
+          echo 000${UPGRADE_IMAGE_REPOSITORY}000
+          echo 123${UPGRADE_CLUSTER_VERSION}123
         env:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_BRANCH }}
