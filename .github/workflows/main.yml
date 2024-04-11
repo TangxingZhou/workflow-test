@@ -17,6 +17,9 @@ jobs:
           echo hello
           echo $UPGRADE_IMAGE_REPOSITORY
           echo ${#UPGRADE_IMAGE_REPOSITORY}
+          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+          echo $UPGRADE_IMAGE_REPOSITORY
+          echo ${#UPGRADE_IMAGE_REPOSITORY}
           echo 000${UPGRADE_IMAGE_REPOSITORY}000
           echo 123${UPGRADE_CLUSTER_VERSION}123
           if [ -z $UPGRADE_IMAGE_REPOSITORY ]; then echo yes; fi
