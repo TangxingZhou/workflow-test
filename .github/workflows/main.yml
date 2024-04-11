@@ -38,10 +38,9 @@ jobs:
             echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
             echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
           fi
-          
         env:
-          UPGRADE_IMAGE_REPOSITORY: ${{ vars.ZTX_TEST0 || env.DEFAULT_MO_BRANCH }}
-          UPGRADE_CLUSTER_VERSION: ${{ vars.ZTX_TEST1 || env.DEFAULT_MO_VERSION }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+          UPGRADE_CLUSTER_VERSION: ${{ vars.UPGRADE_CLUSTER_VERSION }}
       
       - name: Check
         if: ${{ steps.prep.outputs.upgrade-image-repository }}
@@ -58,9 +57,13 @@ jobs:
       - name: Run Tests
         if: ${{ inputs.action == 'upgrade' }}
         run: |
+          env
           echo "run tests"
           echo $UPGRADE_IMAGE_REPOSITORY:$UPGRADE_CLUSTER_VERSION
+          echo $ACR_USERNAME:$ACR_TOKEN
         env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME}}
+          ACR_TOKEN: ${{ secrets.ACR_TOKEN}}
           UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || env.DEFAULT_MO_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || env.DEFAULT_MO_VERSION }}
       
