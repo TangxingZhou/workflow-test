@@ -92,7 +92,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Backup MO Data
-        if: ${{ inputs.action == 'backup' }}
+        if: ${{ inputs.action == 'backup' || vars.UPGRADE_TEST_ACTION == 'backup' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
@@ -100,14 +100,14 @@ jobs:
         env:
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
-          BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
-          BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version }}
-          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
+          BACKUP_CLUSTER: ${{ inputs.backup_cluster || vars.BACKUP_CLUSTER }}
+          BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version || vars.BACKUP_CLUSTER_VERSION }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
 
       - name: Restore MOC From Backup
-        if: ${{ inputs.action == 'restore' }}
+        if: ${{ inputs.action == 'restore' || vars.UPGRADE_TEST_ACTION == 'restore' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
@@ -117,19 +117,19 @@ jobs:
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
-          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket }}
-          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path }}
-          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
-          RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version }}
+          BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
+          RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version || vars.RESTORE_CLUSTER_VERSION }}
           RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
           RESTORE_ROOT_PASSWORD: ${{ secrets.restore_root_password }}
-          RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket }}
-          RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path }}
+          RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket || vars.RESTORE_S3_BUCKET }}
+          RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path || vars.RESTORE_S3_BUCKET_FILE_PATH }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
           MOC_PLUGIN_IMAGE: ${{ vars.MOC_PLUGIN_IMAGE }}
 
       - name: Prepare MO Image
-        if: ${{ inputs.action == 'upgrade' }}
+        if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
         id: prep
         shell: bash
         run: |
@@ -146,10 +146,10 @@ jobs:
           fi
         env:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
-          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version }}
+          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
       
       - name: Build MO Image
-        if: ${{ inputs.action == 'upgrade' && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
         id: build
         uses: matrixone-cloud/gitops/.github/actions/mo-image@main
         with:
@@ -161,24 +161,24 @@ jobs:
           acr-password: ${{ secrets.ACR_PASSWORD }}
       
       - name: Upgrade MOC
-        if: ${{ inputs.action == 'upgrade' }}
+        if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py --verbose upgrade
         env:
-          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
           UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
           UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
       
       - name: Clear MOC
-        if: ${{ inputs.action == 'clear' }}
+        if: ${{ inputs.action == 'clear' || vars.UPGRADE_TEST_ACTION == 'clear' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py --verbose clear --force
         env:
-          RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
+          RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
