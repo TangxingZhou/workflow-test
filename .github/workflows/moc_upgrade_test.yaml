@@ -3,7 +3,6 @@ name:  MOC Upgrade Test
 on:
   # schedule:
   #   - cron: '0 18 * * *'
-
   workflow_dispatch:
     inputs:
       action:
@@ -58,7 +57,15 @@ on:
         required: false
         type: string
         # default: 'nightly-9d616832b'
-
+env:
+  email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+  password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+  database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+  env: qa
+  provider: aliyun
+  region: cn-hangzhou
+  k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+  k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
 jobs:
   upgrade-test:
     runs-on: ubuntu-latest
@@ -91,14 +98,6 @@ jobs:
           export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py --verbose backup
         env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
           BACKUP_CLUSTER: ${{ inputs.backup_cluster }}
@@ -112,16 +111,8 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose restore --force
+          python src/script/upgrade_test/main.py --verbose restore --force --create-instance
         env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
@@ -174,35 +165,19 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose upgrade --create-instance
+          python src/script/upgrade_test/main.py --verbose upgrade
         env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
           UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
           UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
       
-      - name: Upgrade MOC
+      - name: Clear MOC
         if: ${{ inputs.action == 'clear' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
           python src/script/upgrade_test/main.py --verbose clear --force
         env:
-          email: ${{ secrets.UPGRADE_TEST_EMAIL }}
-          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-          env: qa
-          provider: aliyun
-          region: cn-hangzhou
-          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
-          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster }}
 
       - name: Upload Logs
