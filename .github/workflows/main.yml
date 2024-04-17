@@ -1,3 +1,5 @@
+
+
 name: Study and Test
 
 on:
@@ -17,6 +19,30 @@ env:
   DEFAULT_MO_BRANCH: 1.1-dev
   DEFAULT_MO_VERSION: v1.1.2
 jobs:
+  build-mo-image:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
+      - name: Checkout action
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/gitops
+          ref: main
+          token: ${{ secrets.GH_PAT }}
+          # persist-credentials: false
+          path: ./.github/actions/mo-image
+      - run: |
+          ls -al
+          ls -al .github/
+          ls -al ./.github/actions/
+          ls -al ./.github/actions/mo-image
   moc-test:
     runs-on: ubuntu-latest
     environment:
@@ -69,8 +95,8 @@ jobs:
           echo $UPGRADE_IMAGE_REPOSITORY:$UPGRADE_CLUSTER_VERSION
           echo $ACR_USERNAME:$ACR_TOKEN
         env:
-          ACR_USERNAME: ${{ secrets.ACR_USERNAME}}
-          ACR_TOKEN: ${{ secrets.ACR_TOKEN}}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_TOKEN: ${{ secrets.ACR_PASSWORD }}
           UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || env.DEFAULT_MO_BRANCH }}
           UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || env.DEFAULT_MO_VERSION }}
       
