@@ -36,14 +36,15 @@ jobs:
           repository: matrixone-cloud/gitops
           ref: main
           token: ${{ secrets.GH_PAT }}
-          # persist-credentials: false
+          # persist-credentials: true
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .github/actions/mo-image
-          path: ./.github/actions/
+          #path: ./.github/actions/
       - run: |
           ls -al
           tree -a
+          # ./.github/actions/mo-image
   moc-test:
     runs-on: ubuntu-latest
     environment:
