@@ -179,6 +179,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
           env
+          tree -a
           # python src/script/upgrade_test/main.py --verbose upgrade
         env:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
