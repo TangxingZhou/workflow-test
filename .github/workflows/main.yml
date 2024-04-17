@@ -37,7 +37,9 @@ jobs:
           ref: main
           token: ${{ secrets.GH_PAT }}
           # persist-credentials: false
-          path: ./.github/actions/mo-image
+          sparse-checkout: |
+            .github/actions/mo-image
+          path: ./.github/actions/
       - run: |
           ls -al
           ls -al .github/
