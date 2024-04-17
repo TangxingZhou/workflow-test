@@ -40,7 +40,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .github/actions/mo-image
-          #path: ./.github/actions/
+          path: ./
       - run: |
           ls -al
           tree -a
