@@ -58,7 +58,7 @@ on:
         type: string
         # default: 'nightly-9d616832b'
 env:
-  email: ${{ secrets.UPGRADE_TEST_EMAIL }}
+  email: ${{ vars.UPGRADE_TEST_EMAIL }}
   password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
   database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
   env: qa
