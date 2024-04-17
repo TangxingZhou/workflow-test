@@ -74,7 +74,7 @@ jobs:
     outputs:
       image-repo: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
       image-tag: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
-    if: ${{ inputs.action == 'upgrade' || (!inputs.action && vars.UPGRADE_TEST_ACTION == 'upgrade') }}
+    # if: ${{ inputs.action == 'upgrade' || (!inputs.action && vars.UPGRADE_TEST_ACTION == 'upgrade') }}
     steps:
       - name: Prepare MO Image
         if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
