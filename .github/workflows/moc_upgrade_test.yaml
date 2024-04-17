@@ -149,6 +149,7 @@ jobs:
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
       
       - name: Checkout Action
+        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
         uses: actions/checkout@v4
         with:
           repository: matrixone-cloud/gitops
