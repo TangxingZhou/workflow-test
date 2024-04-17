@@ -67,7 +67,62 @@ env:
   k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
   k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
 jobs:
+  build-mo-image:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    outputs:
+      image-repo: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
+      image-tag: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
+    if: ${{ inputs.action == 'upgrade' || (!inputs.action && vars.UPGRADE_TEST_ACTION == 'upgrade') }}
+    steps:
+      - name: Prepare MO Image
+        if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
+        id: prep
+        shell: bash
+        run: |
+          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+          UPGRADE_CLUSTER_VERSION=$(echo $UPGRADE_CLUSTER_VERSION)
+
+          # set output parameters
+          if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
+            echo "upgrade-image-repository=" >> $GITHUB_OUTPUT
+            echo "upgrade-cluster-version=" >> $GITHUB_OUTPUT
+          else
+            echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
+            echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
+          fi
+        env:
+          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
+      - name: Checkout Action
+        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/gitops
+          ref: main
+          token: ${{ secrets.GH_PAT }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/actions/mo-image
+          path: github-actions
+    
+      - name: Build MO Image
+        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+        id: build
+        # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+        uses: ./github-actions/.github/actions/mo-image
+        with:
+          branch: ${{ vars.BUILD_MO_BRANCH }}
+          mo-version: ${{ vars.BUILD_MO_VERSION }}
+          image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
+          platform: linux/amd64
+          acr-username: ${{ secrets.ACR_USERNAME }}
+          acr-password: ${{ secrets.ACR_PASSWORD }}
+  
   upgrade-test:
+    needs:
+      - build-mo-image
     runs-on: ubuntu-latest
     environment:
       name: qa
@@ -128,50 +183,50 @@ jobs:
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
           MOC_PLUGIN_IMAGE: ${{ vars.MOC_PLUGIN_IMAGE }}
 
-      - name: Prepare MO Image
-        if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
-        id: prep
-        shell: bash
-        run: |
-          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
-          UPGRADE_CLUSTER_VERSION=$(echo $UPGRADE_CLUSTER_VERSION)
+      # - name: Prepare MO Image
+      #   if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
+      #   id: prep
+      #   shell: bash
+      #   run: |
+      #     UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+      #     UPGRADE_CLUSTER_VERSION=$(echo $UPGRADE_CLUSTER_VERSION)
 
-          # set output parameters
-          if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
-            echo "upgrade-image-repository=" >> $GITHUB_OUTPUT
-            echo "upgrade-cluster-version=" >> $GITHUB_OUTPUT
-          else
-            echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
-            echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
-          fi
-        env:
-          UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
-          UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
+      #     # set output parameters
+      #     if [ -z $UPGRADE_IMAGE_REPOSITORY -o -z $UPGRADE_CLUSTER_VERSION ]; then
+      #       echo "upgrade-image-repository=" >> $GITHUB_OUTPUT
+      #       echo "upgrade-cluster-version=" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
+      #       echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
+      #     fi
+      #   env:
+      #     UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
+      #     UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
       
-      - name: Checkout Action
-        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
-        uses: actions/checkout@v4
-        with:
-          repository: matrixone-cloud/gitops
-          ref: main
-          token: ${{ secrets.GH_PAT }}
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/actions/mo-image
-          path: github-actions
+      # - name: Checkout Action
+      #   if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: matrixone-cloud/gitops
+      #     ref: main
+      #     token: ${{ secrets.GH_PAT }}
+      #     sparse-checkout-cone-mode: false
+      #     sparse-checkout: |
+      #       .github/actions/mo-image
+      #     path: github-actions
       
-      - name: Build MO Image
-        if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
-        id: build
-        # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
-        uses: ./github-actions/.github/actions/mo-image
-        with:
-          branch: ${{ vars.BUILD_MO_BRANCH }}
-          mo-version: ${{ vars.BUILD_MO_VERSION }}
-          image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
-          platform: linux/amd64
-          acr-username: ${{ secrets.ACR_USERNAME }}
-          acr-password: ${{ secrets.ACR_PASSWORD }}
+      # - name: Build MO Image
+      #   if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
+      #   id: build
+      #   # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+      #   uses: ./github-actions/.github/actions/mo-image
+      #   with:
+      #     branch: ${{ vars.BUILD_MO_BRANCH }}
+      #     mo-version: ${{ vars.BUILD_MO_VERSION }}
+      #     image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
+      #     platform: linux/amd64
+      #     acr-username: ${{ secrets.ACR_USERNAME }}
+      #     acr-password: ${{ secrets.ACR_PASSWORD }}
       
       - name: Upgrade MOC
         if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
@@ -183,8 +238,10 @@ jobs:
           # python src/script/upgrade_test/main.py --verbose upgrade
         env:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
-          UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
-          UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
+          # UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
+          # UPGRADE_CLUSTER_VERSION: ${{ steps.prep.outputs.upgrade-image-version || steps.build.outputs.image-tag }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ needs.build-mo-image.outputs.image-repo }}
+          UPGRADE_CLUSTER_VERSION: ${{ needs.build-mo-image.outputs.image-repo }}
       
       - name: Clear MOC
         if: ${{ inputs.action == 'clear' || vars.UPGRADE_TEST_ACTION == 'clear' }}
