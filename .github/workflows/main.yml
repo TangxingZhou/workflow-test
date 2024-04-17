@@ -43,9 +43,7 @@ jobs:
           path: ./.github/actions/
       - run: |
           ls -al
-          ls -al .github/
-          ls -al ./.github/actions/
-          ls -al ./.github/actions/mo-image
+          tree -a
   moc-test:
     runs-on: ubuntu-latest
     environment:
