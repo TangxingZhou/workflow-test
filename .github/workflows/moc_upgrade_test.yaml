@@ -165,8 +165,6 @@ jobs:
         id: build
         # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
         uses: ./github-actions/.github/actions/mo-image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           branch: ${{ vars.BUILD_MO_BRANCH }}
           mo-version: ${{ vars.BUILD_MO_VERSION }}

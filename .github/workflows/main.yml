@@ -41,10 +41,15 @@ jobs:
           sparse-checkout: |
             .github/actions/mo-image
           path: github-actions
-      - run: |
-          ls -al
-          tree -a
-          # ./.github/actions/mo-image
+      - name: Build MO Image
+        uses: ./github-actions/.github/actions/mo-image
+        with:
+          branch: ${{ vars.BUILD_MO_BRANCH }}
+          mo-version: ${{ vars.BUILD_MO_VERSION }}
+          image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
+          platform: linux/amd64
+          acr-username: ${{ secrets.ACR_USERNAME }}
+          acr-password: ${{ secrets.ACR_PASSWORD }}
   moc-test:
     runs-on: ubuntu-latest
     environment:
