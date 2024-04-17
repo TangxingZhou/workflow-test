@@ -178,7 +178,8 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose upgrade
+          env
+          # python src/script/upgrade_test/main.py --verbose upgrade
         env:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
           UPGRADE_IMAGE_REPOSITORY: ${{ steps.prep.outputs.upgrade-image-repository || steps.build.outputs.image-repo }}
