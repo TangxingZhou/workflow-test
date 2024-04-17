@@ -166,6 +166,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
+          echo $UPGRADE_IMAGE_REPOSITORY:$UPGRADE_CLUSTER_VERSION
           # python src/script/upgrade_test/main.py --verbose restore --force --create-instance
         env:
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
@@ -182,6 +183,8 @@ jobs:
           RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path || vars.RESTORE_S3_BUCKET_FILE_PATH }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
           MOC_PLUGIN_IMAGE: ${{ vars.MOC_PLUGIN_IMAGE }}
+          UPGRADE_IMAGE_REPOSITORY: ${{ needs.build-mo-image.outputs.image-repo }}
+          UPGRADE_CLUSTER_VERSION: ${{ needs.build-mo-image.outputs.image-repo }}
 
       # - name: Prepare MO Image
       #   if: ${{ inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
