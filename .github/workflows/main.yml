@@ -40,10 +40,11 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             .github/actions/mo-image
-          path: ./
+          path: /tmp
       - run: |
           ls -al
           tree -a
+          tree -a /tmp
           # ./.github/actions/mo-image
   moc-test:
     runs-on: ubuntu-latest
