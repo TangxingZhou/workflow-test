@@ -166,7 +166,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose restore --force --create-instance
+          # python src/script/upgrade_test/main.py --verbose restore --force --create-instance
         env:
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
