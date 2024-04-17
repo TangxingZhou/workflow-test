@@ -148,10 +148,22 @@ jobs:
           UPGRADE_IMAGE_REPOSITORY: ${{ vars.UPGRADE_IMAGE_REPOSITORY }}
           UPGRADE_CLUSTER_VERSION: ${{ inputs.upgrade_cluster_version || vars.UPGRADE_CLUSTER_VERSION }}
       
+      - name: Checkout Action
+        uses: actions/checkout@v4
+        with:
+          repository: matrixone-cloud/gitops
+          ref: main
+          token: ${{ secrets.GH_PAT }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/actions/mo-image
+          path: github-actions
+      
       - name: Build MO Image
         if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-image-repository) }}
         id: build
-        uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+        # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+        uses: ./github-actions/.github/actions/mo-image
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
