@@ -32,12 +32,12 @@ on:
         required: false
         type: string
 env:
-  # email: ${{ vars.UPGRADE_TEST_EMAIL }}
-  # password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
-  # database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
-  # env: qa
-  # provider: aliyun
-  # region: cn-hangzhou
+  email: ${{ vars.UPGRADE_TEST_EMAIL }}
+  password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+  database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+  env: qa
+  provider: aliyun
+  region: cn-hangzhou
   k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
   k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
 jobs:
