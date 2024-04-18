@@ -92,5 +92,5 @@ jobs:
           with:
             name: upgrade-test-logs
             path: |
-              ${{ github.workspace }}/moc-upgrade.log
+              ${{ github.workspace }}/moc-upgrade-test.log
             retention-days: 7
