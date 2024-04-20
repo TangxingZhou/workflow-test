@@ -12,5 +12,5 @@ jobs:
         uses: actions/checkout@v4
       - name: Print
         run: |
-          echo "hello dev"
+          echo "hello main"
           ls -al
