@@ -1,0 +1,16 @@
+name: To Test
+
+on:
+  workflow_dispatch:
+jobs:
+  build-mo-image:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print
+        run: |
+          echo "hello dev"
+          ls -al
