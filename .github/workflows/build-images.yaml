@@ -31,6 +31,12 @@ on:
         type: string
         default: main
 
+      dockerfile:
+        description: The path of Dockerfile
+        required: true
+        type: string
+        default: Dockerfile
+
       image:
         description: The image to be tagged
         required: false
@@ -150,8 +156,9 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./optools/images/Dockerfile
+          file: ${{ inputs.dockerfile }}
           platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.prep.outputs.tags }}
       
