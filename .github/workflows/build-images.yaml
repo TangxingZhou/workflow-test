@@ -9,6 +9,12 @@ on:
 #       - published
   workflow_dispatch:
     inputs:
+      organization:
+        description: The organization of project
+        required: true
+        type: string
+        default: matrixorigin
+      
       project:
         description: The project of image to be built
         required: true
@@ -92,7 +98,7 @@ jobs:
         if: ${{ inputs.project == 'mo-backup' }}
         uses: actions/checkout@v4
         with:
-          repository: matrixorigin/mo-backup
+          repository: ${{ inputs.organization }}/mo-backup
           ref: ${{ inputs.ref }}
           token: ${{ secrets.GH_PAT }}
           # fetch-depth: 0
@@ -101,7 +107,7 @@ jobs:
         if: ${{ inputs.project == 'matrixone' }}
         uses: actions/checkout@v4
         with:
-          repository: matrixorigin/matrixone
+          repository: ${{ inputs.organization }}/matrixone
           ref: ${{ inputs.ref }}
           token: ${{ secrets.GH_PAT }}
 
