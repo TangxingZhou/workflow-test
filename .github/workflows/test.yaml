@@ -8,50 +8,87 @@ jobs:
     environment:
       name: qa
     steps:
+      - name: Checkout mo-load
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-load
+          ref: main
+          path: mo-load
+          token: ${{ secrets.GH_PAT }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
           repository: matrixorigin/mo-sysbench
+          path: mo-sysbench
           token: ${{ secrets.GH_PAT }}
-      - uses: ConorMacBride/install-package@v1
+      - name: Set up Java1.8
+        uses: actions/setup-java@v4
         with:
-          apt: sysbench
-      - name: Prepare data
+          distribution: temurin
+          java-version: 1.8
+      - name: Run Sysbench Tests
         run: |
-          ls -al
-          sysbench \
-          --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          --mysql-port=6001 \
-          --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
-          --mysql-password=Admin123 \
-          oltp_common.lua \
-          --mysql-db=sysbench_db \
-          --tables=10 \
-          --table_size=100 \
-          --threads=1 \
-          --time=30 \
-          --report-interval=10 \
-          --create_secondary=off \
-          --auto_inc=off \
-          prepare
-      - name: Run OLTP readonly
-        run: |
-          sysbench \
-          --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          --mysql-port=6001 \
-          --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
-          --mysql-password=Admin123 \
-          --db-ps-mode=disable \
-          oltp_read_only.lua \
-          --mysql-db=sysbench_db \
-          --tables=10 \
-          --table_size=100 \
-          --threads=10 \
-          --time=30 \
-          --report-interval=10 \
-          --create_secondary=off \
-          --auto_inc=off \
-          --skip_trx=on \
-          --range_selects=off \
-          --point_selects=1 \
-          run
+          cd $GITHUB_WORKSPACE/mo-sysbench
+          sysbench --mysql-host=$MO_HOST --mysql-port=$MO_PORT --mysql-user=$MO_USER --mysql-password=$MO_PASSWORD oltp_common.lua --mysql-db=sysbench_db --tables=10 --table_size=100000 --threads=1 --time=30 --report-interval=10 --create_secondary=off --auto_inc=off prepare
+          cd $GITHUB_WORKSPACE/mo-load
+          ./start.sh \
+          -m SYSBENCH \
+          -n 10 \
+          -s 100000 \
+          -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          -P 6001 \
+          -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+          -p Admin123 \
+          -b sysbench_db
+          RUNNER_TRACKING_ID="" && \
+          nohup ./start.sh \
+          -c cases/sysbench/mixed_10_100000/ \
+          -t 10 \
+          -d 1 \
+          -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          -P 6001 \
+          -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+          -p Admin123 \
+          -b sysbench_db \
+          -g > sysbench.log &
+    #   - uses: ConorMacBride/install-package@v1
+    #     with:
+    #       apt: sysbench
+    #   - name: Prepare data
+    #     run: |
+    #       sysbench \
+    #       --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+    #       --mysql-port=6001 \
+    #       --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+    #       --mysql-password=Admin123 \
+    #       oltp_common.lua \
+    #       --mysql-db=sysbench_db \
+    #       --tables=10 \
+    #       --table_size=100 \
+    #       --threads=1 \
+    #       --time=30 \
+    #       --report-interval=10 \
+    #       --create_secondary=off \
+    #       --auto_inc=off \
+    #       prepare
+    #   - name: Run OLTP readonly
+    #     run: |
+    #       sysbench \
+    #       --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+    #       --mysql-port=6001 \
+    #       --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+    #       --mysql-password=Admin123 \
+    #       --db-ps-mode=disable \
+    #       oltp_read_only.lua \
+    #       --mysql-db=sysbench_db \
+    #       --tables=10 \
+    #       --table_size=100 \
+    #       --threads=10 \
+    #       --time=30 \
+    #       --report-interval=10 \
+    #       --create_secondary=off \
+    #       --auto_inc=off \
+    #       --skip_trx=on \
+    #       --range_selects=off \
+    #       --point_selects=1 \
+    #       run
