@@ -16,7 +16,42 @@ jobs:
       - uses: ConorMacBride/install-package@v1
         with:
           apt: sysbench
-      - name: Print
+      - name: Prepare data
         run: |
-          # apt install -y sysbench
-          sysbench --help
+          ls -al
+          sysbench \
+          --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          --mysql-port=6001 \
+          --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+          --mysql-password=Admin123 \
+          oltp_common.lua \
+          --mysql-db=sysbench_db \
+          --tables=10 \
+          --table_size=100 \
+          --threads=1 \
+          --time=30 \
+          --report-interval=10 \
+          --create_secondary=off \
+          --auto_inc=off \
+          prepare
+      - name: Run OLTP readonly
+        run: |
+          sysbench \
+          --mysql-host=restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          --mysql-port=6001 \
+          --mysql-user=018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+          --mysql-password=Admin123 \
+          --db-ps-mode=disable \
+          oltp_read_only.lua \
+          --mysql-db=sysbench_db \
+          --tables=10 \
+          --table_size=100 \
+          --threads=10 \
+          --time=30 \
+          --report-interval=10 \
+          --create_secondary=off \
+          --auto_inc=off \
+          --skip_trx=on \
+          --range_selects=off \
+          --point_selects=1 \
+          run
