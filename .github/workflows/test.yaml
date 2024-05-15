@@ -39,7 +39,7 @@ jobs:
           -P 6001 \
           -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
           -p Admin123 \
-          -b sysbench_db
+          -b sbtest
           RUNNER_TRACKING_ID="" && \
           nohup ./start.sh \
           -c cases/sysbench/mixed_10_100000/ \
@@ -49,7 +49,7 @@ jobs:
           -P 6001 \
           -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
           -p Admin123 \
-          -b sysbench_db \
+          -b sbtest \
           -g > sysbench.log &
       - name: Upload Logs
         uses: actions/upload-artifact@v4
