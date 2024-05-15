@@ -28,6 +28,7 @@ jobs:
           java-version: 8
       - name: Run Sysbench Tests
         run: |
+          tree
           # cd $GITHUB_WORKSPACE/mo-sysbench
           # sysbench --mysql-host=$MO_HOST --mysql-port=$MO_PORT --mysql-user=$MO_USER --mysql-password=$MO_PASSWORD oltp_common.lua --mysql-db=sysbench_db --tables=10 --table_size=100000 --threads=1 --time=30 --report-interval=10 --create_secondary=off --auto_inc=off prepare
           cd $GITHUB_WORKSPACE/mo-load
