@@ -10,7 +10,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-sysbench
+          token: ${{ secrets.GH_PAT }}
+      
       - name: Print
         run: |
-          echo "hello main"
-          ls -al
+          apt install -y sysbench
+          sysbench --help
