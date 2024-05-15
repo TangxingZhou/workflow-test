@@ -13,8 +13,10 @@ jobs:
         with:
           repository: matrixorigin/mo-sysbench
           token: ${{ secrets.GH_PAT }}
-      
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: sysbench
       - name: Print
         run: |
-          apt install -y sysbench
+          # apt install -y sysbench
           sysbench --help
