@@ -51,6 +51,14 @@ jobs:
           -p Admin123 \
           -b sysbench_db \
           -g > sysbench.log &
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-test-logs
+          path: |
+            ${{ github.workspace }}/mo-load/sysbench.log
+          retention-days: 7
     #   - uses: ConorMacBride/install-package@v1
     #     with:
     #       apt: sysbench
