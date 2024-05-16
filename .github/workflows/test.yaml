@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "export ZTX_TEST='hello'" >> ~/.bashrc
           cat ~/.bashrc
-          source ~/.bashrc
+          sources ~/.bashrc
           env
           bash -c "echo $ZTX_TEST"
           echo $ZTX_TEST
