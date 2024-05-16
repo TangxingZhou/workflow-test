@@ -8,6 +8,14 @@ jobs:
     environment:
       name: qa
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: tests
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
       - name: Checkout mo-load
         uses: actions/checkout@v4
         with:
@@ -26,35 +34,41 @@ jobs:
         with:
           distribution: temurin
           java-version: 8
-      - name: Restore MOC From Backup
-        if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+    #   - name: Restore MOC From Backup
+    #     if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+    #     id: restore
+    #     run: |
+    #       if [ -z $MOC_INSTANCE_HOST ]; then
+    #         echo "mo-host=" >> $GITHUB_OUTPUT
+    #       else
+    #         echo "mo-host=${MOC_INSTANCE_HOST}" >> $GITHUB_OUTPUT
+    #       fi
+    #       if [ -z $MOC_INSTANCE_PORT ]; then
+    #         echo "mo-port=" >> $GITHUB_OUTPUT
+    #       else
+    #         echo "mo-port=${MOC_INSTANCE_PORT}" >> $GITHUB_OUTPUT
+    #       fi
+    #       if [ -z $MOC_INSTANCE_USER ]; then
+    #         echo "mo-user=" >> $GITHUB_OUTPUT
+    #       else
+    #         echo "mo-user=${MOC_INSTANCE_USER}" >> $GITHUB_OUTPUT
+    #       fi
+    #       if [ -z $MOC_INSTANCE_PASSWORD ]; then
+    #         echo "mo-password=" >> $GITHUB_OUTPUT
+    #       else
+    #         echo "mo-password=${MOC_INSTANCE_PASSWORD}" >> $GITHUB_OUTPUT
+    #       fi
+    #     env:
+    #       MOC_INSTANCE_HOST: 127.0.0.1
+    #       MOC_INSTANCE_PORT: 6001
+    #       MOC_INSTANCE_USER: dump
+    #       MOC_INSTANCE_PASSWORD: 123
+      - name: Backup MO Data
         id: restore
         run: |
-          if [ -z $MOC_INSTANCE_HOST ]; then
-            echo "mo-host=" >> $GITHUB_OUTPUT
-          else
-            echo "mo-host=${MOC_INSTANCE_HOST}" >> $GITHUB_OUTPUT
-          fi
-          if [ -z $MOC_INSTANCE_PORT ]; then
-            echo "mo-port=" >> $GITHUB_OUTPUT
-          else
-            echo "mo-port=${MOC_INSTANCE_PORT}" >> $GITHUB_OUTPUT
-          fi
-          if [ -z $MOC_INSTANCE_USER ]; then
-            echo "mo-user=" >> $GITHUB_OUTPUT
-          else
-            echo "mo-user=${MOC_INSTANCE_USER}" >> $GITHUB_OUTPUT
-          fi
-          if [ -z $MOC_INSTANCE_PASSWORD ]; then
-            echo "mo-password=" >> $GITHUB_OUTPUT
-          else
-            echo "mo-password=${MOC_INSTANCE_PASSWORD}" >> $GITHUB_OUTPUT
-          fi
-        env:
-          MOC_INSTANCE_HOST: 127.0.0.1
-          MOC_INSTANCE_PORT: 6001
-          MOC_INSTANCE_USER: dump
-          MOC_INSTANCE_PASSWORD: 123
+          cd $GITHUB_WORKSPACE/tests
+          export PYTHONPATH=$(pwd)
+          python test.py
       - name: Test
         if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
         shell: bash
