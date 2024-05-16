@@ -8,9 +8,9 @@ sysbench_envs = {
 }
 for k, v in sysbench_envs.items():
     os.system(f'echo "export {k}={v}" >> .env')
-print(os.getenv('GITHUB_RUN_ID'))
-if os.getenv('GITHUB_RUN_ID'):
-    print('hello')
+print(os.getenv('GITHUB_RUN_NUMBER'))
+if os.getenv('GITHUB_RUN_NUMBER'):
+    print('hello world')
 os.system(f'''echo "mo-host={sysbench_envs.get('MOC_INSTANCE_HOST', '')}" >> $GITHUB_OUTPUT''')
 os.system(f'''echo "mo-port={sysbench_envs.get('MOC_INSTANCE_PORT', '')}" >> $GITHUB_OUTPUT''')
 os.system(f'''echo "mo-user={sysbench_envs.get('MOC_INSTANCE_USER', '')}" >> $GITHUB_OUTPUT''')
