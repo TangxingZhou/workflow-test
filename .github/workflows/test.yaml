@@ -60,7 +60,9 @@ jobs:
         shell: bash
         run: |
           echo "export ZTX_TEST=hello" >> ~/.bashrc
+          cat ~/.bashrc
           source ~/.bashrc
+          env
           echo $ZTX_TEST
           echo ${{ steps.restore.outputs.mo-host }}
           echo ${{ steps.restore.outputs.mo-port }}
