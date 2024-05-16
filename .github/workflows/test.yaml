@@ -3,10 +3,15 @@ name: To Test
 on:
   workflow_dispatch:
 jobs:
-  build-mo-image:
+  restore:
     runs-on: ubuntu-latest
     environment:
       name: qa
+    outputs:
+      mo-host: ${{ steps.restore.outputs.mo-host }}
+      mo-port: ${{ steps.restore.outputs.mo-port }}
+      mo-user: ${{ steps.restore.outputs.mo-user }}
+      mo-password: ${{ steps.restore.outputs.mo-password }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -168,11 +173,14 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
+    needs:
+      - restore
     steps:
       - name: Test
         shell: bash
         run: |
           echo "hello 456" > test.log
+          echo ${{ needs.restore.outputs.mo-host }}-${{ needs.restore.outputs.mo-port }}-${{needs.restore.outputs.mo-user }}-${{ needs.restore.outputs.mo-password }}
       - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
