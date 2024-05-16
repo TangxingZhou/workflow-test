@@ -63,6 +63,7 @@ jobs:
           cat ~/.bashrc
           source ~/.bashrc
           env
+          bash -c "echo $ZTX_TEST"
           echo $ZTX_TEST
           echo ${{ steps.restore.outputs.mo-host }}
           echo ${{ steps.restore.outputs.mo-port }}
