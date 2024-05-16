@@ -179,12 +179,12 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          echo "hello 456" > test1.log
+          echo "hello 456" > test.log
           echo ${{ needs.restore.outputs.mo-host }}-${{ needs.restore.outputs.mo-port }}-${{needs.restore.outputs.mo-user }}-${{ needs.restore.outputs.mo-password }}
       - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: upgrade-test-logs
+          name: upgrade-test1-logs
           path: |
             ${{ github.workspace }}/*.log
