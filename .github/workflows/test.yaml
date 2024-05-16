@@ -58,8 +58,9 @@ jobs:
       - name: Test
         if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
         run: |
-          env
-          echo 111
+          echo "export ZTX_TEST=hello" >> ~/.bashrc
+          source ~/.bashrc
+          echo $ZTX_TEST
           echo ${{ steps.restore.outputs.mo-host }}
           echo ${{ steps.restore.outputs.mo-port }}
           echo ${{ steps.restore.outputs.mo-user }}
