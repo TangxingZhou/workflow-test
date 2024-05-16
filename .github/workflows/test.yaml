@@ -73,6 +73,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/tests
           export PYTHONPATH=$(pwd)
+          env
           python test.py
       - uses: ConorMacBride/install-package@v1
         with:
