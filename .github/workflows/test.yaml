@@ -185,6 +185,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: upgrade-test-logs
+          name: upgrade-test1-logs
           path: |
             ${{ github.workspace }}/*.log
