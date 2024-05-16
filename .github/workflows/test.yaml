@@ -50,11 +50,11 @@ jobs:
           else
             echo "mo-password=${MOC_INSTANCE_PASSWORD}" >> $GITHUB_OUTPUT
           fi
-        env:
-          MOC_INSTANCE_HOST: 127.0.0.1
-          MOC_INSTANCE_PORT: 6001
-          MOC_INSTANCE_USER: dump
-          MOC_INSTANCE_PASSWORD: 123
+        # env:
+        #   MOC_INSTANCE_HOST: 127.0.0.1
+        #   MOC_INSTANCE_PORT: 6001
+        #   MOC_INSTANCE_USER: dump
+        #   MOC_INSTANCE_PASSWORD: 123
       - name: Test
         if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
         run: |
