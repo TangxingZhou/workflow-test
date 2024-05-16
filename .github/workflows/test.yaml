@@ -69,6 +69,9 @@ jobs:
           cd $GITHUB_WORKSPACE/tests
           export PYTHONPATH=$(pwd)
           python test.py
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: mysql-client
       - name: Test
         if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
         shell: bash
@@ -84,6 +87,7 @@ jobs:
           echo ${{ steps.restore.outputs.mo-port }}
           echo ${{ steps.restore.outputs.mo-user }}
           echo ${{ steps.restore.outputs.mo-password }}
+          mysql -h ${{ steps.restore.outputs.mo-host }} -P ${{ steps.restore.outputs.mo-port }} -u ${{ steps.restore.outputs.mo-user }} -p${{ steps.restore.outputs.mo-password }}
     #   - name: Run Sysbench Tests
     #     run: |
     #       tree
@@ -118,9 +122,6 @@ jobs:
     #       path: |
     #         ${{ github.workspace }}/mo-load/sysbench.log
     #       retention-days: 7
-    #   - uses: ConorMacBride/install-package@v1
-    #     with:
-    #       apt: sysbench
     #   - name: Prepare data
     #     run: |
     #       sysbench \
