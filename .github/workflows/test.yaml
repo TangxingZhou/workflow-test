@@ -77,17 +77,20 @@ jobs:
         shell: bash
         run: |
           echo "export ZTX_TEST='hello'" >> ~/.bashrc
-          cat ~/.bashrc
-          source ~/.bashrc
-          ls -al ~/.bash*
-          env
-          bash -c "echo $ZTX_TEST"
-          echo $ZTX_TEST
+          echo "hello 123" > test.log
           echo ${{ steps.restore.outputs.mo-host }}
           echo ${{ steps.restore.outputs.mo-port }}
           echo ${{ steps.restore.outputs.mo-user }}
           echo ${{ steps.restore.outputs.mo-password }}
           mysql -h ${{ steps.restore.outputs.mo-host }} -P ${{ steps.restore.outputs.mo-port }} -u ${{ steps.restore.outputs.mo-user }} -p${{ steps.restore.outputs.mo-password }}
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-test-logs
+          path: |
+            ${{ github.workspace }}/test.log
+          retention-days: 7
     #   - name: Run Sysbench Tests
     #     run: |
     #       tree
@@ -160,3 +163,20 @@ jobs:
     #       --range_selects=off \
     #       --point_selects=1 \
     #       run
+
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - name: Test
+        shell: bash
+        run: |
+          echo "hello 456" > test.log
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-test-logs
+          path: |
+            ${{ github.workspace }}/test.log
