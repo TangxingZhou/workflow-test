@@ -87,7 +87,7 @@ jobs:
           echo ${{ steps.restore.outputs.mo-port }}
           echo ${{ steps.restore.outputs.mo-user }}
           echo ${{ steps.restore.outputs.mo-password }}
-          mysql -h ${{ steps.restore.outputs.mo-host }} -P ${{ steps.restore.outputs.mo-port }} -u ${{ steps.restore.outputs.mo-user }} -p${{ steps.restore.outputs.mo-password }}
+          # mysql -h ${{ steps.restore.outputs.mo-host }} -P ${{ steps.restore.outputs.mo-port }} -u ${{ steps.restore.outputs.mo-user }} -p${{ steps.restore.outputs.mo-password }}
       - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
