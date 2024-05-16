@@ -26,40 +26,73 @@ jobs:
         with:
           distribution: temurin
           java-version: 8
-      - name: Run Sysbench Tests
+      - name: Restore MOC From Backup
+        if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        id: restore
         run: |
-          tree
-          # cd $GITHUB_WORKSPACE/mo-sysbench
-          # sysbench --mysql-host=$MO_HOST --mysql-port=$MO_PORT --mysql-user=$MO_USER --mysql-password=$MO_PASSWORD oltp_common.lua --mysql-db=sysbench_db --tables=10 --table_size=100000 --threads=1 --time=30 --report-interval=10 --create_secondary=off --auto_inc=off prepare
-          cd $GITHUB_WORKSPACE/mo-load
-          ./start.sh \
-          -m SYSBENCH \
-          -n 10 \
-          -s 100000 \
-          -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          -P 6001 \
-          -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
-          -p Admin123 \
-          -b sbtest
-          RUNNER_TRACKING_ID="" && \
-          nohup ./start.sh \
-          -c cases/sysbench/mixed_10_100000/ \
-          -t 10 \
-          -d 1 \
-          -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          -P 6001 \
-          -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
-          -p Admin123 \
-          -b sbtest \
-          -g > sysbench.log &
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: upgrade-test-logs
-          path: |
-            ${{ github.workspace }}/mo-load/sysbench.log
-          retention-days: 7
+          if [ -z $MOC_INSTANCE_HOST ]; then
+            echo "mo-host=" >> $GITHUB_OUTPUT
+          else
+            echo "mo-host=${MOC_INSTANCE_HOST}" >> $GITHUB_OUTPUT
+          fi
+          if [ -z $MOC_INSTANCE_PORT ]; then
+            echo "mo-port=" >> $GITHUB_OUTPUT
+          else
+            echo "mo-port=${MOC_INSTANCE_PORT}" >> $GITHUB_OUTPUT
+          fi
+          if [ -z $MOC_INSTANCE_USER ]; then
+            echo "mo-user=" >> $GITHUB_OUTPUT
+          else
+            echo "mo-user=${MOC_INSTANCE_USER}" >> $GITHUB_OUTPUT
+          fi
+          if [ -z $MOC_INSTANCE_PASSWORD ]; then
+            echo "mo-password=" >> $GITHUB_OUTPUT
+          else
+            echo "mo-password=${MOC_INSTANCE_PASSWORD}" >> $GITHUB_OUTPUT
+          fi
+        env:
+          MOC_INSTANCE_HOST: 127.0.0.1
+          MOC_INSTANCE_PORT: 6001
+          MOC_INSTANCE_USER: dump
+          MOC_INSTANCE_PASSWORD: 123
+      - name: Test
+        if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
+        run: |
+          echo 111
+    #   - name: Run Sysbench Tests
+    #     run: |
+    #       tree
+    #       # cd $GITHUB_WORKSPACE/mo-sysbench
+    #       # sysbench --mysql-host=$MO_HOST --mysql-port=$MO_PORT --mysql-user=$MO_USER --mysql-password=$MO_PASSWORD oltp_common.lua --mysql-db=sysbench_db --tables=10 --table_size=100000 --threads=1 --time=30 --report-interval=10 --create_secondary=off --auto_inc=off prepare
+    #       cd $GITHUB_WORKSPACE/mo-load
+    #       ./start.sh \
+    #       -m SYSBENCH \
+    #       -n 10 \
+    #       -s 100000 \
+    #       -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+    #       -P 6001 \
+    #       -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+    #       -p Admin123 \
+    #       -b sbtest
+    #       RUNNER_TRACKING_ID="" && \
+    #       nohup ./start.sh \
+    #       -c cases/sysbench/mixed_10_100000/ \
+    #       -t 10 \
+    #       -d 1 \
+    #       -h restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+    #       -P 6001 \
+    #       -u 018f7a51_3c66_7991_8402_37c1c0d47263:admin:accountadmin \
+    #       -p Admin123 \
+    #       -b sbtest \
+    #       -g > sysbench.log &
+    #   - name: Upload Logs
+    #     uses: actions/upload-artifact@v4
+    #     if: always()
+    #     with:
+    #       name: upgrade-test-logs
+    #       path: |
+    #         ${{ github.workspace }}/mo-load/sysbench.log
+    #       retention-days: 7
     #   - uses: ConorMacBride/install-package@v1
     #     with:
     #       apt: sysbench
