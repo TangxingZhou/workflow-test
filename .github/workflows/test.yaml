@@ -89,7 +89,7 @@ jobs:
         with:
           name: upgrade-test-logs
           path: |
-            ${{ github.workspace }}/test.log
+            ${{ github.workspace }}/*.log
           retention-days: 7
     #   - name: Run Sysbench Tests
     #     run: |
@@ -179,4 +179,4 @@ jobs:
         with:
           name: upgrade-test-logs
           path: |
-            ${{ github.workspace }}/test.log
+            ${{ github.workspace }}/*.log
