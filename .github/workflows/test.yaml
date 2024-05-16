@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           echo "export ZTX_TEST='hello'" >> ~/.bashrc
-          cat ~/.bashrc_profile
+          cat ~/.bashrc
           source ~/.bashrc
           ls -al ~/.bash*
           env
