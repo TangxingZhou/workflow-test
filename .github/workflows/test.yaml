@@ -183,7 +183,7 @@ jobs:
         run: |
           echo "hello 456" > test.log
           echo ${{ needs.restore.outputs.mo-host }}-${{ needs.restore.outputs.mo-port }}-${{needs.restore.outputs.mo-user }}-${{ needs.restore.outputs.mo-password }}
-          echo ${{ needs.restore.outputs.mo-host1 || needs.restore.outputs.mo-user1 || 'Admin123' }}
+          echo ${{ needs.restore.outputs.mo-host1 || needs.restore.outputs.mo-user1 || 'Admin123' }} | tee test456.log
       - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
