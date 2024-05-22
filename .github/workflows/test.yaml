@@ -191,3 +191,42 @@ jobs:
           name: upgrade-test1-logs
           path: |
             ${{ github.workspace }}/*.log
+  run-tpch-tests:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - name: Checkout mo-tpch
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-tpch
+          ref: main
+          path: mo-tpch
+          token: ${{ secrets.GH_PAT }}
+            
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: mysql-client
+            
+      - name: Run TPCH Tests
+        run: |
+          cd $GITHUB_WORKSPACE/mo-tpch
+          echo "$(date '+%Y-%m-%d %T') - Create database 'tpch_10g' for tpch tests"
+          mysql \
+          -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          -P 6001 \
+          -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
+          -pAdmin123 \
+          -e "drop database if exists tpch_10g; create database tpch_10g from sys publication mo_sample_data_tpch_sf10;"
+          echo "$(date '+%Y-%m-%d %T') - Start to run TPCH_10G tests"
+          ./run.sh \
+          -q all \
+          -s 10 \
+          -t 5 \
+          -d tpch_10g \
+          -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+          -P 6001 \
+          -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
+          -p Admin123 \
+          2>&1 | tee tpch.log
+          tree
