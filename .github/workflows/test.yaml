@@ -191,81 +191,124 @@ jobs:
           name: upgrade-test1-logs
           path: |
             ${{ github.workspace }}/*.log
-  run-tpch-tests:
+#   run-tpch-tests:
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: qa
+#     steps:
+#       - name: Checkout mo-tpch
+#         uses: actions/checkout@v4
+#         with:
+#           repository: matrixorigin/mo-tpch
+#           ref: main
+#           path: mo-tpch
+#           token: ${{ secrets.GH_PAT }}
+            
+#       - uses: ConorMacBride/install-package@v1
+#         with:
+#           apt: mysql-client
+            
+#       - name: Run TPCH Tests
+#         run: |
+#           cd $GITHUB_WORKSPACE/mo-tpch
+#           echo "$(date '+%Y-%m-%d %T') - Create database 'tpch_10g' for tpch tests"
+#           mysql \
+#           -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+#           -P 6001 \
+#           -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
+#           -pAdmin123 \
+#           -e "drop database if exists tpch_10g; create database tpch_10g from sys publication mo_sample_data_tpch_sf10;"
+#           echo "$(date '+%Y-%m-%d %T') - Start to run TPCH_10G tests"
+#           ./run.sh \
+#           -q all \
+#           -s 10 \
+#           -t 5 \
+#           -d tpch_10g \
+#           -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+#           -P 6001 \
+#           -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
+#           -p Admin123 \
+#           2>&1 | tee tpch.log
+#           tree
+
+#   test-tpcc-job:
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: qa
+#     needs:
+#       - load-tpcc-data
+#     steps:
+#       - name: Set up Java1.8
+#         uses: actions/setup-java@v1
+#         with:
+#           java-version: 1.8
+        
+#       - name: Echo Java Version
+#         run: |
+#           echo `java -version`
+        
+#       - name: Checkout mo-tpcc
+#         uses: actions/checkout@v3
+#         with:
+#           repository: matrixorigin/mo-tpcc
+#           ref: main
+#           token: ${{ secrets.GH_PAT }}
+        
+#       - name: Execute tpcc          # tpcc 数据是直接导入到实例中的, 不在workflow流程中
+#         env:
+#           TpExecuteTime: 15               # 单位分钟
+#         run: |
+#           cd $GITHUB_WORKSPACE 
+#           cp props.mo props_10.mo
+#           sed -i 's/socketTimeout=60000/socketTimeout=60000/' props_10.mo 
+#           sed -i '/.*terminals=*/c\terminals=10' props_10.mo
+#           sed -i '/.*warehouses=*/c\warehouses=10' props_10.mo
+#           sed -i '/.*user=*/c\user=018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin' props_10.mo 
+#           sed -i "/.*password=*/c\password=Admin123" props_10.mo 
+#           sed -i '/runMins=*/c\runMins=5' props_10.mo
+#           sed -i 's/tpcc/tpcc_10/g' props_10.mo
+#           sed -i 's/127.0.0.1/freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech/g' props_10.mo          
+#           ./runBenchmark.sh props_10.mo
+#           ./runVerify.sh props_10.mo
+#           tree
+  load-tpcc-data:
     runs-on: ubuntu-latest
     environment:
       name: qa
+    # needs:
+    #   - restore
+    # outputs:
+    #   mo-tpcc-host: ${{ needs.restore.outputs.mo-tpcc-host }}
+    #   mo-tpcc-port: ${{ needs.restore.outputs.mo-tpcc-port }}
+    #   mo-tpcc-user: ${{ needs.restore.outputs.mo-tpcc-user }}
+    #   mo-tpcc-password: ${{ needs.restore.outputs.mo-tpcc-password }}
+    # if: needs.restore.outputs.mo-tpcc-host && needs.restore.outputs.mo-tpcc-user
     steps:
-      - name: Checkout mo-tpch
+      - name: Checkout mo-load-data
         uses: actions/checkout@v4
         with:
-          repository: matrixorigin/mo-tpch
+          repository: matrixorigin/mo-load-data
           ref: main
-          path: mo-tpch
+          path: mo-load-data
           token: ${{ secrets.GH_PAT }}
-            
+        
       - uses: ConorMacBride/install-package@v1
         with:
           apt: mysql-client
-            
-      - name: Run TPCH Tests
+        
+      - name: Load TPCC Data
         run: |
-          cd $GITHUB_WORKSPACE/mo-tpch
-          echo "$(date '+%Y-%m-%d %T') - Create database 'tpch_10g' for tpch tests"
-          mysql \
-          -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          -P 6001 \
-          -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
-          -pAdmin123 \
-          -e "drop database if exists tpch_10g; create database tpch_10g from sys publication mo_sample_data_tpch_sf10;"
-          echo "$(date '+%Y-%m-%d %T') - Start to run TPCH_10G tests"
-          ./run.sh \
-          -q all \
-          -s 10 \
-          -t 5 \
-          -d tpch_10g \
+          cd $GITHUB_WORKSPACE/mo-load-data
+          ./load.sh \
+          -c cases/00_from_s3/tpcc_10 -d tpcc_10 -m -r \
+          -b moc-test-data \
           -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
           -P 6001 \
           -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
           -p Admin123 \
-          2>&1 | tee tpch.log
+          2>&1 | tee load-tpcc-data.log
           tree
-
-  test-tpcc-job:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-    steps:
-      - name: Set up Java1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-        
-      - name: Echo Java Version
-        run: |
-          echo `java -version`
-        
-      - name: Checkout mo-tpcc
-        uses: actions/checkout@v3
-        with:
-          repository: matrixorigin/mo-tpcc
-          ref: main
-          token: ${{ secrets.GH_PAT }}
-        
-      - name: Execute tpcc          # tpcc 数据是直接导入到实例中的, 不在workflow流程中
         env:
-          TpExecuteTime: 15               # 单位分钟
-        run: |
-          cd $GITHUB_WORKSPACE 
-          cp props.mo props_10.mo
-          sed -i 's/socketTimeout=60000/socketTimeout=60000/' props_10.mo 
-          sed -i '/.*terminals=*/c\terminals=10' props_10.mo
-          sed -i '/.*warehouses=*/c\warehouses=10' props_10.mo
-          sed -i '/.*user=*/c\user=018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin' props_10.mo 
-          sed -i "/.*password=*/c\password=Admin123" props_10.mo 
-          sed -i '/runMins=*/c\runMins=5' props_10.mo
-          sed -i 's/tpcc/tpcc_10/g' props_10.mo
-          sed -i 's/127.0.0.1/freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech/g' props_10.mo          
-          ./runBenchmark.sh props_10.mo
-          ./runVerify.sh props_10.mo
-          tree
+          ENDPOINT: oss-cn-hangzhou-internal.aliyuncs.com
+          ACCESS_KEY_ID: ${{ secrets.RESTORE_ALIYUN_AK }}
+          SECRET_ACCESS_KEY: ${{ secrets.RESTORE_ALIYUN_SK }}
