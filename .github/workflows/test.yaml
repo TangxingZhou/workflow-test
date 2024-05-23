@@ -299,6 +299,12 @@ jobs:
       - name: Load TPCC Data
         run: |
           cd $GITHUB_WORKSPACE/mo-load-data
+          sed -i \
+          -e 's/\(ENDPOINT:\).*/\1 oss-cn-hangzhou-internal.aliyuncs.com/' \
+          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
+          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
+          access.yml
+          cat access.yml
           ./load.sh \
           -c cases/00_from_s3/tpcc_10 -d tpcc_10 -m -r \
           -b moc-test-data \
