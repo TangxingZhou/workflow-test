@@ -310,7 +310,7 @@ jobs:
           -b moc-test-data \
           -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
           -P 6001 \
-          -u 018fa03b_a5b1_752e_97af_980bd983f4bf:admin:accountadmin \
+          -u 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin \
           -p Admin123 \
           2>&1 | tee load-tpcc-data.log
           tree
@@ -318,3 +318,14 @@ jobs:
           ENDPOINT: oss-cn-hangzhou-internal.aliyuncs.com
           ACCESS_KEY_ID: ${{ secrets.RESTORE_ALIYUN_AK }}
           SECRET_ACCESS_KEY: ${{ secrets.RESTORE_ALIYUN_SK }}
+  run-tpcc-test:
+    needs:
+        - load-tpcc-data
+    uses: matrixone-cloud/mocloud-tester/.github/workflows/scale_default_runner.yaml@main
+    secrets: inherit
+    with:
+      JobName: test-tpcc-job
+      Host: freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech
+      User: 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin
+      Password: ${{ secrets.INSTANCE_PASSWORD }}
+      TpExecuteTime: 60
