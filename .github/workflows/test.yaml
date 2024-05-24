@@ -170,27 +170,27 @@ jobs:
     #       --point_selects=1 \
     #       run
 
-  test:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-    needs:
-      - restore
-    steps:
-      - name: Test
-        shell: bash
-        if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-port && needs.restore.outputs.mo-user && needs.restore.outputs.mo-password
-        run: |
-          echo "hello 456" > test.log
-          echo ${{ needs.restore.outputs.mo-host }}-${{ needs.restore.outputs.mo-port }}-${{needs.restore.outputs.mo-user }}-${{ needs.restore.outputs.mo-password }}
-          echo ${{ needs.restore.outputs.mo-host1 || needs.restore.outputs.mo-user1 || 'Admin123' }} | tee test456.log
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: upgrade-test1-logs
-          path: |
-            ${{ github.workspace }}/*.log
+#   test:
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: qa
+#     needs:
+#       - restore
+#     steps:
+#       - name: Test
+#         shell: bash
+#         if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-port && needs.restore.outputs.mo-user && needs.restore.outputs.mo-password
+#         run: |
+#           echo "hello 456" > test.log
+#           echo ${{ needs.restore.outputs.mo-host }}-${{ needs.restore.outputs.mo-port }}-${{needs.restore.outputs.mo-user }}-${{ needs.restore.outputs.mo-password }}
+#           echo ${{ needs.restore.outputs.mo-host1 || needs.restore.outputs.mo-user1 || 'Admin123' }} | tee test456.log
+#       - name: Upload Logs
+#         uses: actions/upload-artifact@v4
+#         if: always()
+#         with:
+#           name: upgrade-test1-logs
+#           path: |
+#             ${{ github.workspace }}/*.log
 #   run-tpch-tests:
 #     runs-on: ubuntu-latest
 #     environment:
