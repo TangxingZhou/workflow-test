@@ -92,7 +92,7 @@ jobs:
     #       username: ${{ secrets.DOCKERHUB_USERNAME }}
     #       password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to Alicloud Container Registry
+      - name: Login to Hangzhou Alicloud Container Registry
         if: ${{ inputs.project != 'none' || inputs.image }}
         uses: docker/login-action@v3
         with:
@@ -100,6 +100,14 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       
+      - name: Login to Shanghai Alicloud Container Registry
+        if: ${{ inputs.project != 'none' || inputs.image }}
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-shanghai.aliyuncs.com
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
       - name: Checkout
         if: ${{ inputs.project == 'mo-backup' }}
         uses: actions/checkout@v4
