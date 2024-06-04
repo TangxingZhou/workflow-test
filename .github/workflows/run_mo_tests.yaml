@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    if: inputs.testName == 'all' || inputs.JobName == 'sysbench'
+    if: inputs.testName == 'all' || inputs.testName == 'sysbench'
     steps:
       - name: Checkout mo-load
         uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    if: inputs.testName == 'all' || inputs.JobName == 'tpcc'
+    if: inputs.testName == 'all' || inputs.testName == 'tpcc'
     steps:
       - name: Checkout mo-load-data
         uses: actions/checkout@v4
@@ -185,7 +185,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    if: inputs.testName == 'all' || inputs.JobName == 'tpch'
+    if: inputs.testName == 'all' || inputs.testName == 'tpch'
     steps:
       - name: Checkout mo-tpch
         uses: actions/checkout@v4
