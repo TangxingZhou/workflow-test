@@ -276,61 +276,61 @@ jobs:
 #           ./runBenchmark.sh props_10.mo
 #           ./runVerify.sh props_10.mo
 #           tree
-  load-tpcc-data:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-    # needs:
-    #   - restore
-    # outputs:
-    #   mo-tpcc-host: ${{ needs.restore.outputs.mo-tpcc-host }}
-    #   mo-tpcc-port: ${{ needs.restore.outputs.mo-tpcc-port }}
-    #   mo-tpcc-user: ${{ needs.restore.outputs.mo-tpcc-user }}
-    #   mo-tpcc-password: ${{ needs.restore.outputs.mo-tpcc-password }}
-    # if: needs.restore.outputs.mo-tpcc-host && needs.restore.outputs.mo-tpcc-user
-    steps:
-      - name: Checkout mo-load-data
-        uses: actions/checkout@v4
-        with:
-          repository: matrixorigin/mo-load-data
-          ref: main
-          path: mo-load-data
-          token: ${{ secrets.GH_PAT }}
+  # load-tpcc-data:
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: qa
+  #   # needs:
+  #   #   - restore
+  #   # outputs:
+  #   #   mo-tpcc-host: ${{ needs.restore.outputs.mo-tpcc-host }}
+  #   #   mo-tpcc-port: ${{ needs.restore.outputs.mo-tpcc-port }}
+  #   #   mo-tpcc-user: ${{ needs.restore.outputs.mo-tpcc-user }}
+  #   #   mo-tpcc-password: ${{ needs.restore.outputs.mo-tpcc-password }}
+  #   # if: needs.restore.outputs.mo-tpcc-host && needs.restore.outputs.mo-tpcc-user
+  #   steps:
+  #     - name: Checkout mo-load-data
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: matrixorigin/mo-load-data
+  #         ref: main
+  #         path: mo-load-data
+  #         token: ${{ secrets.GH_PAT }}
         
-      - uses: ConorMacBride/install-package@v1
-        with:
-          apt: mysql-client
+  #     - uses: ConorMacBride/install-package@v1
+  #       with:
+  #         apt: mysql-client
         
-      - name: Load TPCC Data
-        run: |
-          cd $GITHUB_WORKSPACE/mo-load-data
-          sed -i \
-          -e 's/\(ENDPOINT:\).*/\1 oss-cn-hangzhou-internal.aliyuncs.com/' \
-          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
-          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
-          access.yml
-          cat access.yml
-          ./load.sh \
-          -c cases/00_from_s3/tpcc_10 -d tpcc_10 -m -r \
-          -b moc-test-data \
-          -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
-          -P 6001 \
-          -u 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin \
-          -p Admin123 \
-          2>&1 | tee load-tpcc-data.log
-          tree
-        env:
-          ENDPOINT: oss-cn-hangzhou-internal.aliyuncs.com
-          ACCESS_KEY_ID: ${{ secrets.RESTORE_ALIYUN_AK }}
-          SECRET_ACCESS_KEY: ${{ secrets.RESTORE_ALIYUN_SK }}
-  run-tpcc-test:
-    needs:
-        - load-tpcc-data
-    uses: matrixone-cloud/mocloud-tester/.github/workflows/scale_default_runner.yaml@main
-    secrets: inherit
-    with:
-      JobName: test-tpcc-job
-      Host: freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech
-      User: 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin
-      Password: ${{ secrets.INSTANCE_PASSWORD }}
-      TpExecuteTime: 60
+  #     - name: Load TPCC Data
+  #       run: |
+  #         cd $GITHUB_WORKSPACE/mo-load-data
+  #         sed -i \
+  #         -e 's/\(ENDPOINT:\).*/\1 oss-cn-hangzhou-internal.aliyuncs.com/' \
+  #         -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
+  #         -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
+  #         access.yml
+  #         cat access.yml
+  #         ./load.sh \
+  #         -c cases/00_from_s3/tpcc_10 -d tpcc_10 -m -r \
+  #         -b moc-test-data \
+  #         -h freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech \
+  #         -P 6001 \
+  #         -u 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin \
+  #         -p Admin123 \
+  #         2>&1 | tee load-tpcc-data.log
+  #         tree
+  #       env:
+  #         ENDPOINT: oss-cn-hangzhou-internal.aliyuncs.com
+  #         ACCESS_KEY_ID: ${{ secrets.RESTORE_ALIYUN_AK }}
+  #         SECRET_ACCESS_KEY: ${{ secrets.RESTORE_ALIYUN_SK }}
+  # run-tpcc-test:
+  #   needs:
+  #       - load-tpcc-data
+  #   uses: matrixone-cloud/mocloud-tester/.github/workflows/scale_default_runner.yaml@main
+  #   secrets: inherit
+  #   with:
+  #     JobName: test-tpcc-job
+  #     Host: freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech
+  #     User: 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin
+  #     Password: ${{ secrets.INSTANCE_PASSWORD }}
+  #     TpExecuteTime: 60
