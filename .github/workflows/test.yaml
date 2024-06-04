@@ -88,7 +88,7 @@ jobs:
           echo ${{ steps.restore.outputs.mo-port }}
           echo ${{ steps.restore.outputs.mo-user }}
           echo ${{ steps.restore.outputs.mo-password }}
-          if [ ${{ vars.AUTO_UPGRADE = 'true' }} ]; then
+          if [ ${{ vars.AUTO_UPGRADE }} = 'true' ]; then
             echo 123
           else
             echo 456
