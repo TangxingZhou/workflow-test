@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 env:
   host: restore-freetier-02.cn-hangzhou.cluster.cn-qa.matrixone.tech:6001
-  account_name: 01901758-e6a5-7bbc-b2e1-3821cc293782#admin#accountadmin
-  account_password: Admin123
+  account_name: dump
+  account_password: 2BCQlrVjv5bW
   sys_name: dump
   sys_password: 2BCQlrVjv5bW
 jobs:
