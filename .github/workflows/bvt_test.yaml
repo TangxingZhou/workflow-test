@@ -2,12 +2,28 @@ name: MO CI
 
 on:
   workflow_dispatch:
-env:
-  host: restore-freetier-02.cn-hangzhou.cluster.cn-qa.matrixone.tech:6001
-  account_name: dump
-  account_password: 2BCQlrVjv5bW
-  sys_name: dump
-  sys_password: 2BCQlrVjv5bW
+    inputs:
+        host:
+          description: MO Host
+          required: true
+          type: string
+        account:
+          description: MO Account
+          required: true
+          type: string
+        password:
+          description: Password of MO Account
+          required: true
+          type: string
+        sys:
+          description: MO sys
+          required: true
+          type: string
+          default: dump
+        sys-password:
+          description: Password of MO sys
+          required: true
+          type: string
 jobs:
   bvt-test:
     runs-on: ubuntu-latest
@@ -51,11 +67,11 @@ jobs:
           # if [ "$(cat ./result.log | grep -i -E 'WARN|ERROR' | grep -v "grep" | wc -l)" -gt 0 ]; then echo 'case format check failed.'; exit 1; fi
           sed -i \
           -e 's/\(serverTimezone:\).*/\1 "UTC"/' \
-          -e 's/127.0.0.1:6001/${{ env.host }}/' \
-          -e 's/\(name:\).*/\1 "${{ env.account_name }}"/' \
-          -e 's/\(password:\).*/\1 "${{ env.account_password }}"/' \
-          -e 's/\(sysuser:\).*/\1 "${{ env.sys_name }}"/' \
-          -e 's/\(syspass:\).*/\1 "${{ env.sys_password }}"/' \
+          -e 's/127.0.0.1:6001/${{ inputs.host }}/' \
+          -e 's/\(name:\).*/\1 "${{ inputs.account }}"/' \
+          -e 's/\(password:\).*/\1 "${{ inputs.password }}"/' \
+          -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
+          -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
           mo.yml
           cat mo.yml
           ./run.sh -n -g -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -i cluster 2>&1
