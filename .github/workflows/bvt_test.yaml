@@ -56,7 +56,6 @@ jobs:
           -e 's/\(password:\).*/\1 "${{ env.account_password }}"/' \
           -e 's/\(sysuser:\).*/\1 "${{ env.sys_name }}"/' \
           -e 's/\(syspass:\).*/\1 "${{ env.sys_password }}"/' \
-          # -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
           ./run.sh -n -g -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -i cluster 2>&1
