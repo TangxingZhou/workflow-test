@@ -72,13 +72,13 @@ jobs:
           -e 's/\(password:\).*/\1 "${{ inputs.password }}"/' \
           -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
           -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
+          -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
           ./run.sh -n -g -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -i temporary -t 1 -g 2>&1
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
-        continue-on-error: true
         with:
           name: log
           path: |
