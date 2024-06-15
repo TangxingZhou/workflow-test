@@ -28,7 +28,7 @@ jobs:
           repository: matrixorigin/matrixone
           ref: main
           path: matrixone
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Checkout mo-tester
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
           repository: matrixorigin/mo-tester
           ref: main
           path: mo-tester
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           # fetch-depth: '3'
 
       - name: Start BVT Test
