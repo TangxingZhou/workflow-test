@@ -1,0 +1,72 @@
+name: MO CI
+
+on:
+  workflow_dispatch:
+env:
+  host: restore-freetier-02.cn-hangzhou.cluster.cn-qa.matrixone.tech:6001
+  account_name: 01901758-e6a5-7bbc-b2e1-3821cc293782:admin:accountadmin
+  account_password: Admin123
+  sys_name: dump
+  sys_password: 2BCQlrVjv5bW
+jobs:
+  bvt-test:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    timeout-minutes: 300
+
+    steps:
+      - name: Set Up Java1.8
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-version: '8'
+
+      - name: Checkout matrixone
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/matrixone
+          ref: main
+          path: matrixone
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Checkout mo-tester
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-tester
+          ref: main
+          path: mo-tester
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # fetch-depth: '3'
+
+      - name: Start BVT Test
+        id: bvt_on_pr_version
+        run: |
+          # timedatectl status
+          # sudo timedatectl set-timezone "Asia/Shanghai"
+          # timedatectl status
+          # sleep 60s
+          cd $GITHUB_WORKSPACE/mo-tester
+          # ./run.sh -c 2>&1 | tee result.log
+          # if [ "$(cat ./result.log | grep -i -E 'WARN|ERROR' | grep -v "grep" | wc -l)" -gt 0 ]; then echo 'case format check failed.'; exit 1; fi
+          sed -i \
+          -e 's/\(serverTimezone:\).*/\1 "UTC"/' \
+          -e 's/127.0.0.1:6001/${{ env.host }}/' \
+          -e 's/\(name:\).*/\1 "${{ env.account_name }}"/' \
+          -e 's/\(password:\).*/\1 "${{ env.account_password }}"/' \
+          -e 's/\(sysuser:\).*/\1 "${{ env.sys_name }}"/' \
+          -e 's/\(syspass:\).*/\1 "${{ env.sys_password }}"/' \
+          # -e 's/\(default:\).*/\1 "bvt_test"/' \
+          mo.yml
+          cat mo.yml
+          ./run.sh -n -g -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -i cluster 2>&1
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: log
+          path: |
+            ${{ github.workspace }}/mo-tester/*.log
+            ${{ github.workspace }}/mo-tester/report/
+          retention-days: 7
