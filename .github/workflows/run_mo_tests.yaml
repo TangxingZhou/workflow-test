@@ -87,24 +87,22 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -b $DATABASE
-          echo ${{ inputs.run-tests }}
           if [ ${{ inputs.run-tests }} = 'true' ]; then
-            echo hello,world
+            echo "$(date '+%Y-%m-%d %T') - Start to run sysbench tests"
+            ./start.sh \
+            -c cases/sysbench/mixed_10_100000/ \
+            -t 10 \
+            -d ${{ inputs.period }} \
+            -h ${{ inputs.mo-host }} \
+            -P ${{ inputs.mo-port }} \
+            -u ${{ inputs.mo-user }} \
+            -p ${{ inputs.mo-password }} \
+            -b $DATABASE \
+            -g > sysbench.log 2>&1
+            echo "$(date '+%Y-%m-%d %T') - Complete to run sysbench tests"
           fi
-          # echo "$(date '+%Y-%m-%d %T') - Start to run sysbench tests"
-          # ./start.sh \
-          # -c cases/sysbench/mixed_10_100000/ \
-          # -t 10 \
-          # -d ${{ inputs.period }} \
-          # -h ${{ inputs.mo-host }} \
-          # -P ${{ inputs.mo-port }} \
-          # -u ${{ inputs.mo-user }} \
-          # -p ${{ inputs.mo-password }} \
-          # -b $DATABASE \
-          # -g > sysbench.log 2>&1
-          # echo "$(date '+%Y-%m-%d %T') - Complete to run sysbench tests"
         env:
-          DATABASE: sbtest
+          DATABASE: sysbench
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
@@ -166,6 +164,7 @@ jobs:
           java-version: 8
 
       - name: Run TPCC Tests
+        if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-tpcc
           cp props.mo props_10.mo
@@ -213,24 +212,28 @@ jobs:
       - name: Run TPCH Tests
         run: |
           cd $GITHUB_WORKSPACE/mo-tpch
-          echo "$(date '+%Y-%m-%d %T') - Create database 'tpch_10g' for tpch tests"
+          echo "$(date '+%Y-%m-%d %T') - Create database '$DATABASE' for tpch tests"
           mysql \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p${{ inputs.mo-password }} \
-          -e "drop database if exists tpch_10g; create database tpch_10g from sys publication mo_sample_data_tpch_sf10;"
-          echo "$(date '+%Y-%m-%d %T') - Start to run TPCH_10G tests"
-          ./run.sh \
-          -q all \
-          -s 10 \
-          -t ${{ inputs.period }} \
-          -d tpch_10g \
-          -h ${{ inputs.mo-host }} \
-          -P ${{ inputs.mo-port }} \
-          -u ${{ inputs.mo-user }} \
-          -p ${{ inputs.mo-password }} \
-          2>&1 | tee tpch.log
+          -e "drop database if exists $DATABASE; create database $DATABASE from sys publication mo_sample_data_tpch_sf10;"
+          if [ ${{ inputs.run-tests }} = 'true' ]; then
+            echo "$(date '+%Y-%m-%d %T') - Start to run TPCH_10G tests"
+            ./run.sh \
+            -q all \
+            -s 10 \
+            -t ${{ inputs.period }} \
+            -d $DATABASE \
+            -h ${{ inputs.mo-host }} \
+            -P ${{ inputs.mo-port }} \
+            -u ${{ inputs.mo-user }} \
+            -p ${{ inputs.mo-password }} \
+            2>&1 | tee tpch.log
+          fi
+        env:
+          DATABASE: mo_sample_data_tpch_sf10
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
