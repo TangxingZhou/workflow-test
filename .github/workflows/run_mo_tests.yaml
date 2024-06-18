@@ -70,13 +70,13 @@ jobs:
       - name: Run Sysbench Tests
         run: |
           cd $GITHUB_WORKSPACE/mo-load
-          echo "$(date '+%Y-%m-%d %T') - Create database 'sbtest' for sysbench tests"
+          echo "$(date '+%Y-%m-%d %T') - Create database '$DATABASE' for sysbench tests"
           mysql \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p${{ inputs.mo-password }} \
-          -e "drop database if exists sbtest; create database if not exists sbtest;"
+          -e "drop database if exists $DATABASE; create database if not exists $DATABASE;"
           echo "$(date '+%Y-%m-%d %T') - Prepare data for sysbench tests"
           ./start.sh \
           -m SYSBENCH \
@@ -86,7 +86,7 @@ jobs:
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -b sbtest
+          -b $DATABASE
           echo ${{ inputs.run-tests }}
           if [ ${{ inputs.run-tests }} = 'true' ]; then
             echo hello,world
@@ -100,9 +100,11 @@ jobs:
           # -P ${{ inputs.mo-port }} \
           # -u ${{ inputs.mo-user }} \
           # -p ${{ inputs.mo-password }} \
-          # -b sbtest \
+          # -b $DATABASE \
           # -g > sysbench.log 2>&1
           # echo "$(date '+%Y-%m-%d %T') - Complete to run sysbench tests"
+        env:
+          DATABASE: sbtest
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
