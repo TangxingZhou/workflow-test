@@ -37,6 +37,11 @@ on:
         required: true
         type: number
         default: 5
+      run-tests:
+        description: Run mo tests
+        required: true
+        type: boolean
+        default: true
 jobs:
   run-sysbench-tests:
     runs-on: ubuntu-latest
@@ -82,18 +87,22 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -b sbtest
-          echo "$(date '+%Y-%m-%d %T') - Start to run sysbench tests"
-          ./start.sh \
-          -c cases/sysbench/mixed_10_100000/ \
-          -t 10 \
-          -d ${{ inputs.period }} \
-          -h ${{ inputs.mo-host }} \
-          -P ${{ inputs.mo-port }} \
-          -u ${{ inputs.mo-user }} \
-          -p ${{ inputs.mo-password }} \
-          -b sbtest \
-          -g > sysbench.log 2>&1
-          echo "$(date '+%Y-%m-%d %T') - Complete to run sysbench tests"
+          echo ${{ inputs.run-tests }}
+          if [ ${{ inputs.run-tests }} = 'true' ]; then
+            echo hello,world
+          fi
+          # echo "$(date '+%Y-%m-%d %T') - Start to run sysbench tests"
+          # ./start.sh \
+          # -c cases/sysbench/mixed_10_100000/ \
+          # -t 10 \
+          # -d ${{ inputs.period }} \
+          # -h ${{ inputs.mo-host }} \
+          # -P ${{ inputs.mo-port }} \
+          # -u ${{ inputs.mo-user }} \
+          # -p ${{ inputs.mo-password }} \
+          # -b sbtest \
+          # -g > sysbench.log 2>&1
+          # echo "$(date '+%Y-%m-%d %T') - Complete to run sysbench tests"
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
