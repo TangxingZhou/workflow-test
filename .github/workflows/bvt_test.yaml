@@ -75,7 +75,7 @@ jobs:
           -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
-          ./run.sh -n -g -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -i temporary -t 1 -g 2>&1
+          ./run.sh -n -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -t 1 -m run -g 2>&1
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
