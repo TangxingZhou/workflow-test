@@ -7,6 +7,11 @@ on:
           description: MO Host
           required: true
           type: string
+        port:
+          description: MO Port
+          required: true
+          type: string
+          default: '6001'
         account:
           description: MO Account
           required: true
@@ -67,13 +72,15 @@ jobs:
           # if [ "$(cat ./result.log | grep -i -E 'WARN|ERROR' | grep -v "grep" | wc -l)" -gt 0 ]; then echo 'case format check failed.'; exit 1; fi
           sed -i \
           -e 's/\(serverTimezone:\).*/\1 "UTC"/' \
-          -e 's/127.0.0.1:6001/${{ inputs.host }}/' \
+          -e 's/127.0.0.1:6001/${{ inputs.host }}:${{ inputs.port }}/' \
           -e 's/\(name:\).*/\1 "${{ inputs.account }}"/' \
           -e 's/\(password:\).*/\1 "${{ inputs.password }}"/' \
+          -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
+          -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
           -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
-          ./run.sh -n -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -t 1 -m run -g 2>&1
+          ./run.sh -n -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -t 1 -i temporary -m run -g 2>&1
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
