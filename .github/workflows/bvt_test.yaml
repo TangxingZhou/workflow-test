@@ -70,8 +70,6 @@ jobs:
           -e 's/127.0.0.1:6001/${{ inputs.host }}/' \
           -e 's/\(name:\).*/\1 "${{ inputs.account }}"/' \
           -e 's/\(password:\).*/\1 "${{ inputs.password }}"/' \
-          -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
-          -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
           -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
