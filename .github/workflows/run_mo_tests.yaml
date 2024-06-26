@@ -281,6 +281,7 @@ jobs:
         -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
         -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
         -e 's/mo-big-data/bigdata_1y/g' \
+        -e 's/table_basic_for_load_100M/table_basic_for_alter_100M/g' \
         cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
         echo "$(date '+%Y-%m-%d %T') - Create Database and Tables"
         python run.py \
@@ -288,7 +289,7 @@ jobs:
         -P ${{ inputs.mo-port }} \
         -u ${{ inputs.mo-user }} \
         -p ${{ inputs.mo-password }} \
-        -c ./cases/big_data_test/01_CREATE_TABLE
+        -c ./cases/big_data_test/01_CREATE_TABLE/13_table_basic_for_alter_100M.sql
         echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
         python run.py \
         -H ${{ inputs.mo-host }} \
@@ -296,6 +297,7 @@ jobs:
         -u ${{ inputs.mo-user }} \
         -p ${{ inputs.mo-password }} \
         -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+        # -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
     
     - name: Upload Logs
       uses: actions/upload-artifact@v4
