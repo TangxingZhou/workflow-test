@@ -257,7 +257,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: matrixorigin/mo-nightly-regression
-        ref: big_data
+        ref: moc_big_data
         path: mo-nightly-regression
         token: ${{ secrets.GH_PAT }}
 
@@ -298,7 +298,18 @@ jobs:
         -p ${{ inputs.mo-password }} \
         -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
         # -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
-    
+
+    - name: Write 1Y Test
+      if: inputs.run-tests
+      run: |
+        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+        python run.py \
+        -H ${{ inputs.mo-host }} \
+        -P ${{ inputs.mo-port }} \
+        -u ${{ inputs.mo-user }} \
+        -p ${{ inputs.mo-password }} \
+        -c ./cases/big_data_test/04_QUERIES/15_moc_write_100M.sql
+
     - name: Upload Logs
       uses: actions/upload-artifact@v4
       if: always()
