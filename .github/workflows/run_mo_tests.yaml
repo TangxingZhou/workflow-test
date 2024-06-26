@@ -282,6 +282,13 @@ jobs:
         -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
         -e 's/mo-big-data/bigdata_1y/g' \
         cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+        echo "$(date '+%Y-%m-%d %T') - Create Database and Tables"
+        python run.py \
+        -H ${{ inputs.mo-host }} \
+        -P ${{ inputs.mo-port }} \
+        -u ${{ inputs.mo-user }} \
+        -p ${{ inputs.mo-password }} \
+        -c ./cases/big_data_test/01_CREATE_TABLE
         echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
         python run.py \
         -H ${{ inputs.mo-host }} \
