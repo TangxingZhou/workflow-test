@@ -260,7 +260,18 @@ jobs:
         ref: big_data
         path: mo-nightly-regression
         token: ${{ secrets.GH_PAT }}
-              
+
+    - name: Set Up Python3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+
+    - name: Install Python Dependencies
+      run: |
+        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
     - name: Load Data 1Y
       run: |
         cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
