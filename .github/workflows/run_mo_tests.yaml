@@ -253,70 +253,80 @@ jobs:
     timeout-minutes: 120
     if: inputs.testName == 'all' || inputs.testName == 'bigdata'
     steps:
-    - name: Checkout mo-nightly-regression
-      uses: actions/checkout@v4
-      with:
-        repository: matrixorigin/mo-nightly-regression
-        ref: moc_big_data
-        path: mo-nightly-regression
-        token: ${{ secrets.GH_PAT }}
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: mysql-client
 
-    - name: Set Up Python3.8
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.8'
+      - name: Checkout mo-nightly-regression
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-nightly-regression
+          ref: moc_big_data
+          path: mo-nightly-regression
+          token: ${{ secrets.GH_PAT }}
 
-    - name: Install Python Dependencies
-      run: |
-        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
 
-    - name: Load Data 1Y
-      run: |
-        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-        sed -i.bak \
-        -e 's#\${ENDPOINT}#http://oss-cn-hangzhou-internal.aliyuncs.com#g' \
-        -e 's/\${ACCESS_KEY_ID}/${{ secrets.RESTORE_ALIYUN_AK }}/g' \
-        -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
-        -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
-        -e 's/mo-big-data/bigdata_1y/g' \
-        -e 's/table_basic_for_load_100M/table_basic_for_alter_100M/g' \
-        cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
-        echo "$(date '+%Y-%m-%d %T') - Create Database and Tables"
-        python run.py \
-        -H ${{ inputs.mo-host }} \
-        -P ${{ inputs.mo-port }} \
-        -u ${{ inputs.mo-user }} \
-        -p ${{ inputs.mo-password }} \
-        -c ./cases/big_data_test/01_CREATE_TABLE
-        echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
-        python run.py \
-        -H ${{ inputs.mo-host }} \
-        -P ${{ inputs.mo-port }} \
-        -u ${{ inputs.mo-user }} \
-        -p ${{ inputs.mo-password }} \
-        -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
-        # -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Write 1Y Test
-      if: inputs.run-tests
-      run: |
-        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-        python run.py \
-        -H ${{ inputs.mo-host }} \
-        -P ${{ inputs.mo-port }} \
-        -u ${{ inputs.mo-user }} \
-        -p ${{ inputs.mo-password }} \
-        -t ${{ inputs.period }} \
-        -c ./cases/big_data_test/04_QUERIES/15_moc_write_100M.sql
+      - name: Load Data 1Y
+        run: |
+          cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          sed -i \
+          -e 's#\${ENDPOINT}#http://oss-cn-hangzhou-internal.aliyuncs.com#g' \
+          -e 's/\${ACCESS_KEY_ID}/${{ secrets.RESTORE_ALIYUN_AK }}/g' \
+          -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
+          -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
+          -e 's/mo-big-data/bigdata_1y/g' \
+          -e 's/table_basic_for_load_100M/table_basic_for_alter_100M/g' \
+          cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+          mysql \
+          -h ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p${{ inputs.mo-password }} \
+          -e "drop database if exists big_data_test;drop database if exists ssb_100G;"
+          echo "$(date '+%Y-%m-%d %T') - Create Database and Tables"
+          python run.py \
+          -H ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -c ./cases/big_data_test/01_CREATE_TABLE
+          echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
+          python run.py \
+          -H ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+          # -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
 
-    - name: Upload Logs
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: bigdata-test-logs
-        path: |
-          ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
-          ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
-        retention-days: 7
+      - name: Write 1Y Test
+        if: inputs.run-tests
+        run: |
+          cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          python run.py \
+          -H ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -t ${{ inputs.period }} \
+          -c ./cases/big_data_test/04_QUERIES/15_moc_write_100M.sql
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bigdata-test-logs
+          path: |
+            ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
+            ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
+          retention-days: 7
