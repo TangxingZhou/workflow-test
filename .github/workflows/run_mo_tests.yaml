@@ -12,6 +12,7 @@ on:
           - tpch
           - tpcc
           - sysbench
+          - bigdata
         default: all
       mo-host:
         description: Host for mo instance
@@ -244,3 +245,46 @@ jobs:
             ${{ github.workspace }}/mo-tpch/*.log
             ${{ github.workspace }}/mo-tpch/report/
           retention-days: 7
+
+  run-bigdata-tests:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    timeout-minutes: 120
+    if: inputs.testName == 'all' || inputs.testName == 'bigdata'
+    steps:
+    - name: Checkout mo-nightly-regression
+      uses: actions/checkout@v4
+      with:
+        repository: matrixorigin/mo-nightly-regression
+        ref: big_data
+        path: mo-nightly-regression
+        token: ${{ secrets.GH_PAT }}
+              
+    - name: Load Data 1Y
+      run: |
+        cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+        sed -i.bak \
+        -e 's#\${ENDPOINT}#http://oss-cn-hangzhou-internal.aliyuncs.com#g' \
+        -e 's/\${ACCESS_KEY_ID}/${{ secrets.RESTORE_ALIYUN_AK }}/g' \
+        -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
+        -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
+        -e 's/mo-big-data/bigdata_1y/g' \
+        cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+        echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
+        python run.py \
+        -H ${{ inputs.mo-host }} \
+        -P ${{ inputs.mo-port }} \
+        -u ${{ inputs.mo-user }} \
+        -p ${{ inputs.mo-password }} \
+        -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+    
+    - name: Upload Logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bigdata-test-logs
+        path: |
+          ${{ github.workspace }}/mo-nightly-regression/*.log
+          ${{ github.workspace }}/mo-nightly-regression/report/
+        retention-days: 7
