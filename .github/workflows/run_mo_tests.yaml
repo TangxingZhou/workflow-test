@@ -279,13 +279,12 @@ jobs:
       - name: Load Data 1Y
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-          sed -i \
+          sed -i.bak \
           -e 's#\${ENDPOINT}#http://oss-cn-hangzhou-internal.aliyuncs.com#g' \
           -e 's/\${ACCESS_KEY_ID}/${{ secrets.RESTORE_ALIYUN_AK }}/g' \
           -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
           -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
           -e 's/mo-big-data/bigdata_1y/g' \
-          -e 's/table_basic_for_load_100M/table_basic_for_alter_100M/g' \
           cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
           mysql \
           -h ${{ inputs.mo-host }} \
@@ -307,7 +306,12 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
-          # -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
+          python run.py \
+          -H ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
 
       - name: Write 1Y Test
         if: inputs.run-tests
