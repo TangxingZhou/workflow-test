@@ -289,7 +289,7 @@ jobs:
         -P ${{ inputs.mo-port }} \
         -u ${{ inputs.mo-user }} \
         -p ${{ inputs.mo-password }} \
-        -c ./cases/big_data_test/01_CREATE_TABLE/13_table_basic_for_alter_100M.sql
+        -c ./cases/big_data_test/01_CREATE_TABLE
         echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
         python run.py \
         -H ${{ inputs.mo-host }} \
