@@ -308,6 +308,7 @@ jobs:
         -P ${{ inputs.mo-port }} \
         -u ${{ inputs.mo-user }} \
         -p ${{ inputs.mo-password }} \
+        -t ${{ inputs.period }} \
         -c ./cases/big_data_test/04_QUERIES/15_moc_write_100M.sql
 
     - name: Upload Logs
@@ -316,6 +317,6 @@ jobs:
       with:
         name: bigdata-test-logs
         path: |
-          ${{ github.workspace }}/mo-nightly-regression/*.log
-          ${{ github.workspace }}/mo-nightly-regression/report/
+          ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
+          ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
         retention-days: 7
