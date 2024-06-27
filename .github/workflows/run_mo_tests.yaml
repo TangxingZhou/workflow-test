@@ -348,6 +348,7 @@ jobs:
         with:
           repository: matrixone-cloud/mocloud-tester
           ref: main
+          token: ${{ secrets.GH_PAT }}
 
       - name: Echo github workspace
         run: |
