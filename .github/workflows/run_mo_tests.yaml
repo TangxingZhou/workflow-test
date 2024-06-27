@@ -13,6 +13,7 @@ on:
           - tpcc
           - sysbench
           - bigdata
+          - scale
         default: all
       mo-host:
         description: Host for mo instance
@@ -333,4 +334,64 @@ jobs:
           path: |
             ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
             ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
+          retention-days: 7
+
+  test-scale-job:
+    if: inputs.testName == 'all' || inputs.testName == 'scale'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    environment:
+      name: dev
+    steps:
+      - name: Checkout mocloud-tester
+        uses: actions/checkout@v3
+        with:
+          repository: matrixone-cloud/mocloud-tester
+          ref: main
+
+      - name: Echo github workspace
+        run: |
+          echo $GITHUB_WORKSPACE
+          ls $GITHUB_WORKSPACE/
+
+      - name: Set up Python3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute scale
+        env:
+          ApExecuteTime: 10
+          ApWaitTime: 10
+          ApExecuteCount: 1
+        run: |
+          cd $GITHUB_WORKSPACE
+          python scale.py \
+          -host ${{ inputs.mo-host }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -rt 20 \
+          -wt 10 \
+          -ec ${{ inputs.period }} | tee scale.log 
+
+      - name: Remove log to upload
+        if: ${{ always() }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir upload
+          mv $GITHUB_WORKSPACE/scale.log  $GITHUB_WORKSPACE/upload/
+
+      - name: Upload Files
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: test-scale-report
+          path:
+            ${{ github.workspace }}/upload
           retention-days: 7
