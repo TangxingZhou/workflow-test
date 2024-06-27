@@ -252,7 +252,7 @@ jobs:
     environment:
       name: qa
     timeout-minutes: 120
-    if: inputs.testName == 'all' || inputs.testName == 'bigdata'
+    if: inputs.testName == 'bigdata'
     steps:
       - uses: ConorMacBride/install-package@v1
         with:
@@ -337,14 +337,14 @@ jobs:
           retention-days: 7
 
   test-scale-job:
-    if: inputs.testName == 'all' || inputs.testName == 'scale'
+    if: inputs.testName == 'scale'
     runs-on: ubuntu-latest
     timeout-minutes: 70
     environment:
       name: dev
     steps:
       - name: Checkout mocloud-tester
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: matrixone-cloud/mocloud-tester
           ref: main
@@ -360,7 +360,7 @@ jobs:
           ls $GITHUB_WORKSPACE/
 
       - name: Set up Python3.8
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -402,7 +402,7 @@ jobs:
           mv $GITHUB_WORKSPACE/scale.log  $GITHUB_WORKSPACE/upload/
 
       - name: Upload Files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: test-scale-report
