@@ -214,7 +214,7 @@ jobs:
       - name: Run TPCH Tests
         run: |
           cd $GITHUB_WORKSPACE/mo-tpch
-          echo "$(date '+%Y-%m-%d %T') - Create database '$DATABASE' for tpch tests"
+          echo "$(date '+%Y-%m-%d %T') - Subscribe database '$DATABASE' for tpch tests"
           mysql \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
@@ -350,6 +350,10 @@ jobs:
           ref: main
           token: ${{ secrets.GH_PAT }}
 
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: mysql-client
+
       - name: Echo github workspace
         run: |
           echo $GITHUB_WORKSPACE
@@ -367,19 +371,28 @@ jobs:
           pip install -r requirements.txt
 
       - name: Execute scale
-        env:
-          ApExecuteTime: 10
-          ApWaitTime: 10
-          ApExecuteCount: 1
         run: |
           cd $GITHUB_WORKSPACE
-          python scale.py \
-          -host ${{ inputs.mo-host }} \
+          echo "$(date '+%Y-%m-%d %T') - Subscribe database '$DATABASE' for scale tests"
+          mysql \
+          -h ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
-          -p ${{ inputs.mo-password }} \
-          -rt 20 \
-          -wt 10 \
-          -ec ${{ inputs.period }} | tee scale.log 
+          -p${{ inputs.mo-password }} \
+          -e "drop database if exists $DATABASE; create database $DATABASE from sys publication mo_sample_data_tpch_sf10;"
+          if [ ${{ inputs.run-tests }} = 'true' ]; then
+            python scale.py \
+            -host ${{ inputs.mo-host }} \
+            -u ${{ inputs.mo-user }} \
+            -p ${{ inputs.mo-password }} \
+            -rt ${{ env.ApExecuteTime }} \
+            -wt ${{ env.ApWaitTime }} \
+            -ec ${{ inputs.period }} | tee scale.log
+          fi
+        env:
+          DATABASE: mo_sample_data_tpch_sf10
+          ApExecuteTime: 10
+          ApWaitTime: 10
 
       - name: Remove log to upload
         if: ${{ always() }}
