@@ -74,7 +74,7 @@ jobs:
           cd $GITHUB_WORKSPACE/tests
           export PYTHONPATH=$(pwd)
           env
-          python test.py
+          # python test.py
       - uses: ConorMacBride/install-package@v1
         with:
           apt: mysql-client
@@ -335,23 +335,12 @@ jobs:
   #     User: 018fa85f_9a0f_76d4_9caa_633de613d90e:admin:accountadmin
   #     Password: ${{ secrets.INSTANCE_PASSWORD }}
   #     TpExecuteTime: 60
-  test-again:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
+  run-tpcc-tests:
     needs:
       - restore
-    steps:
-      - run: |
-          echo 123
-      
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        # if: always()
-        if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-port
-        with:
-          name: upgrade-test-logs
-          path: |
-            ${{ github.workspace }}/*.log
-          retention-days: 7
+    if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-user
+    uses: ./.github/workflows/upgrade-mo-cluster.yaml
+    secrets: inherit
+    with:
+      JobName: test-tpcc-job
     

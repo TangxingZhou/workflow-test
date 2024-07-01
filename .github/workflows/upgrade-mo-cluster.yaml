@@ -3,7 +3,11 @@ name:  Backup/Restore and Upgrade MO Cluster
 on:
 #   schedule:
 #     - cron: '0 2 * * *'
-
+  workflow_call:
+    inputs:
+      JobName:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       # action:
@@ -73,36 +77,38 @@ jobs:
       name: qa
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: matrixone-cloud/mocloud-tester
-          ref: qa-txzhou
-          token: ${{ secrets.GH_PAT }}
+      - run: |
+          echo 123
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: matrixone-cloud/mocloud-tester
+      #     ref: qa-txzhou
+      #     token: ${{ secrets.GH_PAT }}
 
-      - name: Set Up Python3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
+      # - name: Set Up Python3.8
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.8'
 
-      - name: Install Python Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          # python -m pip install --upgrade pip
-          # pip install -r requirements.txt
-          curl -O https://aliyuncli.alicdn.com/aliyun-cli-linux-latest-amd64.tgz
-          tar xzvf aliyun-cli-linux-latest-amd64.tgz
-          chmod +x ./aliyun
-          ./aliyun configure set \
-            --profile akProfile \
-            --mode AK \
-            --region cn-hangzhou \
-            --access-key-id $ALIYUN_ACR_AK \
-            --access-key-secret $ALIYUN_ACR_SK
-          ./aliyun cr ListRepository --region cn-hangzhou
-        env:
-          ALIYUN_ACR_AK: ${{ inputs.aliyun_acr_ak }}
-          ALIYUN_ACR_SK: ${{ inputs.aliyun_acr_sk }}
+      # - name: Install Python Dependencies
+      #   run: |
+      #     cd $GITHUB_WORKSPACE
+      #     # python -m pip install --upgrade pip
+      #     # pip install -r requirements.txt
+      #     curl -O https://aliyuncli.alicdn.com/aliyun-cli-linux-latest-amd64.tgz
+      #     tar xzvf aliyun-cli-linux-latest-amd64.tgz
+      #     chmod +x ./aliyun
+      #     ./aliyun configure set \
+      #       --profile akProfile \
+      #       --mode AK \
+      #       --region cn-hangzhou \
+      #       --access-key-id $ALIYUN_ACR_AK \
+      #       --access-key-secret $ALIYUN_ACR_SK
+      #     ./aliyun cr ListRepository --region cn-hangzhou
+      #   env:
+      #     ALIYUN_ACR_AK: ${{ inputs.aliyun_acr_ak }}
+      #     ALIYUN_ACR_SK: ${{ inputs.aliyun_acr_sk }}
 
 #       - name: Run Tests Case
 #         run: |
