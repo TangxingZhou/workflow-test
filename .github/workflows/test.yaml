@@ -338,8 +338,9 @@ jobs:
   run-tpcc-tests:
     needs:
       - restore
-    if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-user
+    
     uses: ./.github/workflows/upgrade-mo-cluster.yaml
+    if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-user
     secrets: inherit
     with:
       JobName: test-tpcc-job
