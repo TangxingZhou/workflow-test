@@ -3,6 +3,13 @@ name: To Test
 on:
   workflow_dispatch:
 jobs:
+  test-aaa:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - run: |
+          echo 456
   restore:
     runs-on: ubuntu-latest
     environment:
@@ -336,8 +343,9 @@ jobs:
   #     Password: ${{ secrets.INSTANCE_PASSWORD }}
   #     TpExecuteTime: 60
   run-tpcc-tests:
-    # needs:
-    #   - restore
+    needs:
+      - test-aaa
+      # - restore
     
     uses: ./.github/workflows/upgrade-mo-cluster.yaml
     
