@@ -79,7 +79,7 @@ jobs:
         with:
           apt: mysql-client
       - name: Test
-        if: ${{ steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password }}
+        if: steps.restore.outputs.mo-host && steps.restore.outputs.mo-port && steps.restore.outputs.mo-user && steps.restore.outputs.mo-password
         shell: bash
         run: |
           echo "export ZTX_TEST='hello'" >> ~/.bashrc
