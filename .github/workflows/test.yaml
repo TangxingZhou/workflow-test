@@ -339,8 +339,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    # needs:
-    #   - restore
+    needs:
+      - restore
     steps:
       - run: |
           echo 123
