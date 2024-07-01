@@ -74,7 +74,7 @@ jobs:
           cd $GITHUB_WORKSPACE/tests
           export PYTHONPATH=$(pwd)
           env
-          # python test.py
+          python test.py
       - uses: ConorMacBride/install-package@v1
         with:
           apt: mysql-client
