@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 jobs:
   test-aaa:
-    if: false
+    # if: false
     runs-on: ubuntu-latest
     environment:
       name: qa
@@ -347,9 +347,7 @@ jobs:
     needs:
       - test-aaa
       # - restore
-    
     uses: ./.github/workflows/upgrade-mo-cluster.yaml
-    
     secrets: inherit
     if: needs.restore.outputs.mo-host && needs.restore.outputs.mo-user
     with:
