@@ -402,6 +402,12 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "image-repo=${ACR_DOCKER_IMAGE}" >> $GITHUB_OUTPUT
           echo "image-tag=${repo_tag}" >> $GITHUB_OUTPUT
+          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+          if [ -z $UPGRADE_IMAGE_REPOSITORY ]; then
+            echo "UPGRADE_IMAGE_REPOSITORY=" >> $GITHUB_OUTPUT
+          else
+            echo "UPGRADE_IMAGE_REPOSITORY=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
+          fi
         env:
             DOCKER_REPOSITORY: ''
             DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com
@@ -413,7 +419,7 @@ jobs:
           echo image-tags: ${{ steps.tag.outputs.tags }}
         
       - name: Build and Push
-        if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !vars.UPGRADE_IMAGE_REPOSITORY }}
+        if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !steps.tag.outputs.UPGRADE_IMAGE_REPOSITORY }}
         uses: docker/build-push-action@v5
         with:
           builder: ${{ steps.buildx.outputs.name }}
