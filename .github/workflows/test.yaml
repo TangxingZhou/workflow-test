@@ -344,18 +344,86 @@ jobs:
       image-repo: ${{ steps.prep.outputs.upgrade-image-repository }}
       image-tag: ${{ steps.prep.outputs.upgrade-cluster-version }}
     steps:
-      - name: Build MO Image
-        if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !steps.prep.outputs.upgrade-image-repository }}
-        id: build
-        uses: matrixone-cloud/gitops/.github/actions/mo-image@main
-        with:
-          branch: ${{ vars.BUILD_MO_BRANCH }}
-          mo-version: ${{ vars.BUILD_MO_VERSION }}
-          image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
-          platform: linux/amd64
-          acr-username: ${{ secrets.ACR_USERNAME }}
-          acr-password: ${{ secrets.ACR_PASSWORD }}
+      # - name: Build MO Image
+      #   if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !steps.prep.outputs.upgrade-image-repository }}
+      #   id: build
+      #   uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+      #   with:
+      #     branch: ${{ vars.BUILD_MO_BRANCH }}
+      #     mo-version: ${{ vars.BUILD_MO_VERSION }}
+      #     image-repo: registry.cn-hangzhou.aliyuncs.com/mocloud/matrixone
+      #     platform: linux/amd64
+      #     acr-username: ${{ secrets.ACR_USERNAME }}
+      #     acr-password: ${{ secrets.ACR_PASSWORD }}
 
+      - name: Set Up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: linux/amd64,linux/arm64
+  
+      - name: Set Up Docker Buildx
+        id: buildx
+        uses:  docker/setup-buildx-action@v3
+  
+      - name: Login to Hangzhou Alicloud Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+  
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/matrixone
+          ref: ${{ vars.BUILD_MO_BRANCH }}
+          token: ${{ secrets.GH_PAT }}
+  
+      - name: Make tag
+        id: tag
+        run: |
+          git status
+          # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          if [ -z $DOCKER_REPOSITORY ]; then
+            repo_name=$(git remote get-url origin | xargs basename -s .git)
+          else
+            repo_name=$DOCKER_REPOSITORY
+          fi
+          ACR_DOCKER_IMAGE="$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name"
+          # VERSION=${GITHUB_SHA::8}
+          echo ${GITHUB_SHA}
+          if [ -z $DOCKER_IMAGE_TAG ]; then
+            repo_tag=$(git rev-parse --short HEAD)
+            repo_tag=${repo_tag::7}
+          else
+            repo_tag=$DOCKER_IMAGE_TAG
+          fi
+          TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        env:
+            DOCKER_REPOSITORY: ''
+            DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com
+            DOCKER_NAMESPACE: mocloud
+            DOCKER_IMAGE_TAG: ''
+  
+      - name: Get Image Info
+        run: |
+          echo image-tags: ${{ steps.tag.outputs.tags }}
+        
+      - name: Build and Push
+        if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !vars.UPGRADE_IMAGE_REPOSITORY }}
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./optools/images/Dockerfile
+          platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tag.outputs.tags }}
+    
       - name: Prepare MO Image
         if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' }}
         id: prep
