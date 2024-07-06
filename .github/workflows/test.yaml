@@ -394,13 +394,14 @@ jobs:
           # VERSION=${GITHUB_SHA::8}
           echo ${GITHUB_SHA}
           if [ -z $DOCKER_IMAGE_TAG ]; then
-            repo_tag=$(git rev-parse --short HEAD)
-            repo_tag=${repo_tag::7}
+            repo_tag=${{ vars.BUILD_MO_VERSION }}-$(git rev-parse --short HEAD)-$(date +'%Y-%m-%d')
           else
             repo_tag=$DOCKER_IMAGE_TAG
           fi
           TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "image-repo=${ACR_DOCKER_IMAGE}" >> $GITHUB_OUTPUT
+          echo "image-tag=${repo_tag}" >> $GITHUB_OUTPUT
         env:
             DOCKER_REPOSITORY: ''
             DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com
@@ -413,7 +414,6 @@ jobs:
         
       - name: Build and Push
         if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !vars.UPGRADE_IMAGE_REPOSITORY }}
-        id: build
         uses: docker/build-push-action@v5
         with:
           builder: ${{ steps.buildx.outputs.name }}
@@ -434,11 +434,11 @@ jobs:
 
           # set output parameters
           if [ -z $UPGRADE_IMAGE_REPOSITORY ]; then
-            UPGRADE_IMAGE_REPOSITORY=${{ steps.build.outputs.image-repo }}
+            UPGRADE_IMAGE_REPOSITORY=${{ steps.tag.outputs.image-repo }}
             if [ -z $UPGRADE_CLUSTER_VERSION ]; then
-              UPGRADE_CLUSTER_VERSION=${{ steps.build.outputs.image-tag }}
+              UPGRADE_CLUSTER_VERSION=${{ steps.tag.outputs.image-tag }}
             else
-              UPGRADE_CLUSTER_VERSION=`awk -v build_version=${{ steps.build.outputs.image-tag }} -F ',' '{for (i=1; i<=NF; i++) if ($i == "") {print build_version} else {print $i}}' <<< "$UPGRADE_CLUSTER_VERSION" | tr '\n' ','`
+              UPGRADE_CLUSTER_VERSION=`awk -v build_version=${{ steps.tag.outputs.image-tag }} -F ',' '{for (i=1; i<=NF; i++) if ($i == "") {print build_version} else {print $i}}' <<< "$UPGRADE_CLUSTER_VERSION" | tr '\n' ','`
               UPGRADE_CLUSTER_VERSION=${UPGRADE_CLUSTER_VERSION%,*}
             fi
           fi
