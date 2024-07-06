@@ -440,6 +440,7 @@ jobs:
             else
               UPGRADE_CLUSTER_VERSION=`awk -v build_version=${{ steps.build.outputs.image-tag }} -F ',' '{for (i=1; i<=NF; i++) if ($i == "") {print build_version} else {print $i}}' <<< "$UPGRADE_CLUSTER_VERSION" | tr '\n' ','`
               UPGRADE_CLUSTER_VERSION=${UPGRADE_CLUSTER_VERSION%,*}
+            fi
           fi
           echo "upgrade-image-repository=${UPGRADE_IMAGE_REPOSITORY}" >> $GITHUB_OUTPUT
           echo "upgrade-cluster-version=${UPGRADE_CLUSTER_VERSION}" >> $GITHUB_OUTPUT
