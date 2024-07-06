@@ -413,7 +413,7 @@ jobs:
           echo image-tags: ${{ steps.tag.outputs.tags }}
         
       - name: Build and Push
-        if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !vars.UPGRADE_IMAGE_REPOSITORY }}
+        if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !vars.UPGRADE_IMAGE_REPOSITORY }}
         uses: docker/build-push-action@v5
         with:
           builder: ${{ steps.buildx.outputs.name }}
