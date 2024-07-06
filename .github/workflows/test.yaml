@@ -402,7 +402,7 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "image-repo=${ACR_DOCKER_IMAGE}" >> $GITHUB_OUTPUT
           echo "image-tag=${repo_tag}" >> $GITHUB_OUTPUT
-          UPGRADE_IMAGE_REPOSITORY=$(echo $UPGRADE_IMAGE_REPOSITORY)
+          UPGRADE_IMAGE_REPOSITORY=$(echo ${{ vars.UPGRADE_IMAGE_REPOSITORY }})
           if [ -z $UPGRADE_IMAGE_REPOSITORY ]; then
             echo "UPGRADE_IMAGE_REPOSITORY=" >> $GITHUB_OUTPUT
           else
