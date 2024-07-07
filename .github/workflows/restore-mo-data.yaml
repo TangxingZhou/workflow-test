@@ -35,6 +35,9 @@ env:
   email: ${{ vars.UPGRADE_TEST_EMAIL }}
   password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
   database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+  management_platform_url: ${{ secrets.MANAGEMENT_PLATFORM_URL }}
+  management_platform_user: ${{ secrets.MANAGEMENT_PLATFORM_USER }}
+  management_platform_password: ${{ secrets.MANAGEMENT_PLATFORM_PASSWORD }}
   env: qa
   provider: aliyun
   region: cn-hangzhou
@@ -112,5 +115,5 @@ jobs:
           with:
             name: upgrade-test-logs
             path: |
-              ${{ github.workspace }}/moc-upgrade-test.log
+              ${{ github.workspace }}/*.log
             retention-days: 7

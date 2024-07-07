@@ -173,7 +173,6 @@ jobs:
       - name: Pull and Push
         if: ${{ inputs.image }}
         run: |
-          docker login -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }} registry.cn-shanghai.aliyuncs.com
           docker pull $DOCKER_IMAGE
           if [ -z $DOCKER_REPOSITORY ]; then
             repo_name=${DOCKER_IMAGE%:*}
