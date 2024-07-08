@@ -262,7 +262,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: matrixorigin/mo-nightly-regression
-          ref: moc_big_data
+          ref: big_data
           path: mo-nightly-regression
           token: ${{ secrets.GH_PAT }}
 
@@ -324,7 +324,7 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -t ${{ inputs.period }} \
-          -c ./cases/big_data_test/04_QUERIES/15_moc_write_100M.sql
+          -c ./cases/big_data_test/04_QUERIES/15_write_ddl_100M.sql
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
