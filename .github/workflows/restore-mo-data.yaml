@@ -12,6 +12,10 @@ on:
         description: Backups to be made into the S3 bucket path
         required: false
         type: string
+      backup_id:
+        description: Backup id
+        required: false
+        type: string
       restore_cluster:
         description: The cluster to be restored
         required: false
@@ -81,6 +85,7 @@ jobs:
             RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
             BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
             BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
+            BACKUP_ID: ${{ inputs.backup_id || vars.BACKUP_ID }}
             RESTORE_CLUSTER: ${{ inputs.restore_cluster || 'only-restore-data' }}
             RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version || vars.RESTORE_CLUSTER_VERSION }}
             # RESTORE_ROOT_USERNAME: ${{ secrets.restore_root_username }}
@@ -104,6 +109,7 @@ jobs:
             RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
             BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
             BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
+            BACKUP_ID: ${{ inputs.backup_id || vars.BACKUP_ID }}
             RESTORE_CLUSTER: ${{ inputs.restore_cluster || 'only-restore-data' }}
             RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version || vars.RESTORE_CLUSTER_VERSION }}
             RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket || vars.RESTORE_S3_BUCKET }}
