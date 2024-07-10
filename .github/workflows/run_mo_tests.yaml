@@ -14,6 +14,7 @@ on:
           - sysbench
           - bigdata
           - scale
+          - customer
         default: all
       mo-host:
         description: Host for mo instance
