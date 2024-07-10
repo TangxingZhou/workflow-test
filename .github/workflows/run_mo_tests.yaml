@@ -409,3 +409,54 @@ jobs:
           path:
             ${{ github.workspace }}/upload
           retention-days: 7
+
+  run-customer-tests:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    timeout-minutes: 120
+    if: inputs.testName == 'customer'
+    steps:
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: mysql-client
+
+      - name: Checkout mo-nightly-regression
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mo-nightly-regression
+          ref: main
+          path: mo-nightly-regression
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set Up Python3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        if: inputs.run-tests
+        run: |
+          cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          python run.py \
+          -H ${{ inputs.mo-host }} \
+          -P ${{ inputs.mo-port }} \
+          -u ${{ inputs.mo-user }} \
+          -p ${{ inputs.mo-password }} \
+          -c ./cases/etao_001/q01.sql
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bigdata-test-logs
+          path: |
+            ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
+            ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
+          retention-days: 7
