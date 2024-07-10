@@ -137,6 +137,7 @@ jobs:
 
       - name: Load TPCC Data
         run: |
+          set -uo pipefail
           cd $GITHUB_WORKSPACE/mo-load-data
           sed -i \
           -e 's/\(ENDPOINT:\).*/\1 oss-cn-hangzhou-internal.aliyuncs.com/' \
@@ -186,7 +187,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: load-tpcc-data-logs
+          name: tpcc-test-logs
           path: |
             ${{ github.workspace }}/mo-load-data/*.log
             ${{ github.workspace }}/mo-load-data/report/
@@ -214,6 +215,7 @@ jobs:
 
       - name: Run TPCH Tests
         run: |
+          set -uo pipefail
           cd $GITHUB_WORKSPACE/mo-tpch
           echo "$(date '+%Y-%m-%d %T') - Subscribe database '$DATABASE' for tpch tests"
           mysql \
@@ -373,6 +375,7 @@ jobs:
 
       - name: Execute scale
         run: |
+          set -uo pipefail
           cd $GITHUB_WORKSPACE
           echo "$(date '+%Y-%m-%d %T') - Subscribe database '$DATABASE' for scale tests"
           mysql \
@@ -406,7 +409,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: test-scale-report
+          name: scale-test-report
           path:
             ${{ github.workspace }}/upload
           retention-days: 7
@@ -450,13 +453,14 @@ jobs:
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -c ./cases/etao_001/q01.sql
+          -t ${{ inputs.period }} \
+          -c ./cases/etao_001/
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bigdata-test-logs
+          name: customer-test-logs
           path: |
             ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/*.log
             ${{ github.workspace }}/mo-nightly-regression/tools/mo-regression-test/report/
