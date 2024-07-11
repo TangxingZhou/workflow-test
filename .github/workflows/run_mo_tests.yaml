@@ -455,6 +455,33 @@ jobs:
           -p ${{ inputs.mo-password }} \
           -t ${{ inputs.period }} \
           -c ./cases/etao_001/
+          for ds in $(echo $RUN_DATASETS | tr ',' ' '); do
+            if [ -d ./cases/$ds/ ]; then
+              python run.py \
+              -H ${{ inputs.mo-host }} \
+              -P ${{ inputs.mo-port }} \
+              -u ${{ inputs.mo-user }} \
+              -p ${{ inputs.mo-password }} \
+              -t ${{ inputs.period }} \
+              -c ./cases/$ds/
+              mkdir -p report/$ds/
+              mv report/report.csv report/$ds/
+            fi
+          done
+          for directory in $(find report/* -type d -print); do
+            if cat $directory/report.csv | grep "failed_run" | grep -Ev "$FAILED_RUN_IGNORE_LIST"; then
+              echo "$(date '+%Y-%m-%d %T') - There are failed runs, please check details in $directory/report.csv."
+              exit 1
+            fi
+            if cat $directory/report.csv | grep "failed_diff" | grep -Ev "$FAILED_DIFF_IGNORE_LIST"; then
+              echo "$(date '+%Y-%m-%d %T') - There are failed diffs, please check details in $directory/report.csv."
+              exit 1
+            fi
+          done
+        env:
+          RUN_DATASETS: etao_001,guangheng_001
+          FAILED_RUN_IGNORE_LIST: suwen_001,q16
+          FAILED_DIFF_IGNORE_LIST: unre_001,q03|unre_004,q03|suwen_001,q06|slooong_001,q02|slooong_003,q02|slooong_001,q08|slooong_003,q08
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
