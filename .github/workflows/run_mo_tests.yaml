@@ -444,7 +444,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Tests
+      - name: Run Customer Tests
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
