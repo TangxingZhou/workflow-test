@@ -468,13 +468,13 @@ jobs:
               mv report/report.csv report/$ds/
             fi
           done
-          for directory in $(find report/* -type d -print); do
-            if cat $directory/report.csv | grep "failed_run" | grep -Ev "$FAILED_RUN_IGNORE_LIST"; then
-              echo "$(date '+%Y-%m-%d %T') - There are failed runs, please check details in $directory/report.csv."
+          for report_file in $(find report/* -name "report.csv" -type f -print); do
+            if cat $report_file | grep "failed_run" | grep -Ev "$FAILED_RUN_IGNORE_LIST"; then
+              echo "$(date '+%Y-%m-%d %T') - There are failed runs, please check details in $report_file."
               exit 1
             fi
-            if cat $directory/report.csv | grep "failed_diff" | grep -Ev "$FAILED_DIFF_IGNORE_LIST"; then
-              echo "$(date '+%Y-%m-%d %T') - There are failed diffs, please check details in $directory/report.csv."
+            if cat $report_file | grep "failed_diff" | grep -Ev "$FAILED_DIFF_IGNORE_LIST"; then
+              echo "$(date '+%Y-%m-%d %T') - There are failed diffs, please check details in $report_file."
               exit 1
             fi
           done
