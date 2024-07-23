@@ -480,7 +480,10 @@ jobs:
             fi
           done
         env:
-          RUN_DATASETS: etao_001,unre_001
+          RUN_DATASETS: >
+            cmcciot_001,cmcciot_002,dmt_001,etao_001,etao_002,etao_003,etao_004,etao_005,etao_006,
+            extremevision_001,guangheng_001,shuanghe_001,slooong_001,slooong_002,slooong_003,
+            sutpc_001,suwen_001,unre_001,unre_002,unre_003,unre_004,unre_005,unre_006,worthcloud_001
           FAILED_RUN_IGNORE_LIST: suwen_001,q16
           FAILED_DIFF_IGNORE_LIST: unre_001,q03|unre_004,q03|suwen_001,q06|slooong_001,q02|slooong_003,q02|slooong_001,q08|slooong_003,q08
 
