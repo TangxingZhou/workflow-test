@@ -81,6 +81,7 @@ jobs:
           -p${{ inputs.mo-password }} \
           -e "drop database if exists $DATABASE; create database if not exists $DATABASE;"
           echo "$(date '+%Y-%m-%d %T') - Prepare data for sysbench tests"
+          sed -i.bak "s/\(database:\).*/\1 \"$DATABASE\"/" sysbench.yml
           ./start.sh \
           -m SYSBENCH \
           -n 10 \
