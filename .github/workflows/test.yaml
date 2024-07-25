@@ -340,6 +340,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
+    if: false
     outputs:
       image-repo: ${{ steps.prep.outputs.upgrade-image-repository }}
       image-tag: ${{ steps.prep.outputs.upgrade-cluster-version }}
@@ -465,13 +466,36 @@ jobs:
       #     platform: linux/amd64
       #     acr-username: ${{ secrets.ACR_USERNAME }}
       #     acr-password: ${{ secrets.ACR_PASSWORD }}
+  test-ccc:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - run: |
+          echo 123
   test-aaa:
     # if: false
     runs-on: ubuntu-latest
     environment:
       name: qa
+    outputs:
+      mo-host: ${{ steps.s1.outputs.mo-host }}
+      mo-port: ${{ steps.s1.outputs.mo-port }}
+    steps:
+      - name: s1
+        id: s1
+        run: |
+          echo "mo-host=localhost" >> $GITHUB_OUTPUT
+          echo "mo-port=6001" >> $GITHUB_OUTPUT
+          exit 1
+  test-bbb:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
     needs:
-      - build-mo-image
+      - test-aaa
+      - test-ccc
+    if: needs.test-aaa.outputs.mo-host && needs.test-aaa.outputs.mo-port && always()
     steps:
       - run: |
-          echo ${{ needs.build-mo-image.outputs.image-repo }}:${{ needs.build-mo-image.outputs.image-tag }}
+          echo 456
