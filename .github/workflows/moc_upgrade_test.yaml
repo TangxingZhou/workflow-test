@@ -33,6 +33,10 @@ on:
         description: Backups to be made into the S3 bucket path
         required: false
         type: string
+      backup_id:
+        description: ID of backup to restore
+        required: false
+        type: string
       restore_cluster:
         description: The cluster to be restored
         required: false
@@ -170,12 +174,13 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose backup
+          python src/upgrade/main.py backup
         env:
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
           BACKUP_CLUSTER: ${{ inputs.backup_cluster || vars.BACKUP_CLUSTER }}
           BACKUP_CLUSTER_VERSION: ${{ inputs.backup_cluster_version || vars.BACKUP_CLUSTER_VERSION }}
+          BACKUP_ID: ${{ inputs.backup_id || vars.BACKUP_ID }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
           MO_IMAGE_REPOSITORY: ${{ vars.MO_IMAGE_REPOSITORY }}
@@ -185,7 +190,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose --disable-mo-tests restore --force --create-instance --all
+          python src/upgrade/main.py --disable-mo-tests restore --force --create-instance --all
         env:
           BACKUP_ALIYUN_AK: ${{ secrets.BACKUP_ALIYUN_AK }}
           BACKUP_ALIYUN_SK: ${{ secrets.BACKUP_ALIYUN_SK }}
@@ -193,6 +198,7 @@ jobs:
           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
           BACKUP_S3_BUCKET: ${{ inputs.backup_s3_bucket || vars.BACKUP_S3_BUCKET }}
           BACKUP_S3_BUCKET_FILE_PATH: ${{ inputs.backup_s3_bucket_file_path || vars.BACKUP_S3_BUCKET_FILE_PATH }}
+          BACKUP_ID: ${{ inputs.backup_id || vars.BACKUP_ID }}
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
           RESTORE_CLUSTER_VERSION: ${{ inputs.restore_cluster_version || vars.RESTORE_CLUSTER_VERSION }}
           RESTORE_S3_BUCKET: ${{ inputs.restore_s3_bucket || vars.RESTORE_S3_BUCKET }}
@@ -206,19 +212,20 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          # python src/script/upgrade_test/main.py --verbose --disable-mo-tests upgrade
+          python src/upgrade/main.py --disable-mo-tests upgrade
         env:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
           UPGRADE_IMAGE_REPOSITORY: ${{ needs.build-mo-image.outputs.image-repo }}
           UPGRADE_CLUSTER_VERSION: ${{ needs.build-mo-image.outputs.image-repo }}
           UPGRADE_MOC_PLUGIN_TAG: ${{ vars.UPGRADE_MOC_PLUGIN_TAG }}
+          INSTANCE_PASSWORD: ${{ secrets.INSTANCE_PASSWORD }}
       
       - name: Clear MOC
         if: ${{ inputs.action == 'clear' || vars.UPGRADE_TEST_ACTION == 'clear' }}
         run: |
           cd $GITHUB_WORKSPACE
           export PYTHONPATH=$(pwd)
-          python src/script/upgrade_test/main.py --verbose clear --force
+          python src/upgrade/main.py clear --force
         env:
           RESTORE_CLUSTER: ${{ inputs.restore_cluster || vars.RESTORE_CLUSTER }}
 
