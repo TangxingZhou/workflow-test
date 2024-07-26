@@ -497,7 +497,13 @@ jobs:
       - test-ccc
     # if: needs.test-aaa.outputs.mo-host && needs.test-aaa.outputs.mo-port && always()
     steps:
+      - name: test0
+        run: |
+          exit 1
       - name: test
         if: 1 == 1 && always()
         run: |
           echo 456
+      - name: test1
+        run: |
+          echo 789
