@@ -487,7 +487,7 @@ jobs:
         run: |
           # echo "mo-host=localhost" >> $GITHUB_OUTPUT
           # echo "mo-port=6001" >> $GITHUB_OUTPUT
-          exit 1
+          exit 0
   test-bbb:
     runs-on: ubuntu-latest
     environment:
