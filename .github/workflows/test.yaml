@@ -499,9 +499,9 @@ jobs:
     steps:
       - name: test0
         run: |
-          exit 1
+          exit 0
       - name: test
-        if: 1 == 1 && always()
+        if: 1 == 2 && always()
         run: |
           echo 456
       - name: test1
