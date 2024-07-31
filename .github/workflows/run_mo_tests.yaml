@@ -350,7 +350,7 @@ jobs:
       - name: Checkout mocloud-tester
         uses: actions/checkout@v4
         with:
-          repository: matrixone-cloud/mocloud-tester
+          repository: matrixorigin/mocloud-tester
           ref: main
           token: ${{ secrets.GH_PAT }}
 

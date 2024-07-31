@@ -327,7 +327,7 @@ jobs:
   # run-tpcc-test:
   #   needs:
   #       - load-tpcc-data
-  #   uses: matrixone-cloud/mocloud-tester/.github/workflows/scale_default_runner.yaml@main
+  #   uses: matrixorigin/mocloud-tester/.github/workflows/scale_default_runner.yaml@main
   #   secrets: inherit
   #   with:
   #     JobName: test-tpcc-job

@@ -57,7 +57,7 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v4
           with:
-            repository: matrixone-cloud/mocloud-tester
+            repository: matrixorigin/mocloud-tester
             ref: qa-txzhou
             token: ${{ secrets.GH_PAT }}
   
