@@ -33,7 +33,7 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v4
         with:
-          repository: matrixone-cloud/gitops
+          repository: matrixorigin/gitops
           ref: main
           token: ${{ secrets.GH_PAT }}
           # persist-credentials: true

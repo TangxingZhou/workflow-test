@@ -103,7 +103,7 @@ jobs:
         if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !steps.parse.outputs.UPGRADE_IMAGE_REPOSITORY }}
         uses: actions/checkout@v4
         with:
-          repository: matrixone-cloud/gitops
+          repository: matrixorigin/gitops
           ref: main
           token: ${{ secrets.GH_PAT }}
           sparse-checkout-cone-mode: false
@@ -114,7 +114,7 @@ jobs:
       - name: Build MO Image
         if: ${{ (inputs.action == 'upgrade' || vars.UPGRADE_TEST_ACTION == 'upgrade') && !steps.parse.outputs.UPGRADE_IMAGE_REPOSITORY }}
         id: build
-        # uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+        # uses: matrixorigin/gitops/.github/actions/mo-image@main
         uses: ./github-actions/.github/actions/mo-image
         with:
           branch: ${{ vars.BUILD_MO_BRANCH }}

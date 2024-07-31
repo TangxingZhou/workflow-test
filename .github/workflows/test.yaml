@@ -348,7 +348,7 @@ jobs:
       # - name: Build MO Image
       #   if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade' && !steps.prep.outputs.upgrade-image-repository }}
       #   id: build
-      #   uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+      #   uses: matrixorigin/gitops/.github/actions/mo-image@main
       #   with:
       #     branch: ${{ vars.BUILD_MO_BRANCH }}
       #     mo-version: ${{ vars.BUILD_MO_VERSION }}
@@ -458,7 +458,7 @@ jobs:
       # - name: Build MO Image
       #   if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' || vars.UPGRADE_TEST_ACTION == 'upgrade') && (!steps.prep.outputs.upgrade-image-repository || !steps.prep.outputs.upgrade-cluster-version) }}
       #   id: build
-      #   uses: matrixone-cloud/gitops/.github/actions/mo-image@main
+      #   uses: matrixorigin/gitops/.github/actions/mo-image@main
       #   with:
       #     branch: ${{ vars.BUILD_MO_BRANCH }}
       #     mo-version: ${{ vars.BUILD_MO_VERSION }}
