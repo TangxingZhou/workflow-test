@@ -512,3 +512,6 @@ jobs:
               inputs: {}
             })
             console.log(result)
+      - name: test
+        run: |
+          printenv
