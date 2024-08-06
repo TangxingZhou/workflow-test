@@ -524,7 +524,7 @@ jobs:
               repo: 'workflow-test',
               workflow_id: 'start-standalone-mo.yaml'
             })
-            console.log(typeof result)
+            console.log(result["workflow_runs"])
             return "Hello!"
       - name: test
         run: |
