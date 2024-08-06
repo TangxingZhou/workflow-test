@@ -519,10 +519,10 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const result = await github.rest.actions.createWorkflowDispatch({
+            const result = await github.rest.actions.getWorkflow({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
-              run_id: '10264876086'
+              workflow_id: '10264876086'
             })
             console.log(result)
             return "Hello!"
