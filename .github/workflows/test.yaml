@@ -514,4 +514,4 @@ jobs:
             console.log(result)
       - name: test
         run: |
-          printenv
+          echo ${{ steps.backup.outputs.backup-id }}
