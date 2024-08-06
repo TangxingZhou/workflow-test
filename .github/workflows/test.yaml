@@ -512,6 +512,20 @@ jobs:
               inputs: {}
             })
             console.log(result)
+            return "Hello!"
+      - name: Get
+        # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              run_id: '10264876086'
+            })
+            console.log(result)
+            return "Hello!"
       - name: test
         run: |
           echo ${{ steps.backup.outputs.backup-id }}
