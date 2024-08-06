@@ -519,10 +519,10 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const result = await github.rest.actions.listWorkflowRuns({
+            const result = await github.rest.actions.getWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
-              workflow_id: 'start-standalone-mo.yaml'
+              run_id: '10266758610'
             })
             console.log(result.data.workflow_runs)
             return "Hello!"
