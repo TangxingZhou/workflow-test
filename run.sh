@@ -19,3 +19,4 @@ baseID=$7
 
 
 echo "new backupID: 123456-789-asd"
+echo "backup-id=123456-789-asd" >> $GITHUB_OUTPUT
