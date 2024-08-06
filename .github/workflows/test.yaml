@@ -522,7 +522,7 @@ jobs:
             const result = await github.rest.actions.getWorkflow({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
-              workflow_id: '10264876086'
+              workflow_id: 'start-standalone-mo.yaml'
             })
             console.log(result)
             return "Hello!"
