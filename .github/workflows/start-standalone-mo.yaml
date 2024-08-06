@@ -1,0 +1,76 @@
+name: aliyun mo cluster incremental backup
+on:
+  workflow_dispatch:
+    inputs:
+      cluster-env:
+        description: "env to backup"
+        default: 'prod'
+        required: true
+        type: choice
+        options:
+          - qa
+          - prod
+      mo-cluster:
+        description: 'mo cluster name should backup'
+        default: 'freetier-01'
+        required: true
+        type: choice
+        options:
+        - freetier-01
+        - freetier-02
+      binary-image:
+        description: 'mo_br binary image for backup'
+        # FIXME 如果要改变镜像，务必要确认从日志匹配 baseID 的逻辑是否还正确
+        default: 'registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:main-20240731'
+        required: true
+        type: string
+      oss-bucket:
+        description: 'oss bucket to store backup'
+        default: 'mo-backup-20240201'
+        required: true
+        type: string
+      filepath:
+        description: "filepath of incremental backup, must be same with full backup"
+        default: 'backup0717-1520'
+        required: true
+        type: string
+      parallelism:
+        description: 'backup parallelism'
+        default: 150
+        required: true
+        type: number
+      baseID:
+        description: 'baseID of incremental backup, fetch from configmap if nil'
+        required: false
+        type: string
+
+env:
+  DEFAULT_ENV: "prod"
+  DEFAULT_MO: "freetier-01"
+  DEFAULT_IMAGE: "registry.cn-hangzhou.aliyuncs.com/mocloud/mo-backup:main-20240731"
+  DEFAULT_BUCKET: "mo-backup-20240201"
+  DEFAULT_FILEPATH: "backup0717-1520"
+  DEFAULT_PARALLELISM: 150
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: run scripts
+        run: |
+          /bin/bash run.sh \
+            ${{ inputs.cluster-env || env.DEFAULT_ENV }} \
+            ${{ inputs.mo-cluster || env.DEFAULT_MO }} \
+            ${{ inputs.binary-image || env.DEFAULT_IMAGE }} \
+            ${{ inputs.oss-bucket || env.DEFAULT_BUCKET }} \
+            ${{ inputs.filepath || env.DEFAULT_FILEPATH }} \
+            ${{ inputs.parallelism || env.DEFAULT_PARALLELISM }} \
+            ${{ inputs.baseID }}

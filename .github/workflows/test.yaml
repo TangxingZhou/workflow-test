@@ -466,44 +466,49 @@ jobs:
       #     platform: linux/amd64
       #     acr-username: ${{ secrets.ACR_USERNAME }}
       #     acr-password: ${{ secrets.ACR_PASSWORD }}
-  test-ccc:
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-    steps:
-      - run: |
-          echo 123
-  test-aaa:
-    # if: false
-    runs-on: ubuntu-latest
-    environment:
-      name: qa
-    outputs:
-      mo-host: ${{ steps.s1.outputs.mo-host }}
-      mo-port: ${{ steps.s1.outputs.mo-port }}
-    steps:
-      - name: s1
-        id: s1
-        run: |
-          # echo "mo-host=localhost" >> $GITHUB_OUTPUT
-          # echo "mo-port=6001" >> $GITHUB_OUTPUT
-          exit 0
+  # test-ccc:
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: qa
+  #   steps:
+  #     - run: |
+  #         echo 123
+  # test-aaa:
+  #   # if: false
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: qa
+  #   outputs:
+  #     mo-host: ${{ steps.s1.outputs.mo-host }}
+  #     mo-port: ${{ steps.s1.outputs.mo-port }}
+  #   steps:
+  #     - name: s1
+  #       id: s1
+  #       run: |
+  #         # echo "mo-host=localhost" >> $GITHUB_OUTPUT
+  #         # echo "mo-port=6001" >> $GITHUB_OUTPUT
+  #         exit 0
   test-bbb:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    needs:
-      - test-aaa
-      - test-ccc
+    # needs:
+    #   - test-aaa
+    #   - test-ccc
     # if: needs.test-aaa.outputs.mo-host && needs.test-aaa.outputs.mo-port && always()
     steps:
-      - name: test0
-        run: |
-          exit 0
-      - name: test
-        if: 1 == 2 && always()
-        run: |
-          echo 456
-      - name: test1
-        run: |
-          echo 789
+      - name: Backup Data for Restore
+        # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        id: backup
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              workflow_id: 'start-standalone-mo.yaml',
+              ref: 'main',
+              inputs: {}
+            })
+            console.log(result)
