@@ -518,7 +518,7 @@ jobs:
             try {
                 var timer = setTimeout(() => {
                     throw new Error('Timeout to wait for backup job completes.');
-                }, 60000);
+                }, 3600000);
                 while (true) {
                     await delay(30000);
                     const in_progress_runs = await github.rest.actions.listWorkflowRuns({
