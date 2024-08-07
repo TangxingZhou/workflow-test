@@ -512,7 +512,26 @@ jobs:
               inputs: {}
             })
             console.log(result)
-            return "Hello!"
+            const result0 = await github.rest.actions.listWorkflowRuns({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              workflow_id: 'start-standalone-mo.yaml',
+              status: 'success'
+            })
+            console.log(result0.data.workflow_runs[0].id)
+            const result1 = await github.rest.actions.listJobsForWorkflowRun({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              run_id: result0.data.workflow_runs[0].id
+            })
+            console.log(result1.data.jobs[0].id)
+            const result2 = await github.rest.actions.downloadJobLogsForWorkflowRun({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              job_id: result1.data.jobs[0].id
+            })
+            console.log(result2.url)
+            return result2.url
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
         id: get
@@ -549,7 +568,7 @@ jobs:
       - name: test
         id: get-id
         run: |
-          backup_logs=$(curl ${{ steps.get.outputs.result }})
+          backup_logs=$(curl ${{ steps.backup.outputs.result }})
           backup_bucket=$(grep "shell args" <<< "$backup_logs" | awk '{print $7}')
           backup_bucket_path=$(grep "shell args" <<< "$backup_logs" | awk '{print $8}')
           backup_id=$(grep -Eo 'new backupID:\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})' <<< "$backup_logs" | awk '{print $3}')
