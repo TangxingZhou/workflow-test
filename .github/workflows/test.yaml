@@ -505,9 +505,9 @@ jobs:
           github-token: ${{ secrets.GH_PAT }}
           script: |
             const result = await github.rest.actions.createWorkflowDispatch({
-              owner: 'TangxingZhou',
-              repo: 'workflow-test',
-              workflow_id: 'start-standalone-mo.yaml',
+              owner: 'matrixorigin',
+              repo: 'gitops',
+              workflow_id: 'aliyun-mo-incremental-backup.yaml',
               ref: 'main',
               inputs: {}
             })
@@ -522,32 +522,32 @@ jobs:
                 while (true) {
                     await delay(30000);
                     const in_progress_runs = await github.rest.actions.listWorkflowRuns({
-                        owner: 'TangxingZhou',
-                        repo: 'workflow-test',
-                        workflow_id: 'start-standalone-mo.yaml',
+                        owner: 'matrixorigin',
+                        repo: 'gitops',
+                        workflow_id: 'aliyun-mo-incremental-backup.yaml',
                         status: 'in_progress'
                     });
                     // console.log(in_progress_runs.data.workflow_runs);
                     if ( in_progress_runs.data.total_count === 0 ) {
                         clearTimeout(timer);
                         const success_runs = await github.rest.actions.listWorkflowRuns({
-                            owner: 'TangxingZhou',
-                            repo: 'workflow-test',
-                            workflow_id: 'start-standalone-mo.yaml',
+                            owner: 'matrixorigin',
+                            repo: 'gitops',
+                            workflow_id: 'aliyun-mo-incremental-backup.yaml',
                             status: 'success'
                         });
                         if (success_runs.data.total_count > 0) {
                             console.log(success_runs.data.workflow_runs[0].id);
                             const success_run_jobs = await github.rest.actions.listJobsForWorkflowRun({
-                                owner: 'TangxingZhou',
-                                repo: 'workflow-test',
+                                owner: 'matrixorigin',
+                                repo: 'gitops',
                                 run_id: success_runs.data.workflow_runs[0].id
                             });
                             if (success_run_jobs.data.total_count > 0) {
                                 console.log(success_run_jobs.data.jobs[0].id);
                                 const success_run_job_log = await github.rest.actions.downloadJobLogsForWorkflowRun({
-                                    owner: 'TangxingZhou',
-                                    repo: 'workflow-test',
+                                    owner: 'matrixorigin',
+                                    repo: 'gitops',
                                     job_id: success_run_jobs.data.jobs[0].id
                                 });
                                 console.log(success_run_job_log.url);
@@ -569,6 +569,7 @@ jobs:
             }
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        if: false
         id: get
         uses: actions/github-script@v7
         with:
