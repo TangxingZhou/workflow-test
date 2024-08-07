@@ -515,8 +515,7 @@ jobs:
             const result0 = await github.rest.actions.listWorkflowRuns({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
-              workflow_id: 'start-standalone-mo.yaml',
-              status: 'success'
+              workflow_id: 'start-standalone-mo.yaml'
             })
             console.log(result0.data.workflow_runs[0].id)
             const result1 = await github.rest.actions.listJobsForWorkflowRun({
