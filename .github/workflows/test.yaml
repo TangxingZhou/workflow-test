@@ -545,13 +545,15 @@ jobs:
               repo: 'workflow-test',
               workflow_id: 'start-standalone-mo.yaml'
             })
+            console.log(result0)
             console.log(result0.data.workflow_runs[0].id)
             const result1 = await github.rest.actions.listJobsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
               run_id: result0.data.workflow_runs[0].id
             })
-            console.log(result1.data.jobs[0].id)
+            console.log(result1)
+            console.log(result1.data.jobs) 
             const result2 = await github.rest.actions.downloadJobLogsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
