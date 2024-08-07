@@ -527,7 +527,7 @@ jobs:
                         workflow_id: 'start-standalone-mo.yaml',
                         status: 'in_progress'
                     });
-                    console.log(in_progress_runs.data.workflow_runs);
+                    // console.log(in_progress_runs.data.workflow_runs);
                     if ( in_progress_runs.data.total_count === 0 ) {
                         clearTimeout(timer);
                         const success_runs = await github.rest.actions.listWorkflowRuns({
@@ -552,7 +552,7 @@ jobs:
                                 });
                                 console.log(success_run_job_log.url);
                                 // return success_run_job_log.url;
-                                return '';
+                                return null;
                             } else {
                                 console.error('Found no successful run jobs.');
                             }
