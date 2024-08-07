@@ -519,14 +519,20 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
+            const result0 = await github.rest.actions.listWorkflowRuns({
+              owner: 'matrixorigin',
+              repo: 'gitops',
+            })
+            console.log(result0.data)
             const result = await github.rest.actions.downloadJobLogsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
               job_id: '28405776482'
             })
             console.log(result)
-            return "Hello!"
+            return result.url
       - name: test
         run: |
+          #curl $url | grep "shell args" awk '{print $}'
           ls -al
           echo ${{ steps.backup.outputs.backup-id }}
