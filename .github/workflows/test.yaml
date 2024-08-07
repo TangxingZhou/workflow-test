@@ -524,7 +524,7 @@ jobs:
               repo: 'workflow-test',
               run_id: '10266758610'
             })
-            console.log(result.data)
+            console.log(result.data.jobs[0])
             return "Hello!"
       - name: test
         run: |
