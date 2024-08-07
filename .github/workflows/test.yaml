@@ -512,55 +512,73 @@ jobs:
               inputs: {}
             })
             console.log(result)
-            function resolveAfter2Seconds() {
-                return new Promise((resolve) => {
-                  setTimeout(() => {
-                    resolve('resolved');
-                  }, 11000);
-                });
+            function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
             }
-            async function asyncCall() {
-                console.log('calling');
-                const result = await resolveAfter2Seconds();
-                const result00 = await github.rest.actions.listWorkflowRuns({
-                  owner: 'TangxingZhou',
-                  repo: 'workflow-test',
-                  workflow_id: 'start-standalone-mo.yaml',
-                  status: 'in_progress'
-                })
-                console.log(result00.data)
+            async function awaitWorkflowRunsComplete(timeout, interval) {
+                try {
+                    let timer = setTimeout(() => {
+                        // console.error('Timeout to wait for backup job completes.');
+                        throw new Error('Timeout to wait for backup job completes.');
+                        // process.exit(1)
+                    }, timeout);
+
+                    while (true) {
+                        await delay(interval);
+                        const in_progress_runs = await github.rest.actions.listWorkflowRuns({
+                            owner: 'TangxingZhou',
+                            repo: 'workflow-test',
+                            workflow_id: 'start-standalone-mo.yaml',
+                            status: 'in_progress'
+                        });
+                        console.log(in_progress_runs.data.workflow_runs);
+                        if ( in_progress_runs.data.total_count === 0 ) {
+                            clearTimeout(timer);
+                            const success_runs = await github.rest.actions.listWorkflowRuns({
+                                owner: 'TangxingZhou',
+                                repo: 'workflow-test',
+                                workflow_id: 'start-standalone-mo.yaml',
+                                status: 'success'
+                            });
+                            if (success_runs.data.total_count > 0) {
+                                console.log(success_runs.data.workflow_runs[0].id);
+                                const success_run_jobs = await github.rest.actions.listJobsForWorkflowRun({
+                                    owner: 'TangxingZhou',
+                                    repo: 'workflow-test',
+                                    run_id: success_runs.data.workflow_runs[0].id
+                                });
+                                if (success_run_jobs.data.total_count > 0) {
+                                    console.log(success_run_jobs.data.jobs[0].id);
+                                    const success_run_job_log = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                                        owner: 'TangxingZhou',
+                                        repo: 'workflow-test',
+                                        job_id: success_run_jobs.data.jobs[0].id
+                                    });
+                                    console.log(success_run_job_log.url)
+                                    return success_run_job_log.url
+                                } else {
+                                    console.error('Found no successful run jobs.');
+                                }
+                            } else {
+                                console.error('Found no successful runs.');
+                            }
+                            // break;
+                            return '';
+                        } else {
+                            console.error('Backup jobs are still running.');
+                        }
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+            awaitWorkflowRunsComplete(30000, 11000).then(result => {
                 console.log(result);
-                // Expected output: "resolved"
-            }
-            asyncCall();
-            const result00 = await github.rest.actions.listWorkflowRuns({
-              owner: 'TangxingZhou',
-              repo: 'workflow-test',
-              workflow_id: 'start-standalone-mo.yaml',
-              status: 'in_progress'
-            })
-            console.log(result00.data.workflow_runs)
-            const result0 = await github.rest.actions.listWorkflowRuns({
-              owner: 'TangxingZhou',
-              repo: 'workflow-test',
-              workflow_id: 'start-standalone-mo.yaml'
-            })
-            console.log(result0)
-            console.log(result0.data.workflow_runs[0].id)
-            const result1 = await github.rest.actions.listJobsForWorkflowRun({
-              owner: 'TangxingZhou',
-              repo: 'workflow-test',
-              run_id: result0.data.workflow_runs[0].id
-            })
-            console.log(result1)
-            console.log(result1.data.jobs) 
-            const result2 = await github.rest.actions.downloadJobLogsForWorkflowRun({
-              owner: 'TangxingZhou',
-              repo: 'workflow-test',
-              job_id: result1.data.jobs[0].id
-            })
-            console.log(result2.url)
-            return result2.url
+                return result;
+            }).catch(error => {
+                console.error(error);
+                process.exit(1)
+            });
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
         id: get
