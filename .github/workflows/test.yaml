@@ -515,13 +515,6 @@ jobs:
             function resolveAfter2Seconds() {
                 return new Promise((resolve) => {
                   setTimeout(() => {
-                    const result00 = await github.rest.actions.listWorkflowRuns({
-                      owner: 'TangxingZhou',
-                      repo: 'workflow-test',
-                      workflow_id: 'start-standalone-mo.yaml',
-                      status: 'in_progress'
-                    })
-                    console.log(result00.data.workflow_runs)
                     resolve('resolved');
                   }, 10000);
                 });
@@ -529,6 +522,13 @@ jobs:
             async function asyncCall() {
                 console.log('calling');
                 const result = await resolveAfter2Seconds();
+                const result00 = await github.rest.actions.listWorkflowRuns({
+                  owner: 'TangxingZhou',
+                  repo: 'workflow-test',
+                  workflow_id: 'start-standalone-mo.yaml',
+                  status: 'in_progress'
+                })
+                console.log(result00.data.workflow_runs)
                 console.log(result);
                 // Expected output: "resolved"
             }
