@@ -21,3 +21,4 @@ baseID=$7
 echo "new backupID: 019125ba-6147-7d41-a430-84236dadf806"
 echo "backup-id=123456-789-asd" >> $GITHUB_OUTPUT
 echo "backup-id=123456-789-asd" >> $GITHUB_ENV
+sleep 30

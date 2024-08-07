@@ -516,7 +516,7 @@ jobs:
                 return new Promise((resolve) => {
                   setTimeout(() => {
                     resolve('resolved');
-                  }, 18000);
+                  }, 5000);
                 });
             }
             async function asyncCall() {
@@ -526,7 +526,7 @@ jobs:
                   owner: 'TangxingZhou',
                   repo: 'workflow-test',
                   workflow_id: 'start-standalone-mo.yaml',
-                  status: 'success'
+                  status: 'in_progress'
                 })
                 console.log(result00.data.workflow_runs)
                 console.log(result);
