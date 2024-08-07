@@ -614,12 +614,12 @@ jobs:
               job_id: result1.data.jobs[0].id
             })
             console.log(result2.url)
-            const result = await github.rest.actions.downloadJobLogsForWorkflowRun({
+            const result3 = await github.rest.actions.downloadJobLogsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
               job_id: '28405776482'
             })
-            console.log(result)
+            console.log(result3)
             return result2.url
       - name: test
         id: get-id
