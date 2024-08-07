@@ -519,7 +519,7 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const result = await github.rest.actions.getWorkflowRun({
+            const result = await github.rest.actions.listJobsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
               run_id: '10266758610'
