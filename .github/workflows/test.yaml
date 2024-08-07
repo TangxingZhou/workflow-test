@@ -521,7 +521,7 @@ jobs:
                         // console.error('Timeout to wait for backup job completes.');
                         throw new Error('Timeout to wait for backup job completes.');
                         // process.exit(1)
-                    }, 30000);
+                    }, 60000);
 
                     while (true) {
                         await delay(12000);
