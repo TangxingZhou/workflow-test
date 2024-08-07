@@ -574,7 +574,7 @@ jobs:
             }
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
-        # if: false
+        if: false
         id: get
         uses: actions/github-script@v7
         with:
@@ -626,9 +626,9 @@ jobs:
         run: |
           set -x
           if [ -z $(echo ${{ steps.backup.outputs.result }}) ]; then
-            echo "BACKUP_S3_BUCKET=tttttt1" >> $GITHUB_OUTPUT
-            echo "BACKUP_S3_BUCKET_FILE_PATH=tttttt2" >> $GITHUB_OUTPUT
-            echo "BACKUP_ID=tttttt3" >> $GITHUB_OUTPUT
+            echo "BACKUP_S3_BUCKET=" >> $GITHUB_OUTPUT
+            echo "BACKUP_S3_BUCKET_FILE_PATH=" >> $GITHUB_OUTPUT
+            echo "BACKUP_ID=" >> $GITHUB_OUTPUT
           else
             echo ${{ steps.backup.outputs.result || 'helllo' }}
             backup_logs=$(curl ${{ steps.backup.outputs.result }})
@@ -641,4 +641,4 @@ jobs:
           fi
       - name: debug
         run: |
-          echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID }}
+          echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_S3_BUCKET }}
