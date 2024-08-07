@@ -552,7 +552,7 @@ jobs:
                                 });
                                 console.log(success_run_job_log.url);
                                 // return success_run_job_log.url;
-                                return null;
+                                return '';
                             } else {
                                 console.error('Found no successful run jobs.');
                             }
