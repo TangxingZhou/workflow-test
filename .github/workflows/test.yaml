@@ -515,6 +515,7 @@ jobs:
             return "Hello!"
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        id: get
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GH_PAT }}
@@ -535,7 +536,7 @@ jobs:
             const result2 = await github.rest.actions.downloadJobLogsForWorkflowRun({
               owner: 'matrixorigin',
               repo: 'gitops',
-              run_id: result1.data.jobs[0].id
+              job_id: result1.data.jobs[0].id
             })
             console.log(result2.url)
             const result = await github.rest.actions.downloadJobLogsForWorkflowRun({
@@ -544,9 +545,9 @@ jobs:
               job_id: '28405776482'
             })
             console.log(result)
-            return result.url
+            return result2.url
       - name: test
         run: |
           #curl $url | grep "shell args" awk '{print $}'
           ls -al
-          echo ${{ steps.backup.outputs.backup-id }}
+          echo ${{ steps.get.outputs.result }}
