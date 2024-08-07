@@ -528,7 +528,7 @@ jobs:
                   workflow_id: 'start-standalone-mo.yaml',
                   status: 'in_progress'
                 })
-                console.log(result00.data.workflow_runs)
+                console.log(result00.data)
                 console.log(result);
                 // Expected output: "resolved"
             }
