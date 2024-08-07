@@ -522,6 +522,7 @@ jobs:
             const result0 = await github.rest.actions.listWorkflowRuns({
               owner: 'matrixorigin',
               repo: 'gitops',
+              workflow_id: 'aliyun-mo-incremental-backup.yaml'
             })
             console.log(result0.data)
             const result = await github.rest.actions.downloadJobLogsForWorkflowRun({
