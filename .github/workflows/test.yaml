@@ -512,6 +512,20 @@ jobs:
               inputs: {}
             })
             console.log(result)
+            function resolveAfter2Seconds() {
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve('resolved');
+                  }, 10000);
+                });
+            }
+            async function asyncCall() {
+                console.log('calling');
+                const result = await resolveAfter2Seconds();
+                console.log(result);
+                // Expected output: "resolved"
+            }
+            asyncCall();
             const result00 = await github.rest.actions.listWorkflowRuns({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
