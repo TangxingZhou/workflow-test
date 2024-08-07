@@ -515,71 +515,59 @@ jobs:
             function delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
-            // async function awaitWorkflowRunsComplete(timeout, interval) {
-                try {
-                    var timer = setTimeout(() => {
-                        // console.error('Timeout to wait for backup job completes.');
-                        throw new Error('Timeout to wait for backup job completes.');
-                        // process.exit(1)
-                    }, 60000);
-
-                    while (true) {
-                        await delay(12000);
-                        const in_progress_runs = await github.rest.actions.listWorkflowRuns({
+            try {
+                var timer = setTimeout(() => {
+                    throw new Error('Timeout to wait for backup job completes.');
+                }, 60000);
+                while (true) {
+                    await delay(30000);
+                    const in_progress_runs = await github.rest.actions.listWorkflowRuns({
+                        owner: 'TangxingZhou',
+                        repo: 'workflow-test',
+                        workflow_id: 'start-standalone-mo.yaml',
+                        status: 'in_progress'
+                    });
+                    console.log(in_progress_runs.data.workflow_runs);
+                    if ( in_progress_runs.data.total_count === 0 ) {
+                        clearTimeout(timer);
+                        const success_runs = await github.rest.actions.listWorkflowRuns({
                             owner: 'TangxingZhou',
                             repo: 'workflow-test',
                             workflow_id: 'start-standalone-mo.yaml',
-                            status: 'in_progress'
+                            status: 'success'
                         });
-                        console.log(in_progress_runs.data.workflow_runs);
-                        if ( in_progress_runs.data.total_count === 0 ) {
-                            clearTimeout(timer);
-                            const success_runs = await github.rest.actions.listWorkflowRuns({
+                        if (success_runs.data.total_count > 0) {
+                            console.log(success_runs.data.workflow_runs[0].id);
+                            const success_run_jobs = await github.rest.actions.listJobsForWorkflowRun({
                                 owner: 'TangxingZhou',
                                 repo: 'workflow-test',
-                                workflow_id: 'start-standalone-mo.yaml',
-                                status: 'success'
+                                run_id: success_runs.data.workflow_runs[0].id
                             });
-                            if (success_runs.data.total_count > 0) {
-                                console.log(success_runs.data.workflow_runs[0].id);
-                                const success_run_jobs = await github.rest.actions.listJobsForWorkflowRun({
+                            if (success_run_jobs.data.total_count > 0) {
+                                console.log(success_run_jobs.data.jobs[0].id);
+                                const success_run_job_log = await github.rest.actions.downloadJobLogsForWorkflowRun({
                                     owner: 'TangxingZhou',
                                     repo: 'workflow-test',
-                                    run_id: success_runs.data.workflow_runs[0].id
+                                    job_id: success_run_jobs.data.jobs[0].id
                                 });
-                                if (success_run_jobs.data.total_count > 0) {
-                                    console.log(success_run_jobs.data.jobs[0].id);
-                                    const success_run_job_log = await github.rest.actions.downloadJobLogsForWorkflowRun({
-                                        owner: 'TangxingZhou',
-                                        repo: 'workflow-test',
-                                        job_id: success_run_jobs.data.jobs[0].id
-                                    });
-                                    console.log(success_run_job_log.url)
-                                    return success_run_job_log.url
-                                } else {
-                                    console.error('Found no successful run jobs.');
-                                }
+                                console.log(success_run_job_log.url);
+                                // return success_run_job_log.url;
+                                return '';
                             } else {
-                                console.error('Found no successful runs.');
+                                console.error('Found no successful run jobs.');
                             }
-                            // break;
-                            return '';
                         } else {
-                            console.error('Backup jobs are still running.');
+                            console.error('Found no successful runs.');
                         }
+                        return '';
+                    } else {
+                        console.error('Backup jobs are still running.');
                     }
-                } catch (error) {
-                    console.error(error);
-                    process.exit(1)
                 }
-            // }
-            // awaitWorkflowRunsComplete(30000, 11000).then(result => {
-            //     console.log(result);
-            //     return result;
-            // }).catch(error => {
-            //     console.error(error);
-            //     process.exit(1)
-            // });
+            } catch (error) {
+                console.error(error);
+                process.exit(1);
+            }
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
         id: get
@@ -617,7 +605,7 @@ jobs:
         id: get-id
         run: |
           set -x
-          echo ${{ steps.backup.outputs.result }}
+          echo ${{ steps.backup.outputs.result || 'helllo' }}
           backup_logs=$(curl ${{ steps.backup.outputs.result }})
           backup_bucket=$(grep "shell args" <<< "$backup_logs" | awk '{print $7}')
           backup_bucket_path=$(grep "shell args" <<< "$backup_logs" | awk '{print $8}')
