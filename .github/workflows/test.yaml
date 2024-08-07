@@ -605,14 +605,20 @@ jobs:
         id: get-id
         run: |
           set -x
-          echo ${{ steps.backup.outputs.result || 'helllo' }}
-          backup_logs=$(curl ${{ steps.backup.outputs.result }})
-          backup_bucket=$(grep "shell args" <<< "$backup_logs" | awk '{print $7}')
-          backup_bucket_path=$(grep "shell args" <<< "$backup_logs" | awk '{print $8}')
-          backup_id=$(grep -Eo 'new backupID:\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})' <<< "$backup_logs" | awk '{print $3}')
-          echo "BACKUP_S3_BUCKET=$backup_bucket" >> $GITHUB_OUTPUT
-          echo "BACKUP_S3_BUCKET_FILE_PATH=$backup_bucket_path" >> $GITHUB_OUTPUT
-          echo "BACKUP_ID=$backup_id" >> $GITHUB_OUTPUT
+          if [ -z $(echo ${{ steps.backup.outputs.result }}) ]; then
+            echo "BACKUP_S3_BUCKET=tttttt1" >> $GITHUB_OUTPUT
+            echo "BACKUP_S3_BUCKET_FILE_PATH=tttttt2" >> $GITHUB_OUTPUT
+            echo "BACKUP_ID=tttttt3" >> $GITHUB_OUTPUT
+          else
+            echo ${{ steps.backup.outputs.result || 'helllo' }}
+            backup_logs=$(curl ${{ steps.backup.outputs.result }})
+            backup_bucket=$(grep "shell args" <<< "$backup_logs" | awk '{print $7}')
+            backup_bucket_path=$(grep "shell args" <<< "$backup_logs" | awk '{print $8}')
+            backup_id=$(grep -Eo 'new backupID:\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})' <<< "$backup_logs" | awk '{print $3}')
+            echo "BACKUP_S3_BUCKET=$backup_bucket" >> $GITHUB_OUTPUT
+            echo "BACKUP_S3_BUCKET_FILE_PATH=$backup_bucket_path" >> $GITHUB_OUTPUT
+            echo "BACKUP_ID=$backup_id" >> $GITHUB_OUTPUT
+          fi
       - name: debug
         run: |
           echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID }}
