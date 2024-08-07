@@ -512,6 +512,13 @@ jobs:
               inputs: {}
             })
             console.log(result)
+            const result00 = await github.rest.actions.listWorkflowRuns({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              workflow_id: 'start-standalone-mo.yaml',
+              status: 'in_progress'
+            })
+            console.log(result00.data.workflow_runs)
             const result0 = await github.rest.actions.listWorkflowRuns({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
@@ -567,6 +574,7 @@ jobs:
       - name: test
         id: get-id
         run: |
+          set -x
           backup_logs=$(curl ${{ steps.backup.outputs.result }})
           backup_bucket=$(grep "shell args" <<< "$backup_logs" | awk '{print $7}')
           backup_bucket_path=$(grep "shell args" <<< "$backup_logs" | awk '{print $8}')
