@@ -551,8 +551,7 @@ jobs:
                                     job_id: success_run_jobs.data.jobs[0].id
                                 });
                                 console.log(success_run_job_log.url);
-                                // return success_run_job_log.url;
-                                return '';
+                                return success_run_job_log.url;
                             } else {
                                 console.error('Found no successful run jobs.');
                             }
