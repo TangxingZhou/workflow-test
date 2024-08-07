@@ -516,7 +516,7 @@ jobs:
                 return new Promise((resolve) => {
                   setTimeout(() => {
                     resolve('resolved');
-                  }, 5000);
+                  }, 10000);
                 });
             }
             async function asyncCall() {
