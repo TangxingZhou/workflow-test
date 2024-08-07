@@ -499,6 +499,7 @@ jobs:
     steps:
       - name: Backup Data for Restore
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        if: false
         id: backup
         uses: actions/github-script@v7
         with:
@@ -512,6 +513,10 @@ jobs:
               inputs: {}
             })
             console.log(result)
+            if ( result.status !== 204 ) {
+                console.error('Failed to run workflow job matrixorigin/gitops/.github/workflows/aliyun-mo-incremental-backup.yaml@main.');
+                return '';
+            }
             function delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
@@ -569,12 +574,27 @@ jobs:
             }
       - name: Get
         # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
-        if: false
+        # if: false
         id: get
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'TangxingZhou',
+              repo: 'workflow-test',
+              workflow_id: 'start-standalone-mo.yaml',
+              ref: 'main',
+              inputs: {}
+            })
+            console.log(result)
+            if ( result.status !== 204 ) {
+                console.error('Failed to run workflow job matrixorigin/gitops/.github/workflows/aliyun-mo-incremental-backup.yaml@main.');
+                return '';
+            } else {
+                console.error('Succeed to run workflow job matrixorigin/gitops/.github/workflows/aliyun-mo-incremental-backup.yaml@main.');
+                return '';
+            }
             const result0 = await github.rest.actions.listWorkflowRuns({
               owner: 'matrixorigin',
               repo: 'gitops',
