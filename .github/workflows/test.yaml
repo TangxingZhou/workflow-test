@@ -524,7 +524,13 @@ jobs:
               repo: 'gitops',
               workflow_id: 'aliyun-mo-incremental-backup.yaml'
             })
-            console.log(result0.data)
+            console.log(result0.data.workflow_runs[0].id)
+            const result1 = await github.rest.actions.listJobsForWorkflowRun({
+              owner: 'matrixorigin',
+              repo: 'gitops',
+              run_id: result0.data.workflow_runs[0].id
+            })
+            console.log(result1.data)
             const result = await github.rest.actions.downloadJobLogsForWorkflowRun({
               owner: 'TangxingZhou',
               repo: 'workflow-test',
