@@ -637,8 +637,11 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const { workflow_owner, workflow_repo, workflow_id, backup_latest } = process.env;
-            console.log(`Hello ${workflow_owner} ${workflow_repo} ${workflow_id} ${backup_latest}`);
+            const { BACKUP_WORKFLOW_OWNER, BACKUP_WORKFLOW_REPO, BACKUP_WORKFLOW_ID, BACKUP_LATEST } = process.env;
+            console.log(`Hello ${BACKUP_WORKFLOW_OWNER} ${BACKUP_WORKFLOW_REPO} ${BACKUP_WORKFLOW_ID} ${BACKUP_LATEST}`);
+            if (BACKUP_LATEST === 'false') {
+              console.log('World');
+            }
       - name: test
         id: get-id
         run: |
