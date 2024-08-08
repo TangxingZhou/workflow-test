@@ -577,6 +577,11 @@ jobs:
         if: false
         id: get
         uses: actions/github-script@v7
+        env:
+          BACKUP_WORKFLOW_OWNER: matrixorigin
+          BACKUP_WORKFLOW_REPO: gitops
+          BACKUP_WORKFLOW_ID: aliyun-mo-incremental-backup.yaml
+          BACKUP_LATEST: ${{ vars.BACKUP_LATEST }}
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
@@ -621,6 +626,19 @@ jobs:
             })
             console.log(result3)
             return result2.url
+      - name: TEST
+        # if: ${{ vars.UPGRADE_TEST_ACTION == 'restore' }}
+        uses: actions/github-script@v7
+        env:
+          BACKUP_WORKFLOW_OWNER: matrixorigin
+          BACKUP_WORKFLOW_REPO: gitops
+          BACKUP_WORKFLOW_ID: aliyun-mo-incremental-backup.yaml
+          BACKUP_LATEST: ${{ vars.BACKUP_LATEST }}
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const { workflow_owner, workflow_repo, workflow_id, backup_latest } = process.env;
+            console.log(`Hello ${workflow_owner} ${workflow_repo} ${workflow_id} ${backup_latest}`);
       - name: test
         id: get-id
         run: |
@@ -641,4 +659,4 @@ jobs:
           fi
       - name: debug
         run: |
-          echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_S3_BUCKET }}
+          echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_ID }}
