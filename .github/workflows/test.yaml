@@ -647,6 +647,7 @@ jobs:
         run: |
           set -x
           uname -m
+          arch
           curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x ./mc
           ./mc alias set oss http://oss-cn-hangzhou.aliyuncs.com $RESTORE_ALIYUN_AK $RESTORE_ALIYUN_SK
