@@ -670,5 +670,6 @@ jobs:
           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
       - name: debug
+        if: 1 == 1 && 1 == 2 || 2 == 2
         run: |
           echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_ID }}
