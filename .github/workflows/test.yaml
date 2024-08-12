@@ -646,6 +646,7 @@ jobs:
         id: get-id
         run: |
           set -x
+          uname -m
           if [ -z $(echo ${{ steps.backup.outputs.result }}) ]; then
             echo "BACKUP_S3_BUCKET=" >> $GITHUB_OUTPUT
             echo "BACKUP_S3_BUCKET_FILE_PATH=" >> $GITHUB_OUTPUT
