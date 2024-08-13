@@ -670,6 +670,27 @@ jobs:
           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
       - name: debug
-        if: 1 == 1 && vars.CLEAR_CLUSTER_AFTER_TESTS1 == 'true' || 2 == 1
+        if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && always()
         run: |
           echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_ID }}
+
+  test-job1:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    if: false
+    steps:
+      - name: test1
+        run: |
+          echo 123
+  test-job2:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    needs:
+      - test-job1
+    if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && always()
+    steps:
+      - name: test1
+        run: |
+          echo 456
