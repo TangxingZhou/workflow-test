@@ -689,7 +689,7 @@ jobs:
       name: qa
     needs:
       - test-job1
-    # if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && always()
+    # if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && !cancelled()
     if: ${{ github.event.run_status == 'kipped' || github.event.run_status == 'completed' }}
     steps:
       - name: test1
