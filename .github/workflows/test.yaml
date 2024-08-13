@@ -687,7 +687,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true
+    if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true }}
     needs:
       - test-job1
     steps:
