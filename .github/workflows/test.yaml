@@ -670,7 +670,7 @@ jobs:
           RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
           RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
       - name: debug
-        if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && always()
+        if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true
         run: |
           echo ${{ steps.get-id.outputs.BACKUP_S3_BUCKET }}/${{ steps.get-id.outputs.BACKUP_S3_BUCKET_FILE_PATH }}:${{ steps.get-id.outputs.BACKUP_ID || vars.BACKUP_ID }}
 
