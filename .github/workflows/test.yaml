@@ -1,6 +1,8 @@
 name: To Test
 
 on:
+  schedule:
+    - cron: '27 6 * * *'
   workflow_dispatch:
     inputs:
       restore_s3_bucket:
