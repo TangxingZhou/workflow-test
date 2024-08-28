@@ -2,6 +2,15 @@ name: To Test
 
 on:
   workflow_dispatch:
+    inputs:
+      restore_s3_bucket:
+        description: The S3 bucket to restore
+        required: false
+        type: string
+      restore_s3_bucket_file_path:
+        description: The S3 bucket path to restore
+        required: false
+        type: string
 jobs:
   # restore:
   #   runs-on: ubuntu-latest
@@ -697,3 +706,26 @@ jobs:
           echo ${{ vars.UPGRADE_TEST_ACTION }}
           echo ${{ vars.CLEAR_CLUSTER_AFTER_TESTS }}
           echo 456
+  test-job3:
+    runs-on: ubuntu-latest
+    environment:
+      name: qa
+    steps:
+      - name: set
+        run: |
+          echo "restore-bucket-paths=restore-freetier-01-20240820131038" >> $GITHUB_OUTPUT
+          if [ -z $(echo ${{ inputs.restore_s3_bucket }}) ]; then
+            echo src/tests
+          else
+            echo $(echo ${{ inputs.restore_s3_bucket }})
+          fi
+  # test-job4:
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: qa
+  #   steps:
+  #     - name: get
+  #       run: |
+  #         echo "restore-bucket-paths=restore-freetier-01-20240820131038" >> $GITHUB_OUTPUT
+  #       env:
+  #         RESTORE_S3_BUCKET_FILE_PATH: ${{ inputs.restore_s3_bucket_file_path || needs.restore.outputs.restore-bucket-paths || vars.RESTORE_S3_BUCKET_FILE_PATH }}
