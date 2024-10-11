@@ -4,6 +4,14 @@ on:
 #     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
+      env:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - qa
+          - dev
+        default: qa
       backup_s3_bucket:
         description: Backups to be made into the S3 bucket
         required: false
@@ -42,7 +50,7 @@ env:
   management_platform_url: ${{ secrets.MANAGEMENT_PLATFORM_URL }}
   management_platform_user: ${{ secrets.MANAGEMENT_PLATFORM_USER }}
   management_platform_password: ${{ secrets.MANAGEMENT_PLATFORM_PASSWORD }}
-  env: qa
+  env: ${{ inputs.env || 'qa' }}
   provider: aliyun
   region: cn-hangzhou
   k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
@@ -51,7 +59,7 @@ jobs:
     restore-data:
       runs-on: ubuntu-latest
       environment:
-        name: qa
+        name: ${{ inputs.env || 'qa' }}
   
       steps:
         - name: Checkout
