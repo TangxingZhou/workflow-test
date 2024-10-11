@@ -3,6 +3,14 @@ name: Run MO Tests
 on:
   workflow_dispatch:
     inputs:
+      env:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - qa
+          - dev
+        default: qa
       testName:
         description: What tests to perform
         type: choice
@@ -49,7 +57,7 @@ jobs:
   run-sysbench-tests:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     if: inputs.testName == 'all' || inputs.testName == 'sysbench'
     steps:
       - name: Checkout mo-load
@@ -121,7 +129,7 @@ jobs:
   run-tpcc-tests:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     if: inputs.testName == 'all' || inputs.testName == 'tpcc'
     steps:
       - name: Checkout mo-load-data
@@ -199,7 +207,7 @@ jobs:
   run-tpch-tests:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     if: inputs.testName == 'all' || inputs.testName == 'tpch'
     steps:
       - name: Checkout mo-tpch
@@ -254,7 +262,7 @@ jobs:
   run-bigdata-tests:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     timeout-minutes: 120
     if: inputs.testName == 'bigdata'
     steps:
@@ -345,7 +353,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 70
     environment:
-      name: dev
+      name: ${{ inputs.env || 'qa' }}
     steps:
       - name: Checkout mocloud-tester
         uses: actions/checkout@v4
@@ -418,7 +426,7 @@ jobs:
   run-customer-tests:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     timeout-minutes: 120
     if: inputs.testName == 'customer'
     steps:
