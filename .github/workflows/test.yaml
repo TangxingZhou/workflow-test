@@ -694,6 +694,7 @@ jobs:
       - name: test1
         run: |
           echo 123
+          echo ${{ vars.RESTORE_S3_BUCKET_FILE_PATH || 'dddd' }}
   test-job2:
     runs-on: ubuntu-latest
     environment:
