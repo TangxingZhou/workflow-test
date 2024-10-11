@@ -5,6 +5,13 @@ on:
   #   - cron: '40 6 * * *'
   workflow_dispatch:
     inputs:
+      env:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - qa
+          - dev
       restore_s3_bucket:
         description: The S3 bucket to restore
         required: false
@@ -350,7 +357,7 @@ jobs:
   build-mo-image:
     runs-on: ubuntu-latest
     environment:
-      name: qa
+      name: ${{ inputs.env || 'qa' }}
     if: false
     outputs:
       image-repo: ${{ steps.prep.outputs.upgrade-image-repository }}
