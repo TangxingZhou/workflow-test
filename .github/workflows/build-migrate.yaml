@@ -1,0 +1,171 @@
+name:  Build mo-migrate
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      organization:
+        description: The organization of project
+        required: true
+        type: string
+        default: Wenbin1002
+      
+      project:
+        description: The project of image to be built
+        required: true
+        type: string
+        default: matrixone
+
+      ref:
+        description: The project ref of image to be built
+        required: true
+        type: string
+        default: migrate
+
+      platform:
+        description: The path of Dockerfile
+        type: choice
+        required: true
+        default: linux/amd64
+        options:
+          - linux/amd64
+          - linux/arm64
+          - linux/amd64,linux/arm64
+
+      repository:
+        description: Repository of image
+        required: false
+        type: string
+        default: mo-migrate
+
+      registry:
+        description: Image registry
+        required: true
+        type: string
+        default: registry.cn-hangzhou.aliyuncs.com
+      
+      namespace:
+        description: Namespace of image registry
+        required: true
+        type: string
+        default: mocloud
+      
+      tag:
+        description: The tag of image to be built
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Set Up QEMU
+        if: ${{ inputs.project != 'none' }}
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set Up Docker Buildx
+        # if: ${{ inputs.project != 'none' }}
+        id: buildx
+        uses:  docker/setup-buildx-action@v3
+
+      - name: Login to Hangzhou Alicloud Container Registry
+        if: ${{ inputs.project != 'none' || inputs.image }}
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.organization }}/${{ inputs.project }}
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Prepare
+        id: prep
+        run: |
+          git status
+          # ACR_DOCKER_IMAGE="registry.cn-hangzhou.aliyuncs.com/mocloud/${GITHUB_REPOSITORY#*/}"
+          if [ -z $DOCKER_REPOSITORY ]; then
+            repo_name=$(git remote get-url origin | xargs basename -s .git)
+          else
+            repo_name=$DOCKER_REPOSITORY
+          fi
+          ACR_DOCKER_IMAGE="$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name"
+          # VERSION=${GITHUB_SHA::8}
+          echo ${GITHUB_SHA}
+          if [ -z $DOCKER_IMAGE_TAG ]; then
+            repo_tag=$(git rev-parse --short HEAD)
+            repo_tag=${repo_tag::7}
+          else
+            repo_tag=$DOCKER_IMAGE_TAG
+          fi
+          TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          cat > Dockerfile << EOF
+          FROM golang:1.23.0-bookworm as builder
+
+          # goproxy
+          ARG GOPROXY="https://proxy.golang.org,direct"
+          RUN go env -w GOPROXY=\${GOPROXY}
+
+          RUN mkdir -p /go/src/github.com/matrixorigin/matrixone
+
+          WORKDIR /go/src/github.com/matrixorigin/matrixone
+
+          COPY go.mod go.mod
+          COPY go.sum go.sum
+          RUN go mod download
+
+          COPY . .
+
+          RUN make mo-migrate
+
+          FROM ubuntu:22.04
+
+          COPY --from=builder /go/src/github.com/matrixorigin/matrixone/mo-migrate /mo-migrate
+          COPY --from=builder /go/src/github.com/matrixorigin/matrixone/etc /etc
+
+          RUN apt-get update && apt-get install -y \
+            dnsutils \
+            curl \
+            git \
+            && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+          WORKDIR /
+
+          EXPOSE 6001
+          EOF
+        env:
+          DOCKER_REPOSITORY: ${{ inputs.repository }}
+          DOCKER_REGISTRY: ${{ inputs.registry }}
+          DOCKER_NAMESPACE: ${{ inputs.namespace }}
+          DOCKER_IMAGE_TAG: ${{ inputs.tag }}
+
+      - name: Get Image Info
+        if: ${{ inputs.project != 'none' }}
+        run: |
+          echo image-tags: ${{ steps.prep.outputs.tags }}
+      
+      - name: Build and Push
+        if: ${{ inputs.project != 'none' }}
+        uses: docker/build-push-action@v5
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Dockerfile
+          platforms: ${{ inputs.platform }}
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
+    
