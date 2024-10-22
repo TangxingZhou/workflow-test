@@ -80,6 +80,7 @@ jobs:
 
       - name: Run Sysbench Tests
         run: |
+          set -x
           cd $GITHUB_WORKSPACE/mo-load
           echo "$(date '+%Y-%m-%d %T') - Create database '$DATABASE' for sysbench tests"
           mysql \
