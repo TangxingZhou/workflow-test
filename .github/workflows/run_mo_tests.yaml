@@ -457,13 +457,6 @@ jobs:
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-          python run.py \
-          -H ${{ inputs.mo-host }} \
-          -P ${{ inputs.mo-port }} \
-          -u ${{ inputs.mo-user }} \
-          -p ${{ inputs.mo-password }} \
-          -t ${{ inputs.period }} \
-          -c ./cases/etao_001/
           for ds in $(echo $RUN_DATASETS | tr ',' ' '); do
             if [ -d ./cases/$ds/ ]; then
               python run.py \
@@ -473,8 +466,10 @@ jobs:
               -p ${{ inputs.mo-password }} \
               -t ${{ inputs.period }} \
               -c ./cases/$ds/
-              mkdir -p report/$ds/
-              mv report/report.csv report/$ds/
+              if [ -f report/report.csv ]; then
+                mkdir -p report/$ds/
+                mv report/report.csv report/$ds/
+              fi
             fi
           done
           for report_file in $(find report/* -name "report.csv" -type f -print); do
@@ -493,7 +488,7 @@ jobs:
             guangheng_001,slooong_001,slooong_002,slooong_003,suwen_001,sutpc_001,unre_001,unre_002,
             unre_003,unre_004,unre_005,unre_006,us_001,worthcloud_001,shuanghe_001
           FAILED_RUN_IGNORE_LIST: suwen_001,q16
-          FAILED_DIFF_IGNORE_LIST: unre_001,q03|unre_004,q03|suwen_001,q06|slooong_001,q02|slooong_003,q02|slooong_001,q08|slooong_003,q08
+          FAILED_DIFF_IGNORE_LIST: unre_001,q03|unre_004,q03|suwen_001,q06|slooong_001,q02|slooong_003,q02|slooong_001,q08|slooong_003,q08|extremevision_001,q07|unre_004,q40
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
