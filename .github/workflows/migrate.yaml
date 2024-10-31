@@ -1,0 +1,106 @@
+name: migrate mo-2.0
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "environment"
+        default: dev
+        required: true
+        type: choice
+        options:
+          - qa
+          - dev
+      mo-cluster:
+        description: 'mo cluster to migrate'
+        default: restore-freetier-01
+        required: true
+        type: string
+      upgrade-version:
+        description: 'version to upgrade'
+        required: true
+        type: string
+      ckp-version:
+        description: 'version of MO CKP'
+        default: v1.2.3-7944ef014-2024-10-17
+        required: true
+        type: string
+      migrate-tag:
+        description: 'migrate image tag'
+        default: '3288fb5'
+        required: true
+        type: string
+      bucket:
+        description: 'oss bucket for mo data'
+        default: moc-backup-test
+        required: true
+        type: string
+      filepath:
+        description: "filepath in bucket"
+        required: true
+        type: string
+      table-id:
+        description: 'table id of system.rawlog'
+        required: true
+        type: string
+        default: '272457'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.env || 'qa' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mocloud-tester
+          ref: qa-txzhou
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set Up Python3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+  
+      - name: Install Python Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+  
+      - name: Backup MO Data
+        run: |
+          cd $GITHUB_WORKSPACE
+          export PYTHONPATH=$(pwd)
+          python src/upgrade/migrate-2.0.py \
+          --cluster-name ${{ inputs.mo-cluster }} \
+          --upgrade-version ${{ inputs.upgrade-version }} \
+          --ckp-version ${{ inputs.ckp-version }} \
+          --migrate-tag ${{ inputs.migrate-tag }} \
+          --bucket ${{ inputs.bucket }} \
+          --bucket-path ${{ inputs.filepath }} \
+          --tid ${{ inputs.table-id }}
+        env:
+          email: ${{ vars.UPGRADE_TEST_EMAIL }}
+          password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+          database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
+          management_platform_url: ${{ secrets.MANAGEMENT_PLATFORM_URL }}
+          management_platform_user: ${{ secrets.MANAGEMENT_PLATFORM_USER }}
+          management_platform_password: ${{ secrets.MANAGEMENT_PLATFORM_PASSWORD }}
+          env: ${{ inputs.env || 'qa' }}
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migrate-test-logs
+          path: |
+            ${{ github.workspace }}/moc-migrate-test.log
+          retention-days: 7
