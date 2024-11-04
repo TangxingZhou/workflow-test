@@ -65,6 +65,11 @@ jobs:
         run: |
           cp migrate-2.0.py $GITHUB_WORKSPACE/mocloud-tester/src/upgrade/
           cd $GITHUB_WORKSPACE/mocloud-tester
+          if [ $(uname -m) = 'x86_64' ]; then
+            curl -O https://dl.minio.org.cn/client/mc/release/linux-amd64/mc
+          fi
+          chmod +x ./mc
+          ./mc alias set oss http://oss-cn-hangzhou.aliyuncs.com $RESTORE_ALIYUN_AK $RESTORE_ALIYUN_SK
           export PYTHONPATH=$(pwd)
           python src/upgrade/migrate-2.0.py \
           --cluster-name ${{ inputs.mo-cluster }} \
@@ -83,6 +88,8 @@ jobs:
           region: cn-hangzhou
           k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
           k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
+          RESTORE_ALIYUN_AK: ${{ secrets.RESTORE_ALIYUN_AK }}
+          RESTORE_ALIYUN_SK: ${{ secrets.RESTORE_ALIYUN_SK }}
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
