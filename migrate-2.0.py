@@ -3,7 +3,7 @@ import time
 import yaml
 import argparse
 import logging
-import threading
+import subprocess
 from jinja2 import Template
 from functools import reduce
 from kubernetes.client import ApiException
@@ -255,10 +255,10 @@ def make_migrate(_unit_client: K8sClient, args: argparse.Namespace):
                  _unit_client, f'{args.migrate_ns}')
 
 
-def wait_for_cn_offload(_unit_client: K8sClient, args: argparse.Namespace, timeout=PODS_BECOME_RUNNING_TIMEOUT, interval=5):
+def wait_for_cn_offload(_unit_client: K8sClient, args: argparse.Namespace, label_selector='matrixorigin.io/component=CNSet', timeout=PODS_BECOME_RUNNING_TIMEOUT, interval=5):
     start = time.time()
     while time.time() - start < timeout if timeout > 0 else True:
-        cn_pods = _unit_client.v1_api.list_namespaced_pod(args.cluster_name, label_selector='matrixorigin.io/component=CNSet')
+        cn_pods = _unit_client.v1_api.list_namespaced_pod(args.cluster_name, label_selector=label_selector)
         if len(cn_pods.items) == 0:
             return
         else:
@@ -268,34 +268,30 @@ def wait_for_cn_offload(_unit_client: K8sClient, args: argparse.Namespace, timeo
                         _unit_client.v1_api.delete_namespaced_pod(pod.metadata.name, args.cluster_name)
                     except ApiException as e:
                         logger.debug(e.body)
-        logger.debug(f"Wait for CN pods offload.")
+        logger.debug(f"Wait for CN pods offload with labels: {label_selector}.")
         time.sleep(interval)
-    msg = f"Timeout to await CN pods offload."
+    msg = f"Timeout to await CN pods offload with labels: {label_selector}."
     raise Exception(msg)
 
 
-def offload_cn_and_proxy(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace):
-    logger.info(f"Start to offload CN and Proxy in cluster of {args.cluster_name}.")
-    root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(args.cluster_name, _preload_content=False)
+def wait_for_ob_idle(_unit_client: K8sClient, args: argparse.Namespace, timeout=10 * 60, interval=10):
+    root_cluster = _unit_client.core_matrixone_cloud_v1alpha1_api.read_cluster(args.cluster_name,_preload_content=False)
     assert root_cluster[1] == 200, f"Failed to read root cluster '{args.cluster_name}'."
-    root_cluster[0]['spec']['cnSets'][0]['replicas'] = 0
-    root_cluster[0]['spec']['cnSets'][0]['scalingConfig']['maxReplicas'] = 0
-    root_cluster[0]['spec']['cnSets'][0]['scalingConfig']['minReplicas'] = 0
-    root_cluster[0]['spec']['cnPools'][0]['poolStrategy']['scaleStrategy']['maxIdle'] = 0
-    body = {
-        'spec': {
-            'cnPools': root_cluster[0]['spec']['cnPools'],
-            'endpoint': {
-                'proxySpec': {
-                    'replicas': 0,
-                }
-            },
-            'cnSets': root_cluster[0]['spec']['cnSets']
-        }
-    }
-    patch_root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.patch_cluster(
-        args.cluster_name, body)
-    assert patch_root_cluster[1] == 200, f"Failed to patch root cluster '{args.cluster_name}'."
+    bucket, bucket_path = root_cluster[0]['spec']['managed']['objectStorage']['path'].split('/')
+    # ret = subprocess.run(['mc', 'ls', '-r', f'oss/{bucket}/{bucket_path}/etl'], shell=False, capture_output=True, text=True)
+    start = time.time()
+    while time.time() - start < timeout if timeout > 0 else True:
+        ret = subprocess.run(f'./mc ls -r oss/{bucket}/{bucket_path}/etl | grep "statement_info/.*csv"', shell=True,
+                             capture_output=True, text=True)
+        if ret.returncode == 1:
+            return
+        logger.debug(f"Wait for OB to be idle.")
+        time.sleep(interval)
+    msg = f"Timeout to await OB to be idle."
+    raise Exception(msg)
+
+def offload_ob_cn(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace):
+    wait_for_ob_idle(_unit_client, args)
     ob_sys_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(f'{args.cluster_name}-ob-sys', _preload_content=False)
     if ob_sys_cluster[1] == 404:
         logger.info(f"Cluster '{args.cluster_name}-ob-sys' is not found.")
@@ -310,8 +306,32 @@ def offload_cn_and_proxy(_controller_client: K8sClient, _unit_client: K8sClient,
         patch_ob_sys_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.patch_cluster(
             f'{args.cluster_name}-ob-sys', ob_sys_body)
         assert patch_ob_sys_cluster[1] == 200, f"Failed to patch cluster '{args.cluster_name}-ob-sys'."
+        wait_for_cn_offload(_unit_client, args, f'matrixorigin.io/component=CNSet,matrixorigin.io/owner={args.cluster_name}-ob-sys')
     else:
         raise Exception(f"Failed to read cluster '{args.cluster_name}-ob-sys'.")
+
+
+def offload_cn_and_proxy(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace):
+    logger.info(f"Start to offload CN and Proxy in cluster of {args.cluster_name}.")
+    root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(args.cluster_name, _preload_content=False)
+    assert root_cluster[1] == 200, f"Failed to read root cluster '{args.cluster_name}'."
+    root_cluster[0]['spec']['cnSets'][0]['replicas'] = 0
+    root_cluster[0]['spec']['cnSets'][0]['scalingConfig']['maxReplicas'] = 0
+    root_cluster[0]['spec']['cnSets'][0]['scalingConfig']['minReplicas'] = 0
+    root_cluster[0]['spec']['cnPools'][0]['poolStrategy']['scaleStrategy']['maxIdle'] = 0
+    body = {
+        'spec': {
+            'cnPools': root_cluster[0]['spec']['cnPools'],
+            # 'endpoint': {
+            #     'proxySpec': {
+            #         'replicas': 0,
+            #     }
+            # },
+            'cnSets': root_cluster[0]['spec']['cnSets']
+        }
+    }
+    patch_root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.patch_cluster(args.cluster_name, body)
+    assert patch_root_cluster[1] == 200, f"Failed to patch root cluster '{args.cluster_name}'."
     sys_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(f'{args.cluster_name}-sys', _preload_content=False)
     if sys_cluster[1] == 404:
         logger.info(f"Cluster '{args.cluster_name}-sys' is not found.")
@@ -328,14 +348,30 @@ def offload_cn_and_proxy(_controller_client: K8sClient, _unit_client: K8sClient,
         assert patch_sys_cluster[1] == 200, f"Failed to patch cluster '{args.cluster_name}-sys'."
     else:
         raise Exception(f"Failed to read cluster '{args.cluster_name}-sys'.")
+    wait_for_cn_offload(_unit_client, args, f'matrixorigin.io/component=CNSet,matrixorigin.io/owner!={args.cluster_name}-ob-sys')
+    body = {
+        'spec': {
+            'endpoint': {
+                'proxySpec': {
+                    'replicas': 0,
+                }
+            }
+        }
+    }
+    patch_root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.patch_cluster(args.cluster_name, body)
+    assert patch_root_cluster[1] == 200, f"Failed to patch root cluster '{args.cluster_name}'."
+    wait_for(lambda c, n, s: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n, label_selector=s).items]) == 0,
+             5, PODS_BECOME_RUNNING_TIMEOUT,
+             _unit_client, f'{args.cluster_name}', 'matrixorigin.io/component=ProxySet')
+    offload_ob_cn(_controller_client, _unit_client, args)
     # 等待CN和Proxy下线
     # wait_for(lambda c, n, s: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n, label_selector=s).items]) == 0,
     #          5, PODS_BECOME_RUNNING_TIMEOUT,
     #          _unit_client, f'{args.cluster_name}', 'matrixorigin.io/component=CNSet')
-    wait_for_cn_offload(_unit_client, args)
-    wait_for(lambda c, n, s: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n, label_selector=s).items]) == 0,
-             5, PODS_BECOME_RUNNING_TIMEOUT,
-             _unit_client, f'{args.cluster_name}', 'matrixorigin.io/component=ProxySet')
+    # wait_for_cn_offload(_unit_client, args)
+    # wait_for(lambda c, n, s: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n, label_selector=s).items]) == 0,
+    #          5, PODS_BECOME_RUNNING_TIMEOUT,
+    #          _unit_client, f'{args.cluster_name}', 'matrixorigin.io/component=ProxySet')
 
 
 def offload_dn_and_log(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace):
