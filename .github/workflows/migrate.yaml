@@ -1,4 +1,4 @@
-name: migrate mo-2.0
+name: Migrate mo-2.0
 on:
   workflow_dispatch:
     inputs:
@@ -61,7 +61,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
   
-      - name: Backup MO Data
+      - name: Migrate & Upgrade MO
         run: |
           cp migrate-2.0.py $GITHUB_WORKSPACE/mocloud-tester/src/upgrade/
           cd $GITHUB_WORKSPACE/mocloud-tester

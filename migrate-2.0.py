@@ -6,6 +6,7 @@ import logging
 import threading
 from jinja2 import Template
 from functools import reduce
+from kubernetes.client import ApiException
 from kubernetes.watch import watch
 from src.tests.conftest import init_k8s_client
 from src.cloud.k8s.client import K8sClient
@@ -232,16 +233,16 @@ def config_migrate(_unit_client: K8sClient, args: argparse.Namespace):
         assert migrate_cm[1] == 201, f"Failed to create configmap {body['metadata']['name']}."
 
 def make_migrate(_unit_client: K8sClient, args: argparse.Namespace):
-    # try:
-    #     start_migrate_job(_unit_client, args, 'backup')
-    # except Exception as e:
-    #     logger.error(e)
-    #     return False
-    # finally:
-    #     _unit_client.v1_api.delete_namespaced_pod(args.migrate_job, args.migrate_ns)
-    #     wait_for(lambda c, n: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n).items]) == 0,
-    #              5, PODS_BECOME_RUNNING_TIMEOUT,
-    #              _unit_client, f'{args.migrate_ns}')
+    try:
+        start_migrate_job(_unit_client, args, 'backup')
+    except Exception as e:
+        logger.error(e)
+        return False
+    finally:
+        _unit_client.v1_api.delete_namespaced_pod(args.migrate_job, args.migrate_ns)
+        wait_for(lambda c, n: len([p.metadata.name for p in c.v1_api.list_namespaced_pod(n).items]) == 0,
+                 5, PODS_BECOME_RUNNING_TIMEOUT,
+                 _unit_client, f'{args.migrate_ns}')
     try:
         start_migrate_job(_unit_client, args, 'replay')
     except Exception as e:
@@ -263,7 +264,10 @@ def wait_for_cn_offload(_unit_client: K8sClient, args: argparse.Namespace, timeo
         else:
             for pod in cn_pods.items:
                 if pod.metadata.labels.get('pool.matrixorigin.io/phase') == 'Draining':
-                    _unit_client.v1_api.delete_namespaced_pod(pod.metadata.name, args.cluster_name)
+                    try:
+                        _unit_client.v1_api.delete_namespaced_pod(pod.metadata.name, args.cluster_name)
+                    except ApiException as e:
+                        logger.debug(e.body)
         logger.debug(f"Wait for CN pods offload.")
         time.sleep(interval)
     msg = f"Timeout to await CN pods offload."
