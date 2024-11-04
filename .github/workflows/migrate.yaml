@@ -29,20 +29,6 @@ on:
         default: '3288fb5'
         required: true
         type: string
-      bucket:
-        description: 'oss bucket for mo data'
-        default: moc-backup-test
-        required: true
-        type: string
-      filepath:
-        description: "filepath in bucket"
-        required: true
-        type: string
-      table-id:
-        description: 'table id of system.rawlog'
-        required: true
-        type: string
-        default: '272457'
 
 jobs:
   migrate:
@@ -55,8 +41,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Checkout mocloud-tester
+        uses: actions/checkout@v4
         with:
           repository: matrixorigin/mocloud-tester
+          path: mocloud-tester
           ref: qa-txzhou
           token: ${{ secrets.GH_PAT }}
 
@@ -67,22 +57,20 @@ jobs:
   
       - name: Install Python Dependencies
         run: |
-          cd $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/mocloud-tester
           python -m pip install --upgrade pip
           pip install -r requirements.txt
   
       - name: Backup MO Data
         run: |
-          cd $GITHUB_WORKSPACE
+          cp migrate-2.0.py $GITHUB_WORKSPACE/mocloud-tester/src/upgrade/
+          cd $GITHUB_WORKSPACE/mocloud-tester
           export PYTHONPATH=$(pwd)
           python src/upgrade/migrate-2.0.py \
           --cluster-name ${{ inputs.mo-cluster }} \
           --upgrade-version ${{ inputs.upgrade-version }} \
           --ckp-version ${{ inputs.ckp-version }} \
-          --migrate-tag ${{ inputs.migrate-tag }} \
-          --bucket ${{ inputs.bucket }} \
-          --bucket-path ${{ inputs.filepath }} \
-          --tid ${{ inputs.table-id }}
+          --migrate-tag ${{ inputs.migrate-tag }}
         env:
           email: ${{ vars.UPGRADE_TEST_EMAIL }}
           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
