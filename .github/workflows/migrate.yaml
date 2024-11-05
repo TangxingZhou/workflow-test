@@ -97,5 +97,5 @@ jobs:
         with:
           name: migrate-test-logs
           path: |
-            ${{ github.workspace }}/moc-migrate-test.log
+            ${{ github.workspace }}/mocloud-tester/moc-migrate-test.log
           retention-days: 7
