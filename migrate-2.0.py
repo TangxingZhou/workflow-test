@@ -313,7 +313,7 @@ def offload_ob_cn(_controller_client: K8sClient, _unit_client: K8sClient, args: 
             f'{args.cluster_name}-ob-sys', ob_sys_body)
         assert patch_ob_sys_cluster[1] == 200, f"Failed to patch cluster '{args.cluster_name}-ob-sys'."
         logger.info(f'Await CN of ob-sys to offload.')
-        wait_for_cn_offload(_unit_client, args, f'matrixorigin.io/component=CNSet,matrixorigin.io/owner={args.cluster_name}-ob-sys')
+        wait_for_cn_offload(_unit_client, args, f'matrixorigin.io/component=CNSet')
     else:
         raise Exception(f"Failed to read cluster '{args.cluster_name}-ob-sys'.")
 
@@ -513,8 +513,8 @@ if __name__ == '__main__':
         # cluster是root/main，则状态必须是'Active'
         if _cluster.is_root:
             if _cluster.is_active():
-                setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
-                offload_cn_and_proxy(controller_client, unit_client, parser_args)
+                # setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
+                # offload_cn_and_proxy(controller_client, unit_client, parser_args)
                 make_ckp(controller_client, unit_client, parser_args, 'migration checkpointed')
                 offload_dn_and_log(controller_client, unit_client, parser_args)
                 config_migrate(unit_client, parser_args)
