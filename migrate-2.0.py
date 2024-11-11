@@ -420,6 +420,7 @@ def upgrade(_controller_client: K8sClient, _unit_client: K8sClient, args: argpar
     root_cluster[0]['spec']['dnSets'][0]['replicas'] = 1
     body = {
         'spec': {
+            'operatorVersion': 'v1.3.0',
             'upgradeStrategy': {
                 'upgradeSchema': True,
                 'components': [
