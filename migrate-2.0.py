@@ -266,7 +266,7 @@ def wait_for_cn_offload(_unit_client: K8sClient, args: argparse.Namespace, label
             return
         else:
             for pod in cn_pods.items:
-                if pod.metadata.labels.get('pool.matrixorigin.io/phase') == 'Draining':
+                if pod.metadata.labels.get('pool.matrixorigin.io/phase') == 'Draining' and pod.metadata.deletion_timestamp is None:
                     try:
                         logger.info(f"Delete pod {pod.metadata.name} in phase of 'Draining'.")
                         _unit_client.v1_api.delete_namespaced_pod(pod.metadata.name, args.cluster_name)
