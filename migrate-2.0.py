@@ -525,9 +525,8 @@ if __name__ == '__main__':
         # cluster是root/main，则状态必须是'Active'
         if _cluster.is_root:
             if _cluster.is_active():
-                # setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
-                # offload_cn_and_proxy(controller_client, unit_client, parser_args)
-                offload_ob_cn(controller_client, unit_client, parser_args)
+                setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
+                offload_cn_and_proxy(controller_client, unit_client, parser_args)
                 make_ckp(controller_client, unit_client, parser_args, 'migration checkpointed')
                 offload_dn_and_log(controller_client, unit_client, parser_args)
                 config_migrate(unit_client, parser_args)
