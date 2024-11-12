@@ -432,26 +432,26 @@ def upgrade(_controller_client: K8sClient, _unit_client: K8sClient, args: argpar
     body = {
         'spec': {
             'operatorVersion': 'v1.3.0',
-            'upgradeStrategy': {
-                'upgradeSchema': True,
-                'components': [
-                    {
-                        'name': 'proxy',
-                        'needs': ['cn']
-                    },
-                    {
-                        'name': 'cn',
-                        'needs': ['dn']
-                    },
-                    {
-                        'name': 'dn',
-                        'needs': ['log']
-                    },
-                    {
-                        'name': 'log'
-                    }
-                ]
-            },
+            # 'upgradeStrategy': {
+            #     'upgradeSchema': True,
+            #     'components': [
+            #         {
+            #             'name': 'proxy',
+            #             'needs': ['cn']
+            #         },
+            #         {
+            #             'name': 'cn',
+            #             'needs': ['dn']
+            #         },
+            #         {
+            #             'name': 'dn',
+            #             'needs': ['log']
+            #         },
+            #         {
+            #             'name': 'log'
+            #         }
+            #     ]
+            # },
             'cnPools': root_cluster[0]['spec']['cnPools'],
             'endpoint': {
                 'proxySpec': {
