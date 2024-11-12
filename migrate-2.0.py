@@ -296,6 +296,17 @@ def wait_for_ob_idle(_unit_client: K8sClient, args: argparse.Namespace, timeout=
 
 def offload_ob_cn(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace):
     logger.info(f'Await OB CN to be idle.')
+    ob_sys_pod_body = {
+        'metadata': {
+            'annotations': {
+                'matrixone.cloud/resource-range': '{"min":{"cpu":"4","memory":"12Gi"},"max":{"cpu":"15","memory":"120Gi"}}'
+            }
+        }
+    }
+    for p in _unit_client.v1_api.list_namespaced_pod(args.cluster_name, label_selector=f'matrixorigin.io/owner={args.cluster_name}-ob-sys').items:
+        logger.info(f'Reset resources range for ob-sys CN pod: {p.metadata.name}.')
+        patch_ob_sys_pod = _unit_client.v1_api.patch_namespaced_pod(p.metadata.name, args.cluster_name, ob_sys_pod_body)
+        assert patch_ob_sys_pod[1] == 200, f"Failed to patch ob-sys CN pod: {p.metadata.name}."
     wait_for_ob_idle(_unit_client, args)
     ob_sys_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(f'{args.cluster_name}-ob-sys', _preload_content=False)
     if ob_sys_cluster[1] == 404:
@@ -514,8 +525,9 @@ if __name__ == '__main__':
         # cluster是root/main，则状态必须是'Active'
         if _cluster.is_root:
             if _cluster.is_active():
-                setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
-                offload_cn_and_proxy(controller_client, unit_client, parser_args)
+                # setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
+                # offload_cn_and_proxy(controller_client, unit_client, parser_args)
+                offload_ob_cn(controller_client, unit_client, parser_args)
                 make_ckp(controller_client, unit_client, parser_args, 'migration checkpointed')
                 offload_dn_and_log(controller_client, unit_client, parser_args)
                 config_migrate(unit_client, parser_args)
