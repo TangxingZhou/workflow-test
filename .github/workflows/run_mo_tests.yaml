@@ -322,30 +322,45 @@ jobs:
           -p ${{ inputs.mo-password }} \
           -c ./cases/big_data_test/01_CREATE_TABLE
           echo "$(date '+%Y-%m-%d %T') - Start to Load Data"
+          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+            sql_file=01_load_basic_for_${{ inputs.data-size }}.sql
+          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+            sql_file=02_load_basic_for_${{ inputs.data-size }}.sql
+          fi
           python run.py \
           -H ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_${{ inputs.data-size }}.sql
+          -c ./cases/big_data_test/02_LOAD_DATA/$sql_file
+          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+            sql_file=11_table_basic_for_alter_${{ inputs.data-size }}.sql
+          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+            sql_file=12_table_basic_for_alter_${{ inputs.data-size }}.sql
+          fi
           python run.py \
           -H ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_${{ inputs.data-size }}.sql
+          -c ./cases/big_data_test/03_INSERT_SELECT/$sql_file
 
       - name: Write Test
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
+          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+            sql_file=15_write_ddl_${{ inputs.data-size }}.sql
+          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+            sql_file=16_write_ddl_${{ inputs.data-size }}.sql
+          fi
           python run.py \
           -H ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -t ${{ inputs.period }} \
-          -c ./cases/big_data_test/04_QUERIES/15_write_ddl_${{ inputs.data-size }}.sql
+          -c ./cases/big_data_test/04_QUERIES/$sql_file
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
