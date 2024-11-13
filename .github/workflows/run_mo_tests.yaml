@@ -304,6 +304,8 @@ jobs:
             sql_file=01_load_basic_for_100M.sql
           elif [ ${{ inputs.data-size }} = '1B'}} ]; then
             sql_file=02_load_basic_for_1B.sql
+          else
+            sql_file=02_load_basic_for_1B.sql
           fi
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
           sed -i.bak \
