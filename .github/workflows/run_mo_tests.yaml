@@ -48,6 +48,14 @@ on:
         required: true
         type: number
         default: 5
+      data-size:
+        description: Size of data
+        type: choice
+        required: true
+        options:
+          - 100M
+          - 1B
+        default: 100M
       run-tests:
         description: Run mo tests
         required: true
@@ -290,7 +298,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Load Data 1Y
+      - name: Load Data
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
           sed -i.bak \
@@ -298,8 +306,8 @@ jobs:
           -e 's/\${ACCESS_KEY_ID}/${{ secrets.RESTORE_ALIYUN_AK }}/g' \
           -e 's/\${SECRET_ACCESS_KEY}/${{ secrets.RESTORE_ALIYUN_SK }}/g' \
           -e 's/mo-load-guangzhou-1308875761/moc-test-data/g' \
-          -e 's/mo-big-data/bigdata_1y/g' \
-          cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+          -e 's/mo-big-data/bigdata/g' \
+          cases/big_data_test/02_LOAD_DATA/01_load_basic_for_${{ inputs.data-size }}.sql
           mysql \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
@@ -313,21 +321,21 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -c ./cases/big_data_test/01_CREATE_TABLE
-          echo "$(date '+%Y-%m-%d %T') - Start to Load 1Y Data"
+          echo "$(date '+%Y-%m-%d %T') - Start to Load Data"
           python run.py \
           -H ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_100M.sql
+          -c ./cases/big_data_test/02_LOAD_DATA/01_load_basic_for_${{ inputs.data-size }}.sql
           python run.py \
           -H ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
-          -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_100M.sql
+          -c ./cases/big_data_test/03_INSERT_SELECT/11_table_basic_for_alter_${{ inputs.data-size }}.sql
 
-      - name: Write 1Y Test
+      - name: Write Test
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
@@ -337,7 +345,7 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -t ${{ inputs.period }} \
-          -c ./cases/big_data_test/04_QUERIES/15_write_ddl_100M.sql
+          -c ./cases/big_data_test/04_QUERIES/15_write_ddl_${{ inputs.data-size }}.sql
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
