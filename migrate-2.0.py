@@ -172,6 +172,36 @@ def containers_image_upgraded(_unit_client: K8sClient, namespace, expected_image
                     return False
     return True
 
+
+def cluster_pods_are_running(_controller_client: K8sClient, _unit_client: K8sClient, args: argparse.Namespace, expected_image):
+    for k, v in ROOT_CLUSTER_INIT_PODS.items():
+        if k == 'local-service':
+            continue
+        namespace = args.cluster_name
+        pods = _unit_client.v1_api.list_namespaced_pod(
+            namespace, label_selector=v['label_selector'].format(cluster_name=args.cluster_name)).items
+        logger.debug(f"List {namespace}/pods with labels "
+                     f"'{v['label_selector'].format(cluster_name=args.cluster_name)}':\n"
+                     f"{', '.join([p.metadata.name for p in pods])}")
+        if len(pods) != v['replicas']:
+            logger.debug(f"Expected number of {namespace}/pods with labels "
+                         f"'{v['label_selector'].format(cluster_name=args.cluster_name)}' is {v['replicas']}, not {len(pods)}.")
+            return False
+        for pod in pods:
+            if pod.status.phase != 'Running':
+                logger.debug(f"Pod '{namespace}/{pod.metadata.name}' is in phase of '{pod.status.phase}', "
+                             f"not running.")
+                return False
+            logger.debug(f"Containers of pod '{namespace}/{pod.metadata.name}': {', '.join([c.name + '(' + c.image + ')' for c in pod.spec.containers])}")
+            for container in pod.spec.containers:
+                if container.name == 'main':
+                    if container.image != expected_image:
+                        logger.debug(f"Container named 'main' of pod '{namespace}/{pod.metadata.name}': "
+                                     f"expected image is {expected_image} rather than {container.image}.")
+                        return False
+    return True
+
+
 def start_migrate_job(_unit_client: K8sClient, args: argparse.Namespace, action='replay'):
     body = yaml.safe_load(migrate_pod_template.render(args=args, action=action))
     migrate_pod = _unit_client.v1_api.create_namespaced_pod_with_http_info(args.migrate_ns, body)
@@ -503,9 +533,38 @@ def upgrade(_controller_client: K8sClient, _unit_client: K8sClient, args: argpar
     else:
         raise Exception(f"Failed to read cluster '{args.cluster_name}-sys'.")
     # 等待集群升级完成
-    wait_for(containers_image_upgraded,
+    # wait_for(containers_image_upgraded,
+    #          10, PODS_BECOME_RUNNING_TIMEOUT,
+    #          _unit_client, args.cluster_name, f'{args.cluster_image_repository}:{args.upgrade_version}')
+    wait_for(cluster_pods_are_running,
              10, PODS_BECOME_RUNNING_TIMEOUT,
-             _unit_client, args.cluster_name, f'{args.cluster_image_repository}:{args.upgrade_version}')
+             _controller_client, _unit_client, args, f'{args.cluster_image_repository}:{args.upgrade_version}')
+    upgrade_strategy_body = {
+        'spec': {
+            'upgradeStrategy': {
+                'upgradeSchema': True,
+                'components': [
+                    {
+                        'name': 'proxy',
+                        'needs': ['cn']
+                    },
+                    {
+                        'name': 'cn',
+                        'needs': ['dn']
+                    },
+                    {
+                        'name': 'dn',
+                        'needs': ['log']
+                    },
+                    {
+                        'name': 'log'
+                    }
+                ]
+            }
+        }
+    }
+    patch_root_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.patch_cluster(args.cluster_name, upgrade_strategy_body)
+    assert patch_root_cluster[1] == 200, f"Failed to patch root cluster '{args.cluster_name}'."
 
 
 if __name__ == '__main__':
