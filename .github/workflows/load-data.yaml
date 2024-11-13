@@ -1,4 +1,4 @@
-name: Run MO Tests
+name: Load Data
 
 on:
   workflow_dispatch:
