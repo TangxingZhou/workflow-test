@@ -300,12 +300,11 @@ jobs:
 
       - name: Load Data
         run: |
-          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+          if [ '${{ inputs.data-size }}' = '100M'}} ]; then
             sql_file=01_load_basic_for_100M.sql
-          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+          elif [ '${{ inputs.data-size }}' = '1B'}} ]; then
             sql_file=02_load_basic_for_1B.sql
           fi
-          echo $sql_file
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
           sed -i.bak \
           -e 's#\${ENDPOINT}#http://oss-cn-hangzhou-internal.aliyuncs.com#g' \
@@ -334,9 +333,9 @@ jobs:
           -u ${{ inputs.mo-user }} \
           -p ${{ inputs.mo-password }} \
           -c ./cases/big_data_test/02_LOAD_DATA/$sql_file
-          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+          if [ '${{ inputs.data-size }}' = '100M'}} ]; then
             sql_file=11_table_basic_for_alter_100M.sql
-          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+          elif [ '${{ inputs.data-size }}' = '1B'}} ]; then
             sql_file=12_table_basic_for_alter_1B.sql
           fi
           python run.py \
@@ -350,9 +349,9 @@ jobs:
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-nightly-regression/tools/mo-regression-test
-          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+          if [ '${{ inputs.data-size }}' = '100M'}} ]; then
             sql_file=15_write_ddl_100M.sql
-          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+          elif [ '${{ inputs.data-size }}' = '1B'}} ]; then
             sql_file=16_write_ddl_1B.sql
           fi
           python run.py \
