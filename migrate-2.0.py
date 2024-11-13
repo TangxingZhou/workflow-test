@@ -305,7 +305,7 @@ def offload_ob_cn(_controller_client: K8sClient, _unit_client: K8sClient, args: 
     }
     for p in _unit_client.v1_api.list_namespaced_pod(args.cluster_name, label_selector=f'matrixorigin.io/owner={args.cluster_name}-ob-sys').items:
         logger.info(f'Reset resources range for ob-sys CN pod: {p.metadata.name}.')
-        patch_ob_sys_pod = _unit_client.v1_api.patch_namespaced_pod(p.metadata.name, args.cluster_name, ob_sys_pod_body)
+        patch_ob_sys_pod = _unit_client.v1_api.patch_namespaced_pod_with_http_info(p.metadata.name, args.cluster_name, ob_sys_pod_body)
         assert patch_ob_sys_pod[1] == 200, f"Failed to patch ob-sys CN pod: {p.metadata.name}."
     wait_for_ob_idle(_unit_client, args)
     ob_sys_cluster = _controller_client.core_matrixone_cloud_v1alpha1_api.read_cluster(f'{args.cluster_name}-ob-sys', _preload_content=False)
