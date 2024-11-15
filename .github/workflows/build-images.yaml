@@ -214,6 +214,9 @@ jobs:
             repo_tag=${repo_tag::7}
           else
             repo_tag=$DOCKER_IMAGE_TAG
+            if [ ${{ inputs.project  }} = 'matrixone' ]; then
+              repo_tag=${DOCKER_IMAGE_TAG}-$(git rev-parse --short HEAD)-$(date +'%Y-%m-%d')
+            fi
           fi
           echo "image-repo=$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name" >> $GITHUB_OUTPUT
           echo "image-tag=$repo_tag" >> $GITHUB_OUTPUT

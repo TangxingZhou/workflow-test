@@ -737,6 +737,7 @@ jobs:
       project: matrixone
       ref: 2.0-dev
       dockerfile: ./optools/images/Dockerfile
+      tag: v2.0.1
   test-job4:
     runs-on: ubuntu-latest
     environment:
