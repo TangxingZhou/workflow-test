@@ -317,6 +317,7 @@ def wait_for_ob_idle(_unit_client: K8sClient, args: argparse.Namespace, timeout=
     while time.time() - start < timeout if timeout > 0 else True:
         ret = subprocess.run(f'./mc ls -r oss/{bucket}/{bucket_path}/etl | grep "statement_info/.*csv"', shell=True,
                              capture_output=True, text=True)
+        logger.info(ret)
         if ret.returncode == 1:
             return
         logger.debug(f"Wait for OB to be idle.")
