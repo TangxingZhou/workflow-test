@@ -22,8 +22,8 @@ on:
         options:
           - mo-backup
           - matrixone
-          - none
-        default: none
+          # - none
+        default: matrixone
 
       ref:
         description: The project ref of image to be built
@@ -140,12 +140,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      image-repo: ${{ steps.prep.outputs.image-repo }}
-      image-tag: ${{ steps.prep.outputs.image-tag }}
+      image-repo: ${{ steps.prep.outputs.image-repo || steps.pull.outputs.image-repo }}
+      image-tag: ${{ steps.prep.outputs.image-tag || steps.pull.outputs.image-tag }}
     steps:
 
       - name: Set Up QEMU
-        if: ${{ inputs.project != 'none' }}
+        # if: ${{ inputs.project != 'none' }}
         uses: docker/setup-qemu-action@v3
         with:
           image: tonistiigi/binfmt:latest
@@ -163,7 +163,7 @@ jobs:
     #       password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Hangzhou Alicloud Container Registry
-        if: ${{ inputs.project != 'none' || inputs.image }}
+        # if: ${{ inputs.project != 'none' || inputs.image }}
         uses: docker/login-action@v3
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
@@ -171,15 +171,15 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
       
       - name: Login to Shanghai Alicloud Container Registry
-        if: ${{ inputs.project != 'none' || inputs.image }}
+        # if: ${{ inputs.project != 'none' || inputs.image }}
         uses: docker/login-action@v3
         with:
           registry: registry.cn-shanghai.aliyuncs.com
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Checkout
-        if: ${{ inputs.project == 'mo-backup' }}
+      - name: Checkout mo-backup
+        if: ${{ ! inputs.image && inputs.project == 'mo-backup' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.organization }}/mo-backup
@@ -187,8 +187,8 @@ jobs:
           token: ${{ secrets.GH_PAT }}
           # fetch-depth: 0
 
-      - name: Checkout
-        if: ${{ inputs.project == 'matrixone' }}
+      - name: Checkout MO
+        if: ${{ ! inputs.image && inputs.project == 'matrixone' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.organization }}/matrixone
@@ -196,7 +196,8 @@ jobs:
           token: ${{ secrets.GH_PAT }}
 
       - name: Prepare
-        if: ${{ inputs.project != 'none' }}
+        # if: ${{ inputs.project != 'none' }}
+        if: ${{ ! inputs.image }}
         id: prep
         run: |
           git status
@@ -206,7 +207,6 @@ jobs:
           else
             repo_name=$DOCKER_REPOSITORY
           fi
-          ACR_DOCKER_IMAGE="$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name"
           # VERSION=${GITHUB_SHA::8}
           echo ${GITHUB_SHA}
           if [ -z $DOCKER_IMAGE_TAG ]; then
@@ -215,10 +215,8 @@ jobs:
           else
             repo_tag=$DOCKER_IMAGE_TAG
           fi
-          TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          echo "image-repo=${ACR_DOCKER_IMAGE}" >> $GITHUB_OUTPUT
-          echo "image-tag=${repo_tag}" >> $GITHUB_OUTPUT
+          echo "image-repo=$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name" >> $GITHUB_OUTPUT
+          echo "image-tag=$repo_tag" >> $GITHUB_OUTPUT
         env:
           DOCKER_REPOSITORY: ${{ inputs.repository }}
           DOCKER_REGISTRY: ${{ inputs.registry }}
@@ -226,12 +224,14 @@ jobs:
           DOCKER_IMAGE_TAG: ${{ inputs.tag }}
 
       - name: Get Image Info
-        if: ${{ inputs.project != 'none' }}
+        # if: ${{ inputs.project != 'none' }}
+        if: ${{ ! inputs.image }}
         run: |
           echo image-tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
 
       - name: Build and Push
-        if: ${{ inputs.project != 'none' }}
+        # if: ${{ inputs.project != 'none' }}
+        if: ${{ ! inputs.image }}
         uses: docker/build-push-action@v5
         with:
           builder: ${{ steps.buildx.outputs.name }}
@@ -239,7 +239,7 @@ jobs:
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platform }}
           push: true
-          tags: ${{ steps.prep.outputs.tags }}
+          tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
 
       - name: Pull and Push
         if: ${{ inputs.image }}
@@ -259,7 +259,8 @@ jobs:
           fi
           # docker tag $DOCKER_IMAGE $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
           # docker push $DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag
-          echo "tags=$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name:$repo_tag" >> $GITHUB_OUTPUT
+          echo "image-repo=$DOCKER_REGISTRY/$DOCKER_NAMESPACE/$repo_name" >> $GITHUB_OUTPUT
+          echo "image-tag=$repo_tag" >> $GITHUB_OUTPUT
           cat > Dockerfile_pull << EOF
           FROM $DOCKER_IMAGE
           EOF
@@ -279,7 +280,7 @@ jobs:
           file: Dockerfile_pull
           platforms: ${{ inputs.platform }}
           push: true
-          tags: ${{ steps.pull.outputs.tags }}
+          tags: ${{ format('{0}:{1}', steps.pull.outputs.image-repo, steps.pull.outputs.image-tag) }}
 #   release:
 #     runs-on: ubuntu-latest
 #     steps:
