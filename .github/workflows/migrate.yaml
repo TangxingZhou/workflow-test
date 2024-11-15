@@ -31,6 +31,16 @@ on:
         type: string
 
 jobs:
+  build-mo-image:
+    uses: ./.github/workflows/build-images.yaml
+    secrets: inherit
+    with:
+      organization: matrixorigin
+      project: matrixone
+      ref: 2.0-dev
+      dockerfile: ./optools/images/Dockerfile
+      tag: v2.0.1
+
   build-migrate-image:
     runs-on: ubuntu-latest
     environment:
@@ -124,6 +134,7 @@ jobs:
       contents: write
     needs:
       - build-migrate-image
+      - build-mo-image
 
     steps:
       - name: Checkout
@@ -160,7 +171,7 @@ jobs:
           export PYTHONPATH=$(pwd)
           python src/upgrade/migrate-2.0.py \
           --cluster-name ${{ inputs.mo-cluster }} \
-          --upgrade-version ${{ inputs.upgrade-version }} \
+          --upgrade-version ${{ needs.build-mo-image.outputs.image-tag || inputs.upgrade-version }} \
           --ckp-version ${{ inputs.ckp-version }} \
           --migrate-tag ${{ needs.build-migrate-image.outputs.image-tag || inputs.migrate-tag }}
         env:

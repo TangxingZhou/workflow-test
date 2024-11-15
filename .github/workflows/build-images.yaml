@@ -73,6 +73,7 @@ on:
         description: The tag of image to be built
         required: false
         type: string
+
   workflow_call:
     outputs:
       image-repo:
@@ -239,17 +240,17 @@ jobs:
         run: |
           echo image-tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
 
-      # - name: Build and Push
-      #   # if: ${{ inputs.project != 'none' }}
-      #   if: ${{ ! inputs.image }}
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     builder: ${{ steps.buildx.outputs.name }}
-      #     context: .
-      #     file: ${{ inputs.dockerfile }}
-      #     platforms: ${{ inputs.platform }}
-      #     push: true
-      #     tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
+      - name: Build and Push
+        # if: ${{ inputs.project != 'none' }}
+        if: ${{ ! inputs.image }}
+        uses: docker/build-push-action@v5
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ${{ inputs.dockerfile }}
+          platforms: ${{ inputs.platform }}
+          push: true
+          tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
 
       - name: Pull and Push
         if: ${{ inputs.image }}
