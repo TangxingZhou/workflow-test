@@ -38,7 +38,7 @@ on:
         default: Dockerfile
 
       platform:
-        description: The path of Dockerfile
+        description: The target platform
         type: choice
         required: true
         default: linux/amd64
@@ -46,6 +46,64 @@ on:
           - linux/amd64
           - linux/arm64
           - linux/amd64,linux/arm64
+
+      image:
+        description: The image to be tagged
+        required: false
+        type: string
+
+      repository:
+        description: Repository of image
+        required: false
+        type: string  
+
+      registry:
+        description: Image registry
+        required: true
+        type: string
+        default: registry.cn-hangzhou.aliyuncs.com
+      
+      namespace:
+        description: Namespace of image registry
+        required: true
+        type: string
+        default: mocloud
+      
+      tag:
+        description: The tag of image to be built
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      organization:
+        description: The organization of project
+        required: true
+        type: string
+        default: matrixorigin
+      
+      project:
+        description: The project of image to be built
+        required: true
+        type: string
+        default: matrixone
+
+      ref:
+        description: The project ref of image to be built
+        required: true
+        type: string
+        default: main
+
+      dockerfile:
+        description: The path of Dockerfile
+        required: true
+        type: string
+        default: Dockerfile
+
+      platform:
+        description: The target platform
+        type: string
+        required: true
+        default: linux/amd64
 
       image:
         description: The image to be tagged
@@ -81,7 +139,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      image-repo: ${{ steps.prep.outputs.image-repo }}
+      image-tag: ${{ steps.prep.outputs.image-tag }}
     steps:
 
       - name: Set Up QEMU
@@ -157,6 +217,8 @@ jobs:
           fi
           TAGS="$ACR_DOCKER_IMAGE:$repo_tag"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "image-repo=${ACR_DOCKER_IMAGE}" >> $GITHUB_OUTPUT
+          echo "image-tag=${repo_tag}" >> $GITHUB_OUTPUT
         env:
           DOCKER_REPOSITORY: ${{ inputs.repository }}
           DOCKER_REGISTRY: ${{ inputs.registry }}
@@ -166,8 +228,8 @@ jobs:
       - name: Get Image Info
         if: ${{ inputs.project != 'none' }}
         run: |
-          echo image-tags: ${{ steps.prep.outputs.tags }}
-      
+          echo image-tags: ${{ format('{0}:{1}', steps.prep.outputs.image-repo, steps.prep.outputs.image-tag) }}
+
       - name: Build and Push
         if: ${{ inputs.project != 'none' }}
         uses: docker/build-push-action@v5
@@ -178,7 +240,7 @@ jobs:
           platforms: ${{ inputs.platform }}
           push: true
           tags: ${{ steps.prep.outputs.tags }}
-      
+
       - name: Pull and Push
         if: ${{ inputs.image }}
         id: pull
