@@ -102,7 +102,7 @@ on:
       platform:
         description: The target platform
         type: string
-        required: true
+        required: false
         default: linux/amd64
 
       image:
@@ -117,13 +117,13 @@ on:
 
       registry:
         description: Image registry
-        required: true
+        required: false
         type: string
         default: registry.cn-hangzhou.aliyuncs.com
       
       namespace:
         description: Namespace of image registry
-        required: true
+        required: false
         type: string
         default: mocloud
       
