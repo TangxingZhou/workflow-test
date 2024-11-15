@@ -747,7 +747,7 @@ jobs:
     steps:
       - name: echo
         run: |
-          echo ${{ needs.build-mo1-image.outputs.image-repo }}:${{ steps.build-mo1-image.outputs.image-tag }}
+          echo ${{ needs.build-mo1-image.outputs.image-repo }}:${{ needs.build-mo1-image.outputs.image-tag }}
   # test-job4:
   #   runs-on: ubuntu-latest
   #   environment:
