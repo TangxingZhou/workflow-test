@@ -729,25 +729,36 @@ jobs:
           else
             echo $(echo ${{ inputs.restore_s3_bucket }})
           fi
-  build-mo1-image:
-    uses: ./.github/workflows/build-images.yaml
-    secrets: inherit
-    with:
-      organization: matrixorigin
-      project: matrixone
-      ref: 2.0-dev
-      dockerfile: ./optools/images/Dockerfile
-      tag: v2.0.1
+  # build-mo1-image:
+  #   uses: ./.github/workflows/build-images.yaml
+  #   outputs:
+
+  #   secrets: inherit
+  #   with:
+  #     organization: matrixorigin
+  #     project: matrixone
+  #     ref: 2.0-dev
+  #     dockerfile: ./optools/images/Dockerfile
+  #     tag: v2.0.1
   test-job4:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    needs:
-      - build-mo1-image
+    # needs:
+    #   - build-mo1-image
     steps:
+      - name: build
+        uses: ./.github/workflows/build-images.yaml
+        id: build
+        with:
+          organization: matrixorigin
+          project: matrixone
+          ref: 2.0-dev
+          dockerfile: ./optools/images/Dockerfile
+          tag: v2.0.1
       - name: echo
         run: |
-          echo ${{ needs.build-mo1-image.outputs.image-repo }}:${{ needs.build-mo1-image.outputs.image-tag }}
+          echo ${{ steps.build.outputs.image-repo }}:${{ steps.build.outputs.image-tag }}
   # test-job4:
   #   runs-on: ubuntu-latest
   #   environment:
