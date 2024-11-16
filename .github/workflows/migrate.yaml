@@ -56,9 +56,9 @@ jobs:
       name: ${{ inputs.env || 'qa' }}
     permissions:
       contents: write
-#    needs:
-#      - build-migrate-image
-#      - build-mo-image
+    needs:
+      - build-migrate-image
+      - build-mo-image
 
     steps:
       - name: Checkout
