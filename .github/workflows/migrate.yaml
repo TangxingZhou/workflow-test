@@ -1,4 +1,4 @@
-name: Migrate mo-2.0
+name: Migrate MO-2.0
 on:
   workflow_dispatch:
     inputs:
@@ -56,9 +56,9 @@ jobs:
       name: ${{ inputs.env || 'qa' }}
     permissions:
       contents: write
-    needs:
-      - build-migrate-image
-      - build-mo-image
+#    needs:
+#      - build-migrate-image
+#      - build-mo-image
 
     steps:
       - name: Checkout

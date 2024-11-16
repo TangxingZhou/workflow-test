@@ -315,7 +315,7 @@ def wait_for_ob_idle(_unit_client: K8sClient, args: argparse.Namespace, timeout=
     # ret = subprocess.run(['mc', 'ls', '-r', f'oss/{bucket}/{bucket_path}/etl'], shell=False, capture_output=True, text=True)
     start = time.time()
     while time.time() - start < timeout if timeout > 0 else True:
-        ret = subprocess.run(f'./mc ls -r oss/{bucket}/{bucket_path}/etl | grep "statement_info/.*csv"', shell=True,
+        ret = subprocess.run(f'pwd;./mc ls -r oss/{bucket}/{bucket_path}/etl | grep "statement_info/.*csv"', shell=True,
                              capture_output=True, text=True)
         logger.info(ret)
         if ret.returncode == 1:
@@ -585,13 +585,14 @@ if __name__ == '__main__':
         # cluster是root/main，则状态必须是'Active'
         if _cluster.is_root:
             if _cluster.is_active():
-                setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
-                offload_cn_and_proxy(controller_client, unit_client, parser_args)
-                make_ckp(controller_client, unit_client, parser_args, 'migration checkpointed')
-                offload_dn_and_log(controller_client, unit_client, parser_args)
-                config_migrate(unit_client, parser_args)
-                if make_migrate(unit_client, parser_args) is None:
-                   upgrade(controller_client, unit_client, parser_args)
+                wait_for_ob_idle(unit_client, parser_args)
+                # setattr(parser_args, 'tid', get_table_id(unit_client, parser_args))
+                # offload_cn_and_proxy(controller_client, unit_client, parser_args)
+                # make_ckp(controller_client, unit_client, parser_args, 'migration checkpointed')
+                # offload_dn_and_log(controller_client, unit_client, parser_args)
+                # config_migrate(unit_client, parser_args)
+                # if make_migrate(unit_client, parser_args) is None:
+                #    upgrade(controller_client, unit_client, parser_args)
             else:
                 _msg = f"Cluster '{_cluster.name}' is in phase of '{_cluster.phase.value}' not 'Active'."
                 logger.error(_msg)
