@@ -147,6 +147,11 @@ def get_table_id(_unit_client: K8sClient, args: argparse.Namespace):
     logger.info(f'Table ID of system.rawlog is {tid}.')
     return tid
 
+def upgrade_tenants(_unit_client: K8sClient, args: argparse.Namespace):
+    sql = "UPGRADE ACCOUNT ALL;"
+    logger.info('Start to upgrade tenants.')
+    mo_root(_unit_client, args)._execute(sql, False)
+
 def watch_dn_logs(_unit_client: K8sClient, args: argparse.Namespace, event, *keywords):
     logger.info(f'Start to watch logs of pod {args.cluster_name}/default-dn-0')
     _watch = watch.Watch()
@@ -318,7 +323,7 @@ def wait_for_ob_idle(_unit_client: K8sClient, args: argparse.Namespace, timeout=
     while time.time() - start < timeout if timeout > 0 else True:
         ret = subprocess.run(f'./mc ls -r oss/{bucket}/{bucket_path}/etl | grep "statement_info/.*csv"', shell=True,
                              capture_output=True, text=True)
-        logger.info(ret)
+        logger.debug(ret)
         if ret.returncode == 1:
             return
         logger.debug(f"Wait for OB to be idle.")
@@ -593,6 +598,8 @@ if __name__ == '__main__':
                 config_migrate(unit_client, parser_args)
                 if make_migrate(unit_client, parser_args) is None:
                    upgrade(controller_client, unit_client, parser_args)
+                   time.sleep(60)
+                   upgrade_tenants(unit_client, parser_args)
             else:
                 _msg = f"Cluster '{_cluster.name}' is in phase of '{_cluster.phase.value}' not 'Active'."
                 logger.error(_msg)
