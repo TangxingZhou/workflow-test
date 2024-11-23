@@ -598,8 +598,8 @@ if __name__ == '__main__':
                 config_migrate(unit_client, parser_args)
                 if make_migrate(unit_client, parser_args) is None:
                    upgrade(controller_client, unit_client, parser_args)
-                   time.sleep(60)
-                   upgrade_tenants(unit_client, parser_args)
+                #    time.sleep(3 * 60)
+                #    upgrade_tenants(unit_client, parser_args)
             else:
                 _msg = f"Cluster '{_cluster.name}' is in phase of '{_cluster.phase.value}' not 'Active'."
                 logger.error(_msg)
