@@ -103,7 +103,7 @@ def parse_args(name, description=None, usage='%(prog)s [options] args'):
                         dest='cluster_name', help='Name of MO cluster')
     parser.add_argument('--upgrade-version', action='store', required=True, type=str,
                         dest='upgrade_version', help='Version of MO cluster to upgrade to')
-    parser.add_argument('--ckp-version', action='store', required=False, type=str, default='v1.2.3-7944ef014-2024-10-17',
+    parser.add_argument('--ckp-version', action='store', required=False, type=str, default='v1.2.3-bce127554-2024-11-26',
                         dest='ckp_version', help='Version of MO CKP')
     parser.add_argument('--migrate-tag', action='store', required=False, type=str, default='3288fb5',
                         dest='migrate_tag', help='Migrate image tag')
