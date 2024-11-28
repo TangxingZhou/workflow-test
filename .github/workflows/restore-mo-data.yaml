@@ -44,8 +44,8 @@ on:
         required: false
         type: string
 env:
-  email: ${{ vars.UPGRADE_TEST_EMAIL }}
-  password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
+  normal_email_1: ${{ vars.UPGRADE_TEST_EMAIL }}
+  normal_password_1: ${{ secrets.UPGRADE_TEST_PASSWORD }}
   database_platform_password: ${{ secrets.DATABASE_PLATFORM_PASSWORD }}
   management_platform_url: ${{ secrets.MANAGEMENT_PLATFORM_URL }}
   management_platform_user: ${{ secrets.MANAGEMENT_PLATFORM_USER }}
