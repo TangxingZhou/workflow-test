@@ -3,11 +3,6 @@ name: Run MO Tests
 on:
   workflow_dispatch:
     inputs:
-      aliyun:
-        description: Provier is aliyun
-        required: true
-        type: boolean
-        default: true
       env:
         description: Target environment
         required: true
@@ -61,6 +56,11 @@ on:
           - 100M
           - 1B
         default: 100M
+      aliyun:
+        description: Provier is aliyun
+        required: true
+        type: boolean
+        default: true
       run-tests:
         description: Run mo tests
         required: true
