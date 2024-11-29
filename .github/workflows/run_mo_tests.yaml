@@ -55,6 +55,9 @@ on:
         options:
           - 100M
           - 1B
+          - '10'
+          - '100'
+          - '1000'
         default: 100M
       aliyun:
         description: Provier is aliyun
@@ -167,13 +170,20 @@ jobs:
           else
             endpoint=oss-cn-hangzhou.aliyuncs.com
           fi
+          if [ ${{ inputs.data-size }} = '100'}} ]; then
+            database=tpcc_100
+          elif [ ${{ inputs.data-size }} = '1000'}} ]; then
+            database=tpcc_1000
+          else
+            database=tpcc_10
+          fi
           sed -i \
           -e "s/\(ENDPOINT:\).*/\1 $endpoint/" \
           -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
           -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
           access.yml
           ./load.sh \
-          -c cases/00_from_s3/tpcc_10 -d tpcc_10 -m -r \
+          -c cases/00_from_s3/$database -d $database -m -r \
           -b moc-test-data \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
@@ -199,17 +209,24 @@ jobs:
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-tpcc
-          cp props.mo props_10.mo
-          sed -i 's/socketTimeout=60000/socketTimeout=60000/' props_10.mo
-          sed -i '/.*terminals=*/c\terminals=10' props_10.mo
-          sed -i '/.*warehouses=*/c\warehouses=10' props_10.mo
-          sed -i '/.*user=*/c\user=${{ inputs.mo-user }}' props_10.mo
-          sed -i "/.*password=*/c\password=${{ inputs.mo-password }}" props_10.mo
-          sed -i '/runMins=*/c\runMins=${{ inputs.period }}' props_10.mo
-          sed -i 's/tpcc/tpcc_10/g' props_10.mo
-          sed -i 's/127.0.0.1/${{ inputs.mo-host }}/g' props_10.mo
-          ./runBenchmark.sh props_10.mo
-          ./runVerify.sh props_10.mo
+          if [ ${{ inputs.data-size }} = '100'}} ]; then
+            database=tpcc_100
+          elif [ ${{ inputs.data-size }} = '1000'}} ]; then
+            database=tpcc_1000
+          else
+            database=tpcc_10
+          fi
+          # cp props.mo props_10.mo
+          sed -i 's/socketTimeout=60000/socketTimeout=60000/' props.mo
+          sed -i '/.*terminals=*/c\terminals=10' props.mo
+          sed -i '/.*warehouses=*/c\warehouses=10' props.mo
+          sed -i '/.*user=*/c\user=${{ inputs.mo-user }}' props.mo
+          sed -i "/.*password=*/c\password=${{ inputs.mo-password }}" props.mo
+          sed -i '/runMins=*/c\runMins=${{ inputs.period }}' props.mo
+          sed -i "s/tpcc/$database/g" props.mo
+          sed -i 's/127.0.0.1/${{ inputs.mo-host }}/g' props.mo
+          ./runBenchmark.sh props.mo
+          ./runVerify.sh props.mo
 
       - name: Upload Logs
         uses: actions/upload-artifact@v4
