@@ -209,9 +209,9 @@ jobs:
         if: inputs.run-tests
         run: |
           cd $GITHUB_WORKSPACE/mo-tpcc
-          if [ ${{ inputs.data-size }} = '100'}} ]; then
+          if [ ${{ inputs.data-size }} = '100' ]; then
             database=tpcc_100
-          elif [ ${{ inputs.data-size }} = '1000'}} ]; then
+          elif [ ${{ inputs.data-size }} = '1000' ]; then
             database=tpcc_1000
           else
             database=tpcc_10
@@ -327,9 +327,9 @@ jobs:
 
       - name: Load Data
         run: |
-          if [ ${{ inputs.data-size }} = '100M'}} ]; then
+          if [ ${{ inputs.data-size }} = '100M' ]; then
             sql_file=01_load_basic_for_100M.sql
-          elif [ ${{ inputs.data-size }} = '1B'}} ]; then
+          elif [ ${{ inputs.data-size }} = '1B' ]; then
             sql_file=02_load_basic_for_1B.sql
           else
             sql_file=02_load_basic_for_1B.sql
