@@ -170,9 +170,9 @@ jobs:
           else
             endpoint=oss-cn-hangzhou.aliyuncs.com
           fi
-          if [ '${{ inputs.data-size }}' = '100'}} ]; then
+          if [ ${{ inputs.data-size }} = '100' ]; then
             database=tpcc_100
-          elif [ '${{ inputs.data-size }}' = '1000'}} ]; then
+          elif [ ${{ inputs.data-size }} = '1000' ]; then
             database=tpcc_1000
           else
             database=tpcc_10
