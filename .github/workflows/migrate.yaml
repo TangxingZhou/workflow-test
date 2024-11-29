@@ -17,18 +17,16 @@ on:
         type: string
       upgrade-version:
         description: 'version to upgrade'
-        default: 'v2.0.1-6177e47-2024-11-15'
-        required: true
+        required: false
         type: string
       ckp-version:
         description: 'version of MO CKP'
-        default: v1.2.3-7944ef014-2024-10-17
+        default: v1.2.3-bce127554-2024-11-26
         required: true
         type: string
       migrate-tag:
         description: 'migrate image tag'
-        default: '3288fb5'
-        required: true
+        required: false
         type: string
 
 jobs:
@@ -95,9 +93,9 @@ jobs:
           export PYTHONPATH=$(pwd)
           python src/upgrade/migrate-2.0.py \
           --cluster-name ${{ inputs.mo-cluster }} \
-          --upgrade-version ${{ needs.build-mo-image.outputs.image-tag || inputs.upgrade-version }} \
+          --upgrade-version ${{ inputs.upgrade-version || needs.build-mo-image.outputs.image-tag }} \
           --ckp-version ${{ inputs.ckp-version }} \
-          --migrate-tag ${{ needs.build-migrate-image.outputs.image-tag || inputs.migrate-tag }}
+          --migrate-tag ${{ inputs.migrate-tag || needs.build-migrate-image.outputs.image-tag }}
         env:
           email: ${{ vars.UPGRADE_TEST_EMAIL }}
           password: ${{ secrets.UPGRADE_TEST_PASSWORD }}
