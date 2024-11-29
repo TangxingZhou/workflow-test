@@ -130,7 +130,7 @@ jobs:
     environment:
       name: ${{ inputs.env || 'qa' }}
     timeout-minutes: 120
-    if: inputs.data-category == 'all' || inputs.data-category == 'tpcc'
+    if: inputs.data-category == 'all' || inputs.data-category == 'tpch'
     steps:
       - name: Checkout mo-load-data
         uses: actions/checkout@v4
