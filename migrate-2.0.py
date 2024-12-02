@@ -215,7 +215,7 @@ def start_migrate_job(_unit_client: K8sClient, args: argparse.Namespace, action=
     logger.info(f"Start to make migration with command of mo-migrate as: {migrate_commands}")
     # 等待恢复数据的任务执行成功
     wait_for(namespaced_pod_successfully_completed,
-             10, 10 * 60,
+             5, 10 * 60,
              _unit_client, body['metadata']['name'], args.migrate_ns)
 
 

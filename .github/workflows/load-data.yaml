@@ -180,10 +180,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: tpcc-test-logs
+          name: tpch-test-logs
           path: |
             ${{ github.workspace }}/mo-load-data/*.log
             ${{ github.workspace }}/mo-load-data/report/
-            ${{ github.workspace }}/mo-tpcc/*.log
-            ${{ github.workspace }}/mo-tpcc/report/
           retention-days: 7
