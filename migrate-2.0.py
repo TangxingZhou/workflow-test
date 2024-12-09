@@ -493,6 +493,7 @@ def upgrade(_controller_client: K8sClient, _unit_client: K8sClient, args: argpar
             'endpoint': {
                 'proxySpec': {
                     'image': f'{args.cluster_image_repository}:{args.upgrade_version}',
+                    'pluginImage': 'registry.cn-hangzhou.aliyuncs.com/mocloud/plugin:0.11.0-17e89d6-2024-12-04',
                     'replicas': 2,
                 }
             },
