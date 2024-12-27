@@ -3,6 +3,14 @@ name: MO CI
 on:
   workflow_dispatch:
     inputs:
+        env:
+          description: Target environment
+          required: true
+          type: choice
+          options:
+            - qa
+            - dev
+          default: qa
         host:
           description: MO Host
           required: true
@@ -71,10 +79,11 @@ jobs:
           # ./run.sh -c 2>&1 | tee result.log
           # if [ "$(cat ./result.log | grep -i -E 'WARN|ERROR' | grep -v "grep" | wc -l)" -gt 0 ]; then echo 'case format check failed.'; exit 1; fi
           sed -i \
+          -e 's/socketTimeout:.*/socketTimeout: 300000/' \
           -e 's/\(serverTimezone:\).*/\1 "UTC"/' \
           -e 's/127.0.0.1:6001/${{ inputs.host }}:${{ inputs.port }}/' \
-          -e 's/\(name:\).*/\1 "${{ inputs.account }}"/' \
-          -e 's/\(password:\).*/\1 "${{ inputs.password }}"/' \
+          -e 's/\(name:\).*/\1 "${{ inputs.sys }}"/' \
+          -e 's/\(password:\).*/\1 "${{ inputs.sys-password }}"/' \
           -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
           -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
           -e 's/\(default:\).*/\1 "bvt_test"/' \
@@ -88,5 +97,6 @@ jobs:
           name: log
           path: |
             ${{ github.workspace }}/mo-tester/*.log
+            ${{ github.workspace }}/mo-tester/log/
             ${{ github.workspace }}/mo-tester/report/
           retention-days: 7
