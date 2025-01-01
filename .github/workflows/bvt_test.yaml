@@ -86,7 +86,6 @@ jobs:
           -e 's/\(password:\).*/\1 "${{ inputs.sys-password }}"/' \
           -e 's/\(sysuser:\).*/\1 "${{ inputs.sys }}"/' \
           -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
-          -e 's/\(default:\).*/\1 "bvt_test"/' \
           mo.yml
           cat mo.yml
           ./run.sh -n -p $GITHUB_WORKSPACE/matrixone/test/distributed/cases/table/ -t 1 -i temporary -m run -g 2>&1
