@@ -1,4 +1,4 @@
-name: MO CI
+name: MO BVT Tests
 
 on:
   workflow_dispatch:
@@ -88,7 +88,6 @@ jobs:
         run: |
           dbs=$(MYSQL_PWD=${{ inputs.sys-password }} mysql -h ${{ inputs.host }} -P ${{ inputs.port }} -u ${{ inputs.sys }}  -e "show databases" --skip-column-names | awk '{print $1}')
           dbs="${dbs//$'\n'/,}"
-          sed -i.bak "s/\(^builtindb:\).*/\1 $dbs/" run.yml
           # timedatectl status
           # sudo timedatectl set-timezone "Asia/Shanghai"
           # timedatectl status
@@ -96,6 +95,7 @@ jobs:
           cd $GITHUB_WORKSPACE/mo-tester
           # ./run.sh -c 2>&1 | tee result.log
           # if [ "$(cat ./result.log | grep -i -E 'WARN|ERROR' | grep -v "grep" | wc -l)" -gt 0 ]; then echo 'case format check failed.'; exit 1; fi
+          sed -i.bak "s/\(^builtindb:\).*/\1 $dbs/" run.yml
           sed -i.bak \
           -e 's/socketTimeout:.*/socketTimeout: 300000/' \
           -e 's/\(serverTimezone:\).*/\1 "UTC"/' \
