@@ -713,12 +713,12 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: qa
-    if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true }}
+    # if: ${{ (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true }}
     needs:
       - test-job1
     steps:
       - name: test1
-        if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true
+        #if: (vars.UPGRADE_TEST_ACTION == 'restore' && vars.CLEAR_CLUSTER_AFTER_TESTS == 'true' || vars.UPGRADE_TEST_ACTION == 'clear') && true
         run: |
           echo ${{ vars.UPGRADE_TEST_ACTION }}
           echo ${{ vars.CLEAR_CLUSTER_AFTER_TESTS }}
@@ -739,6 +739,7 @@ jobs:
           fi
   build-mo1-image:
     uses: ./.github/workflows/build-images.yaml
+    if: false
     secrets: inherit
     with:
       organization: matrixorigin
