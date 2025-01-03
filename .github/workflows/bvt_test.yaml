@@ -86,7 +86,6 @@ jobs:
       - name: Start BVT Test
         id: bvt_on_pr_version
         run: |
-          env
           dbs=$(MYSQL_PWD=${{ inputs.sys-password }} mysql -h ${{ inputs.host }} -P ${{ inputs.port }} -u ${{ inputs.sys }}  -e "show databases" --skip-column-names | awk '{print $1}')
           dbs="${dbs//$'\n'/,}"
           # timedatectl status
@@ -107,6 +106,7 @@ jobs:
           -e 's/\(syspass:\).*/\1 "${{ inputs.sys-password }}"/' \
           mo.yml
           cat mo.yml
+          cat run.yml
           ./run.sh -p $GITHUB_WORKSPACE/${{ inputs.bvt_cases }} ${{ inputs.bvt_extra_args }} 2>&1
         env:
           resources: ${{ github.workspace }}/matrixone/test/distributed/resources
