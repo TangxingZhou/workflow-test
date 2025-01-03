@@ -116,7 +116,6 @@ jobs:
         with:
           name: bvt_tests_results
           path: |
-            ${{ github.workspace }}/mo-tester/*.log
             ${{ github.workspace }}/mo-tester/log/
             ${{ github.workspace }}/mo-tester/report/
           retention-days: 7

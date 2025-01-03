@@ -507,6 +507,7 @@ jobs:
   #         # echo "mo-port=6001" >> $GITHUB_OUTPUT
   #         exit 0
   test-bbb:
+    if: false
     runs-on: ubuntu-latest
     environment:
       name: qa
@@ -697,11 +698,17 @@ jobs:
     environment:
       name: ${{ inputs.env || 'qa' }}
     if: true
+    outputs:
+      mo-usr: ${{ steps.test1.outputs.mo-usr }}
+      mo-pass: ${{ steps.test1.outputs.mo-pass }}
     steps:
       - name: test1
+        id: test1
         run: |
           echo 123
           echo ${{ vars.RESTORE_S3_BUCKET_FILE_PATH || 'dddd' }}
+          echo "mo-usr=dump" >> $GITHUB_OUTPUT
+          echo "mo-pass=Admin123" >> $GITHUB_OUTPUT
   test-job2:
     runs-on: ubuntu-latest
     environment:
@@ -716,6 +723,7 @@ jobs:
           echo ${{ vars.UPGRADE_TEST_ACTION }}
           echo ${{ vars.CLEAR_CLUSTER_AFTER_TESTS }}
           echo 456
+          echo ${{ needs.test-job1.outputs.mo-usr}}:${{ needs.test-job1.outputs.mo-pass}}
   test-job3:
     runs-on: ubuntu-latest
     environment:
