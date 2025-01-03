@@ -111,7 +111,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: log
+          name: bvt_tests_results
           path: |
             ${{ github.workspace }}/mo-tester/*.log
             ${{ github.workspace }}/mo-tester/log/
