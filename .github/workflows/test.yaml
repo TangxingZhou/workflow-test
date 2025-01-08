@@ -698,7 +698,7 @@ jobs:
     environment:
       name: ${{ inputs.env || 'qa' }}
     # if: true
-    if: contains(fromJSON('["qa1", "dev", "prod"]'), inputs.env)
+    if: ${{ contains(fromJSON('["qa", "dev", "prod"]'), inputs.env) }}
     outputs:
       mo-usr: ${{ steps.test1.outputs.mo-usr }}
       mo-pass: ${{ steps.test1.outputs.mo-pass }}

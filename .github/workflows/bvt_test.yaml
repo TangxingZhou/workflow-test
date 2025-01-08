@@ -107,9 +107,29 @@ jobs:
           mo.yml
           cat mo.yml
           cat run.yml
-          ./run.sh -p $GITHUB_WORKSPACE/${{ inputs.bvt_cases }} ${{ inputs.bvt_extra_args }} 2>&1
-        env:
-          resources: ${{ github.workspace }}/matrixone/test/distributed/resources
+          # ./run.sh -p $GITHUB_WORKSPACE/${{ inputs.bvt_cases }} ${{ inputs.bvt_extra_args }} 2>&1
+
+          exclude_tests=
+          cases_path=$GITHUB_WORKSPACE/${{ inputs.bvt_cases }}
+          if [ -d $cases_path ]; then
+            if [ ${cases_path: -1} = '/' ]; then
+              cases_path=${cases_path%?}
+            fi
+            for exclude in $(find $cases_path -type f ! -name "*.result" -exec grep -l "\$resources" {} \;); do
+              exclude_tests="${exclude_tests},${exclude##*cases/}"
+            done
+            echo "Exclude tests to run: ${exclude_tests:1}"
+          elif [ -f $cases_path ]; then
+            :
+          else
+            echo "The cases path must be file or directory."
+            exit 1
+          fi
+          if [ -z $exclude_tests ]; then
+            ./run.sh -p $cases_path ${{ inputs.bvt_extra_args }}
+          else
+            ./run.sh -p $cases_path -e ${exclude_tests:1} ${{ inputs.bvt_extra_args }}
+          fi
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
