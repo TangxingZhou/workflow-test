@@ -86,6 +86,7 @@ jobs:
       - name: Start BVT Test
         id: bvt_on_pr_version
         run: |
+          set -x
           # dbs=$(MYSQL_PWD=${{ inputs.sys-password }} mysql -h ${{ inputs.host }} -P ${{ inputs.port }} -u ${{ inputs.sys }}  -e "show databases" --skip-column-names | awk '{print $1}')
           # dbs="${dbs//$'\n'/,}"
           locale
