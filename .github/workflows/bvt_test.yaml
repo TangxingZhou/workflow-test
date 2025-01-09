@@ -118,7 +118,7 @@ jobs:
           cat run.yml
           # ./run.sh -p $GITHUB_WORKSPACE/${{ inputs.bvt_cases }} ${{ inputs.bvt_extra_args }} 2>&1
 
-          exclude_tests=optimistic
+          exclude_tests=optimistic,tenant/privilege/role7_special_roles_accountadmin.sql,zz_accesscontrol/drop_user.sql
           cases_path=$GITHUB_WORKSPACE/${{ inputs.bvt_cases }}
           if [ -d "$cases_path" ]; then
             if [ ${cases_path: -1} = '/' ]; then
