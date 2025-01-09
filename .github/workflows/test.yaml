@@ -704,8 +704,14 @@ jobs:
       mo-usr: ${{ steps.test1.outputs.mo-usr }}
       mo-pass: ${{ steps.test1.outputs.mo-pass }}
     steps:
+      
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: matrixorigin/mocloud-tester
+          ref: qa-txzhou
+          # path: mocloud-tester
+          token: ${{ secrets.GH_PAT }}
       - name: Set Up Python3.8
         uses: actions/setup-python@v5
         with:
@@ -723,11 +729,24 @@ jobs:
           # cd $GITHUB_WORKSPACE/
           # export PYTHONPATH=$(pwd)
           # env
-          python test.py
+          # python test.py
+          echo "default-cluster=restore-freetier-01" >> $GITHUB_OUTPUT
+          
       - name: Print
         if: always()
         run: |
-          echo "1${{ steps.back.outputs.default-cluster }}2"
+          echo "${{ steps.back.outputs.default-cluster }}"
+          python -c '''
+          from src.cloud.moc.cluster import MOClusterManager
+          from src.tests.conftest import init_k8s_client
+          MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')
+          '''
+        env:
+          env: dev
+          provider: aliyun
+          region: cn-hangzhou
+          k8s_unit_config: ${{ secrets.K8S_UNIT_CONFIG }}
+          k8s_controller_config: ${{ secrets.K8S_CONTROLLER_CONFIG }}
   test-job2:
     runs-on: ubuntu-latest
     environment:
