@@ -70,8 +70,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: matrixorigin/matrixone
-          ref: main
-          path: 2.0-dev
+          ref: 2.0-dev
+          path: matrixone
           token: ${{ secrets.GH_PAT }}
 
       - name: Checkout mo-tester
@@ -120,8 +120,6 @@ jobs:
 
           exclude_tests=optimistic
           cases_path=$GITHUB_WORKSPACE/${{ inputs.bvt_cases }}
-          ls -al $cases_path
-          tree $GITHUB_WORKSPACE
           if [ -d "$cases_path" ]; then
             if [ ${cases_path: -1} = '/' ]; then
               cases_path=${cases_path%?}
