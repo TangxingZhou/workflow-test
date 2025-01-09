@@ -1,5 +1,5 @@
-# import os
-
+import os
+import time
 # sysbench_envs = {
 #     'MOC_INSTANCE_HOST': 'restore-freetier-01.cn-hangzhou.cluster.cn-qa.matrixone.tech',
 #     'MOC_INSTANCE_PORT': 6001,
@@ -17,26 +17,31 @@
 # os.system(f'''echo "mo-password={sysbench_envs.get('MOC_INSTANCE_PASSWORD', '')}" >> $GITHUB_OUTPUT''')
 
 
-import signal
-import time
+# import signal
+# import time
 
 
-def handler(signum, frame):
-    print(f"Received {signum} signal")
+# def handler(signum, frame):
+#     print(f"Received {signum} signal")
 
 
-# 设置信号处理函数
-# for i in range(1, 32):
-#     signal.signal(i, handler)
-signal.signal(signal.SIGINT, handler)
-signal.signal(signal.SIGTERM, handler)
-signal.signal(signal.SIGCONT, handler)
-# signal.signal(signal.SIGSTOP, handler)
-# signal.signal(signal.SIGKILL, handler)
-signal.signal(signal.SIGQUIT, handler)
-signal.signal(signal.SIGTSTP, handler)
+# # 设置信号处理函数
+# # for i in range(1, 32):
+# #     signal.signal(i, handler)
+# signal.signal(signal.SIGINT, handler)
+# signal.signal(signal.SIGTERM, handler)
+# signal.signal(signal.SIGCONT, handler)
+# # signal.signal(signal.SIGSTOP, handler)
+# # signal.signal(signal.SIGKILL, handler)
+# signal.signal(signal.SIGQUIT, handler)
+# signal.signal(signal.SIGTSTP, handler)
 
 
-while True:
-    print("Running...")
-    time.sleep(1)
+# while True:
+#     print("Running...")
+#     time.sleep(1)
+
+os.system(f'''echo "default-cluster=freetier-01" >> $GITHUB_OUTPUT''')
+
+time.sleep(5 * 60)
+
