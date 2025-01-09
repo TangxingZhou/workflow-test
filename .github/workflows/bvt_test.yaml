@@ -120,7 +120,7 @@ jobs:
 
           exclude_tests=optimistic
           cases_path=$GITHUB_WORKSPACE/${{ inputs.bvt_cases }}
-          if [ -d $cases_path ]; then
+          if [ -d "$cases_path" ]; then
             if [ ${cases_path: -1} = '/' ]; then
               cases_path=${cases_path%?}
             fi
@@ -129,7 +129,7 @@ jobs:
               exclude_tests="${exclude_tests},${exclude##*cases/}"
             done
             echo "Exclude tests to run: ${exclude_tests}"
-          elif [ -f $cases_path ]; then
+          elif [ -f "$cases_path" ]; then
             sed -i.bak 's/user=\(.*\)dump\&password=.*/user=\1dump\&password=${{ inputs.sys-password }}/g' $cases_path
           else
             echo "The cases path must be file or directory."
