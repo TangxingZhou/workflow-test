@@ -730,7 +730,7 @@ jobs:
           # export PYTHONPATH=$(pwd)
           # env
           # python test.py
-          echo "default-cluster=restore-freetier-01" >> $GITHUB_OUTPUT
+          echo "default-cluster=freetier-01" >> $GITHUB_OUTPUT
           
       - name: Print
         if: always()
@@ -741,7 +741,12 @@ jobs:
           export PYTHONPATH=$(pwd)
           pip install -r requirements.txt
           pip -V
-          python -c "from src.cloud.moc.cluster import MOClusterManager;from src.tests.conftest import init_k8s_client;MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')"
+          # python -c "from src.cloud.moc.cluster import MOClusterManager;from src.tests.conftest import init_k8s_client;MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')"
+          python - << EOF
+          from src.cloud.moc.cluster import MOClusterManager
+          from src.tests.conftest import init_k8s_client
+          MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')
+          EOF
           deactivate
         env:
           env: dev
