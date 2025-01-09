@@ -88,6 +88,7 @@ jobs:
         run: |
           # dbs=$(MYSQL_PWD=${{ inputs.sys-password }} mysql -h ${{ inputs.host }} -P ${{ inputs.port }} -u ${{ inputs.sys }}  -e "show databases" --skip-column-names | awk '{print $1}')
           # dbs="${dbs//$'\n'/,}"
+          locale
           dbs=
           for db in $(MYSQL_PWD=${{ inputs.sys-password }} mysql -h ${{ inputs.host }} -P ${{ inputs.port }} -u ${{ inputs.sys }}  -e "show databases" --skip-column-names | awk '{print $1}'); do
             if [ ! $db = "test" ]; then
@@ -122,12 +123,13 @@ jobs:
             if [ ${cases_path: -1} = '/' ]; then
               cases_path=${cases_path%?}
             fi
+            find $cases_path -type f ! -name "*.result" -exec sed -i 's/user=\(.*\)dump\&password=.*/user=\1dump\&password=${{ inputs.sys-password }}/g' {} \;
             for exclude in $(find $cases_path -type f ! -name "*.result" -exec grep -l "\$resources" {} \;); do
               exclude_tests="${exclude_tests},${exclude##*cases/}"
             done
             echo "Exclude tests to run: ${exclude_tests}"
           elif [ -f $cases_path ]; then
-            :
+            sed -i.bak 's/user=\(.*\)dump\&password=.*/user=\1dump\&password=${{ inputs.sys-password }}/g' $cases_path
           else
             echo "The cases path must be file or directory."
             exit 1
