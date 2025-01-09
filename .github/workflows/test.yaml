@@ -736,11 +736,7 @@ jobs:
         if: always()
         run: |
           echo "${{ steps.back.outputs.default-cluster }}"
-          python -c '''
-          from src.cloud.moc.cluster import MOClusterManager
-          from src.tests.conftest import init_k8s_client
-          MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')
-          '''
+          python -c "from src.cloud.moc.cluster import MOClusterManager;from src.tests.conftest import init_k8s_client;MOClusterManager(init_k8s_client('controller')).set_proxy('${{ steps.back.outputs.default-cluster }}')"
         env:
           env: dev
           provider: aliyun
