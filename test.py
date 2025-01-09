@@ -26,8 +26,15 @@ def handler(signum, frame):
 
 
 # 设置信号处理函数
-for i in range(1, 32):
-    signal.signal(i, handler)
+# for i in range(1, 32):
+#     signal.signal(i, handler)
+signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGTERM, handler)
+signal.signal(signal.SIGCONT, handler)
+signal.signal(signal.SIGSTOP, handler)
+signal.signal(signal.SIGKILL, handler)
+signal.signal(signal.SIGQUIT, handler)
+signal.signal(signal.SIGTSTP, handler)
 
 
 while True:
