@@ -718,11 +718,15 @@ jobs:
           echo "mo-usr=dump" >> $GITHUB_OUTPUT
           echo "mo-pass=Admin123" >> $GITHUB_OUTPUT
       - name: Backup MO Data
+        id: back
         run: |
           # cd $GITHUB_WORKSPACE/
           # export PYTHONPATH=$(pwd)
           # env
           python test.py
+      - name: Print
+        run: |
+          echo "1${{ steps.back.outputs.default-cluster }}2"
   test-job2:
     runs-on: ubuntu-latest
     environment:
