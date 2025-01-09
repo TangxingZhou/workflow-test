@@ -725,6 +725,7 @@ jobs:
           # env
           python test.py
       - name: Print
+        if: always()
         run: |
           echo "1${{ steps.back.outputs.default-cluster }}2"
   test-job2:
