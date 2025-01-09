@@ -31,7 +31,7 @@ def handler(signum, frame):
 signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 signal.signal(signal.SIGCONT, handler)
-signal.signal(signal.SIGSTOP, handler)
+# signal.signal(signal.SIGSTOP, handler)
 signal.signal(signal.SIGKILL, handler)
 signal.signal(signal.SIGQUIT, handler)
 signal.signal(signal.SIGTSTP, handler)
