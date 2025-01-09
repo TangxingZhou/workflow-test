@@ -135,6 +135,7 @@ jobs:
             echo "The cases path must be file or directory."
             exit 1
           fi
+          echo $cases_path
           ./run.sh -p $cases_path -e ${exclude_tests} ${{ inputs.bvt_extra_args }}
 
       - uses: actions/upload-artifact@v4
