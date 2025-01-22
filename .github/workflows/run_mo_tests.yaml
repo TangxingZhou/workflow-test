@@ -216,15 +216,16 @@ jobs:
           else
             database=tpcc_10
           fi
-          # cp props.mo props_10.mo
-          sed -i 's/socketTimeout=60000/socketTimeout=60000/' props.mo
-          sed -i 's/.*terminals=*/c\terminals=10' props.mo
-          sed -i 's/.*warehouses=*/c\warehouses=10' props.mo
-          sed -i 's/.*user=*/c\user=${{ inputs.mo-user }}' props.mo
-          sed -i 's/.*password=*/c\password=${{ inputs.mo-password }}' props.mo
-          sed -i 's/runMins=*/c\runMins=${{ inputs.period }}' props.mo
-          sed -i 's/tpcc/$database/g' props.mo
-          sed -i 's/127.0.0.1/${{ inputs.mo-host }}/g' props.mo
+          sed -i.bak \
+          -e 's/socketTimeout=60000/socketTimeout=60000/' \
+          -e 's/^.*terminals=.*$/terminals=10/' \
+          -e 's/^.*warehouses=.*$/warehouses=10/' \
+          -e 's/^.*user=.*$/user=${{ inputs.mo-user }}/' \
+          -e 's/^.*password=.*$/password=${{ inputs.mo-password }}/' \
+          -e 's/^.*runMins=.*$/runMins=${{ inputs.period }}/' \
+          -e "s/tpcc.*\?/$database\?/g" \
+          -e 's/127.0.0.1:6001/${{ inputs.mo-host }}:${{ inputs.mo-port }}/g' \
+          props.mo
           ./runBenchmark.sh props.mo
           ./runVerify.sh props.mo
 

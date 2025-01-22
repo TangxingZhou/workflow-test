@@ -22,7 +22,7 @@ on:
         options:
           - mo-backup
           - matrixone
-          # - none
+          - none
         default: matrixone
 
       ref:
