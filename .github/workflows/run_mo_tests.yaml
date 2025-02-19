@@ -107,7 +107,7 @@ jobs:
           -e "drop database if exists $DATABASE; create database if not exists $DATABASE;"
           echo "$(date '+%Y-%m-%d %T') - Prepare data for sysbench tests"
           sed -i.bak "s/\(database:\).*/\1 \"$DATABASE\"/" sysbench.yml
-          ./run.sh \
+          ./start.sh \
           -m SYSBENCH \
           -n 10 \
           -s 100000 \
@@ -118,7 +118,7 @@ jobs:
           -b $DATABASE
           if [ ${{ inputs.run-tests }} = 'true' ]; then
             echo "$(date '+%Y-%m-%d %T') - Start to run sysbench tests"
-            ./run.sh \
+            ./start.sh \
             -c cases/sysbench/mixed_10_100000/ \
             -t 10 \
             -d ${{ inputs.period }} \
