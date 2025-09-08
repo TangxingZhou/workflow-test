@@ -154,7 +154,7 @@ jobs:
           #else
           #  endpoint=oss-cn-hangzhou.aliyuncs.com
           #fi
-          endpoint=cos.ap-guangzhou.myqcloud.com
+          endpoint=oss-cn-hangzhou-internal.aliyuncs.com
           if [ ${{ inputs.data-size }} = '1' ]; then
             database=tpch_100
           elif [ ${{ inputs.data-size }} = '100' ]; then
@@ -166,12 +166,12 @@ jobs:
           fi
           sed -i \
           -e "s/\(ENDPOINT:\).*/\1 $endpoint/" \
-          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.COS_AK }}/' \
-          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.COS_SK }}/' \
+          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
+          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
           access.yml
           ./load.sh \
           -c cases/00_from_s3/$database -d $database -m -r \
-          -b mo-load-guangzhou-1308875761 \
+          -b moc-test-data \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
           -u ${{ inputs.mo-user }} \
