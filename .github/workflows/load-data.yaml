@@ -53,6 +53,7 @@ on:
           - '10'
           - '100'
           - '1000'
+          - '10000'
         default: 100M
 
 jobs:
@@ -148,12 +149,12 @@ jobs:
         run: |
           set -uo pipefail
           cd $GITHUB_WORKSPACE/mo-load-data
-          if [ ${{ inputs.aliyun }} = 'true' ]; then
-            endpoint=oss-cn-hangzhou-internal.aliyuncs.com
-          else
-            endpoint=oss-cn-hangzhou.aliyuncs.com
-          fi
-          endpoint=http://cos.ap-guangzhou.myqcloud.com
+          #if [ ${{ inputs.aliyun }} = 'true' ]; then
+          #  endpoint=oss-cn-hangzhou-internal.aliyuncs.com
+          #else
+          #  endpoint=oss-cn-hangzhou.aliyuncs.com
+          #fi
+          endpoint=cos.ap-guangzhou.myqcloud.com
           if [ ${{ inputs.data-size }} = '1' ]; then
             database=tpch_100
           elif [ ${{ inputs.data-size }} = '100' ]; then
