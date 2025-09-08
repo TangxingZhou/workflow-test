@@ -144,7 +144,7 @@ jobs:
         with:
           apt: mysql-client
 
-      - name: Load TPCC Data
+      - name: Load TPCH Data
         run: |
           set -uo pipefail
           cd $GITHUB_WORKSPACE/mo-load-data
@@ -153,6 +153,7 @@ jobs:
           else
             endpoint=oss-cn-hangzhou.aliyuncs.com
           fi
+          endpoint=http://cos.ap-guangzhou.myqcloud.com
           if [ ${{ inputs.data-size }} = '1' ]; then
             database=tpch_100
           elif [ ${{ inputs.data-size }} = '100' ]; then
@@ -164,8 +165,8 @@ jobs:
           fi
           sed -i \
           -e "s/\(ENDPOINT:\).*/\1 $endpoint/" \
-          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
-          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
+          -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.COS_AK }}/' \
+          -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.COS_SK }}/' \
           access.yml
           ./load.sh \
           -c cases/00_from_s3/$database -d $database -m -r \
