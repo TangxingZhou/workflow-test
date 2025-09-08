@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.env || 'qa' }}
-    timeout-minutes: 120
+    timeout-minutes: 1200
     if: inputs.data-category == 'all' || inputs.data-category == 'tpch'
     steps:
       - name: Checkout mo-load-data
