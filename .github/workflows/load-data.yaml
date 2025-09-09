@@ -169,14 +169,13 @@ jobs:
           else
             database=tpch_10
           fi
-          database=tpch2_1000
           sed -i \
           -e "s/\(ENDPOINT:\).*/\1 $endpoint/" \
           -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
           -e 's/\(SECRET_ACCESS_KEY:\).*/\1 ${{ secrets.RESTORE_ALIYUN_SK }}/' \
           access.yml
           ./load.sh \
-          -c cases/00_from_s3/$database -d $database -m -r \
+          -c cases/00_from_s3/$database -d tpch2_1000 -m -r \
           -b moc-test-data \
           -h ${{ inputs.mo-host }} \
           -P ${{ inputs.mo-port }} \
