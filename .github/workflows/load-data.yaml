@@ -55,6 +55,11 @@ on:
           - '1000'
           - '10000'
         default: 100M
+      database:
+        description: Target database
+        required: false
+        type: string
+        # default: Admin123
 
 jobs:
   load-bigdata:
@@ -164,6 +169,7 @@ jobs:
           else
             database=tpch_10
           fi
+          database=tpch2_1000
           sed -i \
           -e "s/\(ENDPOINT:\).*/\1 $endpoint/" \
           -e 's/\(ACCESS_KEY_ID:\).*/\1 ${{ secrets.RESTORE_ALIYUN_AK }}/' \
